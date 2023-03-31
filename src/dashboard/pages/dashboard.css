@@ -1,0 +1,22 @@
+.hilight-data .card .card-body{
+    font-size: 14px;
+    padding: 4px;
+    paddin-top: 0px;
+}
+.hilight-data .card .card-body .inner .text-total{
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+}
+.hilight-data .card .card-body .inner p{
+    margin-bottom: 0rem;
+    text-align: center;
+}
+.hilight-data .card .card-footer p{
+    margin: 0 auto;
+    font-size: 13px;
+    font-weight: bold;
+}
+.hilight-data .card .card-footer{
+    padding: 0px;
+}

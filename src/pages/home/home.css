@@ -1,0 +1,60 @@
+.home_icon {
+  width: 60px;
+}
+
+.banner {
+  width: 100%;
+  min-height: 90vh;
+  background-attachment: fixed !important;
+  background-size: cover !important;
+}
+
+.advantage {
+  width: 100%;
+  background-color: cadetblue;
+  padding: 90px 0px;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+}
+
+.advantage .icon {
+  font-size: 70px;
+  color: #93c847;
+}
+
+.advantage .card-body {
+  min-height: 14em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.rotated_div {
+  transition: 1s;
+}
+
+.rotated_div:hover {
+  /* transform: rotateY(360deg);
+  transition: 2s; */
+
+  transform: scale(1.1);
+  box-shadow: 1px 1px 1px #e3e5e2;
+
+  /* transform: rotateY(360deg) !important;
+  -moz-transform: rotateY(360deg) !important;
+  -webkit-transform: rotateY(360deg) !important;
+  transform-origin: center !important;
+  -moz-transform-origin: center !important;
+  -webkit-transform-origin: center !important;
+  transition: transform 1s ease all !important;
+  -moz-transition: -moz-transform 1s ease all !important;
+  -webkit-transition: -webkit-transform 1s ease all !important; */
+}
+
+.icon_size {
+  font-size: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #842029;
+}

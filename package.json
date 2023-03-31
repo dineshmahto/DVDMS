@@ -1,0 +1,89 @@
+{
+  "name": "dvdms",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@fortawesome/fontawesome-free": "^5.1.0-9",
+    "@fortawesome/fontawesome-svg-core": "^6.2.1",
+    "@fortawesome/free-solid-svg-icons": "^6.2.1",
+    "@fortawesome/react-fontawesome": "^0.2.0",
+    "@mui/material": "^5.11.8",
+    "@mui/styled-engine-sc": "^5.11.0",
+    "@mui/styles": "^5.11.9",
+    "@mui/x-date-pickers": "^5.0.20",
+    "@react-pdf/renderer": "^3.1.8",
+    "@reduxjs/toolkit": "^1.9.3",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "antd": "^5.1.7",
+    "aos": "^2.3.4",
+    "axios": "^1.2.3",
+    "babel-plugin-macros": "^3.1.0",
+    "bootstrap": "^5.2.3",
+    "chart.js": "^4.2.1",
+    "crypto-js": "^4.1.1",
+    "dotenv": "^16.0.3",
+    "faker": "^5.5.3",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.4",
+    "papaparse": "^5.4.1",
+    "react": "^18.2.0",
+    "react-animations": "^1.0.0",
+    "react-bootstrap": "^2.7.2",
+    "react-chartjs-2": "^5.2.0",
+    "react-data-table-component": "^7.5.3",
+    "react-datepicker": "^4.10.0",
+    "react-dom": "^18.2.0",
+    "react-perfect-scrollbar": "^1.5.8",
+    "react-redux": "^8.0.5",
+    "react-router-dom": "^6.7.0",
+    "react-scroll": "^1.8.9",
+    "react-slick": "^0.29.0",
+    "react-toastify": "^9.1.1",
+    "redux": "^4.2.0",
+    "redux-saga": "^1.2.2",
+    "sass": "^1.58.1",
+    "styled-components": "^5.3.9",
+    "swiper": "^9.1.1",
+    "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^7.6.0",
+    "@types/bootstrap": "^5.2.6",
+    "@types/jest": "^29.4.0",
+    "@types/node": "^18.13.0",
+    "@types/react": "^18.0.28",
+    "@types/react-datepicker": "^4.8.0",
+    "@types/react-dom": "^18.0.11",
+    "@types/styled-components": "^5.1.26",
+    "react-scripts": "^5.0.1",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

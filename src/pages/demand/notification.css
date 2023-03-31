@@ -1,0 +1,12 @@
+.labellineHeight {
+  line-height: 35px;
+}
+
+.lightBlueBackGround {
+  background-color: lightblue;
+  padding: 3px;
+}
+.custompadding {
+  padding: "10px !important";
+  font-size: "0.7rem";
+}

@@ -1,0 +1,4 @@
+.custom_switch input:focus {
+  border-color: #ced4da;
+  box-shadow: none;
+}

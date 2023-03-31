@@ -1,0 +1,4 @@
+{
+    "DEV_BASE_URL":"http://10.248.1.78:8081/dvdms/api/v1/",
+    "PROD_BASE_URL": ""
+}

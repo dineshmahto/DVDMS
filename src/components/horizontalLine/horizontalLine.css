@@ -1,0 +1,21 @@
+.horizontalLine {
+  overflow: hidden;
+}
+.horizontalLine:before,
+.horizontalLine:after {
+  background-color: #0e507c;
+  content: "";
+  display: inline-block;
+  height: 3px;
+  position: relative;
+  vertical-align: middle;
+  width: 95%;
+}
+.horizontalLine:before {
+  right: 0.5em;
+  width: 5%;
+}
+.horizontalLine:after {
+  left: 0.5em;
+  margin-right: -50%;
+}

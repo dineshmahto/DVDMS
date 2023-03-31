@@ -1,0 +1,34 @@
+.floatlabel input:active,
+.floatlabel input:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: #ced4da;
+}
+
+.floatlabel label {
+  /* transform: translate(12px, 17px); */
+  background-color: white;
+  padding: 0px 3px;
+  font-size: 16px;
+  position: absolute;
+  /* transform: translate(12px, -10px); */
+  transform: translate(12px, -30px);
+  margin-bottom: 0px;
+  transition: 0.2s;
+}
+
+.floatlabel input {
+  border-radius: 4px;
+}
+
+.floatlabel input:focus ~ label,
+.floatlabel input:valid ~ label {
+  transform: translate(12px, -48px);
+  transition: 0.2s;
+  font-size: 13px;
+}
+.floatlabel small {
+  font-size: 11px;
+  padding-left: 10px;
+  color: red;
+}
