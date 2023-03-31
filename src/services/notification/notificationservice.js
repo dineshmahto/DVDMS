@@ -24,4 +24,6 @@ const postNotificationService = async (endpoint, queryParam) => {
     });
 };
 
+
+
 export { getNotificationService, postNotificationService };
