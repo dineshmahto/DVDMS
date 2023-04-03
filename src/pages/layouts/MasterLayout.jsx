@@ -8,18 +8,12 @@ import { useSelector } from "react-redux";
 import { Spinner } from "react-bootstrap";
 import "../../assets/styles/styles.css";
 
-//import "bootstrap/dist/js/bootstrap.bundle";
-
 const MasterLayout = () => {
   const loader = useSelector((state) => state?.loader?.loading);
   useEffect(() => {
     // Will be called after mounting the componnent.
     const sidebarToggle = document.body.querySelector("#sidebarToggle");
     if (sidebarToggle) {
-      // Uncomment Below to persist sidebar toggle between refreshes
-      // if (localStorage.getItem('sb|sidebar-toggle') === 'true') {
-      //     document.body.classList.toggle('sb-sidenav-toggled');
-      // }
       sidebarToggle.addEventListener("click", (event) => {
         event.preventDefault();
         document.body.classList.toggle("sb-sidenav-toggled");
@@ -30,6 +24,24 @@ const MasterLayout = () => {
       });
     }
   }, []);
+
+  // const [isTimeout, setIsTimeout] = useState(false);
+  // useEffect(() => {
+  //   const timer = new IdleTimer({
+  //     timeout: 10, //expire after 10 seconds
+  //     onTimeout: () => {
+  //       setIsTimeout(true);
+  //     },
+  //     onExpired: () => {
+  //       // do something if expired on load
+  //       setIsTimeout(true);
+  //     },
+  //   });
+
+  //   return () => {
+  //     timer.cleanUp();
+  //   };
+  // }, []);
   return (
     <>
       {loader ? (
