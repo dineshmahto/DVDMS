@@ -14,9 +14,10 @@ import Canvas from "../../canvas/Canvas";
 import { Spinner } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { closeLoginModal } from "../../../store/login/actions";
+import * as CONSTANTS from "../../../common/constant/constants";
 
 const LoginForm = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [userData, setUSerData] = useState({
     username: "",
@@ -27,7 +28,6 @@ const LoginForm = () => {
   const [isValid, setValid] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [captchaValue, setCaptchaValue] = useState([]);
-
 
   const validate = () => {
     if (
@@ -54,11 +54,11 @@ const LoginForm = () => {
         setValid(false);
       } else {
         setLoading(true);
-        let loginResp = await loginservice("auth/authenticate", userData);
+        let loginResp = await loginservice(CONSTANTS.LOGIN, userData);
         if (loginResp.status === 200) {
           setLoading(false);
-          console.log("loginResp", loginResp.status)
-         dispatch(closeLoginModal())
+          console.log("loginResp", loginResp.status);
+          dispatch(closeLoginModal());
           navigate("/dashboard");
         } else if (loginResp.response.status === 400) {
           setLoading(false);
@@ -73,7 +73,7 @@ const LoginForm = () => {
   const createCaptcha = () => {
     console.log("Recalled");
     var charsArray =
-      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@!#$%^&*";
+      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     var lengthOtp = 6;
     var captcha = [];
     for (var i = 0; i < lengthOtp; i++) {
@@ -96,10 +96,15 @@ const LoginForm = () => {
 
   return (
     <>
-      <div className="card" style={{position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform:" translate(-50%, -50%)"}}>
+      <div
+        className="card"
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: " translate(-50%, -50%)",
+        }}
+      >
         <div className="card-header card-head">
           <FontAwesomeIcon icon={faRightToBracket} /> &nbsp; LogIn to DVDMS
           NagaLand

@@ -3,7 +3,10 @@ import BasicButton from "../../components/button/basicbutton";
 import HorizonatalLine from "../../components/horizontalLine/horizonatalLine";
 import SelectOption from "../../components/option/option";
 import TableComponent from "../../components/tables/datatable/tableComponent";
-import { getNotificationService } from "../../services/notification/notificationservice";
+import {
+  getNotificationService,
+  postNotificationService,
+} from "../../services/notification/notificationservice";
 import { TableBody, TableRow, TableCell } from "@mui/material";
 import "./notification.css";
 import SearchField from "../../components/search/search";
@@ -15,6 +18,7 @@ import BasicModal from "../../components/modal/basicmodal";
 import Checkbox from "@mui/material/Checkbox";
 import { Spinner } from "react-bootstrap";
 import { makeStyles } from "@mui/styles";
+import * as CONSTANTS from "../../common/constant/constants";
 
 const useStyles = makeStyles({
   tableCell: {
@@ -34,6 +38,7 @@ const Notification = () => {
     page: 0,
     rowsPerPage: 10,
   });
+  const [totalRows, setTotalRows] = useState(0);
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [selected, setSelected] = useState([]);
@@ -93,14 +98,15 @@ const Notification = () => {
   ]);
 
   const callApi = async () => {
-    await getNotificationService("pagination/calls/notificationList", {
+    await getNotificationService(CONSTANTS?.GET_NOTIFICATION_LIST, {
       pageNumber: controller.page,
       pageSize: controller.rowsPerPage,
     })
       .then((r) => {
         setLoading(false);
+        console.log("Response", r?.data);
         setTotalPages(r?.data?.totalPages);
-        // setTotalRows(r.data.totalElements);
+        setTotalRows(r.data.totalElements);
         setTableData(r.data.content);
       })
       .catch((e) => {
@@ -110,12 +116,13 @@ const Notification = () => {
   useEffect(() => {
     setLoading(true);
 
-    setTimeout(() => {
-      callApi();
-    }, 10000);
-    return () => {
-      clearTimeout();
-    };
+    // setTimeout(() => {
+    //   callApi();
+    // }, 10000);
+    // return () => {
+    //   clearTimeout();
+    // };
+    callApi();
   }, [controller]);
   const handlePageChange = (event, newPage) => {
     setController({
@@ -124,17 +131,18 @@ const Notification = () => {
     });
   };
 
-  const handlePageChange1 = (event, newPage) => {
+  const handlePageChange1 = (newPage) => {
     setLoading(true);
+    console.log("NewPage", newPage);
     setController({
       ...controller,
       page: newPage - 1,
     });
   };
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = (current, size) => {
     setController({
       ...controller,
-      rowsPerPage: parseInt(event.target.value, 10),
+      rowsPerPage: size,
       page: 0,
     });
   };
@@ -305,27 +313,7 @@ const Notification = () => {
           <HorizonatalLine text="Notification Details" />
         </div>
         <div className="row mb-1">
-          <div className="d-flex justify-content-between">
-            <div className="">
-              <div className="d-flex">
-                <div className={classes.lineHeight}>Show</div>
-                <SelectOption
-                  className="ms-1 me-1"
-                  id="rowsPerChange"
-                  data={[
-                    { value: 10, selected: true },
-                    { value: 20, selected: false },
-                    { value: 30, selected: false },
-                    { value: 40, selected: false },
-                  ]}
-                  onChange={(e) => {
-                    console.log("Value", e.target.value);
-                    if (e.target.value != "None") handleChangeRowsPerPage(e);
-                  }}
-                />
-                <div className={classes.lineHeight}>Entries</div>
-              </div>
-            </div>
+          <div className="d-flex justify-content-end">
             <SearchField
               iconPosition="end"
               iconName={faSearch}
@@ -342,7 +330,7 @@ const Notification = () => {
               columns={columns}
               sortField={sortField}
               page={controller.page + 1}
-              count={totalPages}
+              count={totalRows}
               rowsPerPage={controller.rowsPerPage}
               order={order}
               paginationRequired={true}

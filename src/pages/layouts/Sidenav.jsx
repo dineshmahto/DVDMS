@@ -12,14 +12,18 @@ const Sidenav = () => {
           <div className="sb-sidenav-menu">
             <div className="nav">
               {/* <div className="sb-sidenav-menu-heading">Core</div> */}
-              <Link id="dashboard" className="nav-link active-me" to={{ pathname: "/dashboard" }}>
+              <Link
+                className="nav-link active-me"
+                to={{ pathname: "/dashboard" }}
+              >
                 <div className="sb-nav-link-icon">
                   <i className="fas fa-tachometer-alt"></i>
                 </div>
                 Dashboard
               </Link>
               {/* <div className="sb-sidenav-menu-heading">Interface</div> */}
-              <Link id="demand"
+              {/* Demand */}
+              <Link
                 className="nav-link collapsed"
                 to={{}}
                 data-bs-toggle="collapse"
@@ -53,6 +57,51 @@ const Sidenav = () => {
                   </Link>
                 </nav>
               </div>
+              {/* End of Demand SubListing */}
+              {/* Stock */}
+              <Link
+                className="nav-link collapsed"
+                to={{}}
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseLayouts"
+                aria-expanded="false"
+                aria-controls="collapseLayouts"
+              >
+                <div className="sb-nav-link-icon">
+                  <i className="fas fa-warehouse"></i>
+                </div>
+                Stock
+                <div className="sb-sidenav-collapse-arrow">
+                  <i className="fas fa-angle-down"></i>
+                </div>
+              </Link>
+              <div
+                className="collapse"
+                id="collapseLayouts"
+                aria-labelledby="headingOne"
+                data-bs-parent="#sidenavAccordion"
+              >
+                <nav className="sb-sidenav-menu-nested nav">
+                  <Link className="nav-link" to={{ pathname: "/stocklisting" }}>
+                    Stock List
+                  </Link>
+                  <Link
+                    className="nav-link"
+                    to={{ pathname: "/openstockentry" }}
+                  >
+                    Stock Entry
+                  </Link>
+                  <Link
+                    className="nav-link"
+                    to={{ pathname: "/openCondeminationRegister" }}
+                  >
+                    Condemnation Register
+                  </Link>
+                </nav>
+              </div>
+
+              {/* End of Stock */}
+
               <Link
                 className="nav-link collapsed"
                 to={{}}
