@@ -27,7 +27,7 @@ import Dashboard from "./dashboard/pages/Dashboard";
 import MasterLayout from "./dashboard/components/layouts/MasterLayout";
 import Annualdemand from "./dashboard/pages/demand/AnnualDemand";
 import DemandNotification from "./dashboard/pages/demand/DemandNotification";
-import Dash from "./pages/dashboard/dash";
+//te
 function App() {
   return (
     <div className="dvdms-root">
@@ -44,7 +44,6 @@ function App() {
             <Route path="csv" element={<Csv />} />
             <Route path="openNotification" element={<OpenNotification />} />
             <Route path="programmeList" element={<ProgramList />} />
-            <Route path="dash" element={<Dash />} />
           </Route>
         </Routes>
       </Provider>
