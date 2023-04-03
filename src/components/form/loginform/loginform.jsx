@@ -27,7 +27,7 @@ const LoginForm = () => {
   const [isValid, setValid] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [captchaValue, setCaptchaValue] = useState([]);
- 
+
 
   const validate = () => {
     if (
@@ -58,8 +58,8 @@ const LoginForm = () => {
         if (loginResp.status === 200) {
           setLoading(false);
           console.log("loginResp", loginResp.status)
-         dispatch(closeLoginModal()) 
-          navigate("/admin");
+         dispatch(closeLoginModal())
+          navigate("/dashboard");
         } else if (loginResp.response.status === 400) {
           setLoading(false);
           toastMessage("Login Error", "Please enter valid ID", "error");

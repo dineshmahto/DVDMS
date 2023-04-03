@@ -6,7 +6,7 @@ import Navbar from "./Navbar";
 import Sidenav from "./Sidenav";
 import { useSelector } from "react-redux";
 import { Spinner } from "react-bootstrap";
-import "../../styles/styles.css";
+import "../../assets/styles/styles.css";
 
 //import "bootstrap/dist/js/bootstrap.bundle";
 

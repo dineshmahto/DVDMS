@@ -12,7 +12,7 @@ const Sidenav = () => {
           <div className="sb-sidenav-menu">
             <div className="nav">
               {/* <div className="sb-sidenav-menu-heading">Core</div> */}
-              <Link className="nav-link" to={{ pathname: "/dashboard" }}>
+              <Link className="nav-link active-me" to={{ pathname: "/dashboard" }}>
                 <div className="sb-nav-link-icon">
                   <i className="fas fa-tachometer-alt"></i>
                 </div>

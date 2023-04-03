@@ -4,7 +4,7 @@ import "./App.css";
 import { Provider } from "react-redux";
 import store from "./store/store";
 import Dash from "./pages/dashboard/dash";
-import DashBoard from "./pages/dashboard/dashboard";
+//import DashBoard from "./pages/dashboard/dashboard";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProgramList from "./pages/program/programlist/programlist";
@@ -23,11 +23,10 @@ import Pdf from "./pages/Report/Pdf";
 import Csv from "./pages/Report/Csv";
 import FileUpload from "./pages/Report/FIleUpload";
 import Landing from "./pages/screens/Landing";
-import Dashboard from "./dashboard/pages/Dashboard";
-import MasterLayout from "./dashboard/components/layouts/MasterLayout";
-import Annualdemand from "./dashboard/pages/demand/AnnualDemand";
-import DemandNotification from "./dashboard/pages/demand/DemandNotification";
-//te
+import Dashboard from "./pages/dashboard/Dashboard";
+import MasterLayout from "./pages/layouts/MasterLayout";
+import DemandNotification from "./pages/demand/Notification";
+
 function App() {
   return (
     <div className="dvdms-root">
@@ -36,7 +35,7 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="" element={<MasterLayout />}>
             <Route path="dashboard" element={<Dashboard />} />
-            <Route path="annualdemand" element={<Annualdemand />} />
+            <Route path="annualdemand" element={<Notification />} />
             <Route path="demandnotification" element={<DemandNotification />} />
             <Route path="purchaseorderlist" element={<PurchaseOrderList />} />
             <Route path="intent" element={<OpenIntentDesk />} />
