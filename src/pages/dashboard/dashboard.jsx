@@ -1,4 +1,5 @@
 import React from 'react'
+import { useState } from 'react';
 //import {Link} from 'react-router-dom'
 import './dashboard.css'
 import Chart from "chart.js/auto";
@@ -7,6 +8,14 @@ import faker from 'faker';
 import DashboardCardSmall from '../../components/card/DashboardCardSmall';
 
 function Dashboard() {
+    //set active menu
+    const [menuData, setMenuData] = useState({
+        menuId1: "dashboard",
+        hasSubMenu1: false,
+        subMenuId2: "",
+        hasSubMenu2: false,
+        subMenuId3: "",
+      });
     //Chart data
     const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
 

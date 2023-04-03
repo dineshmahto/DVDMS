@@ -12,14 +12,14 @@ const Sidenav = () => {
           <div className="sb-sidenav-menu">
             <div className="nav">
               {/* <div className="sb-sidenav-menu-heading">Core</div> */}
-              <Link className="nav-link active-me" to={{ pathname: "/dashboard" }}>
+              <Link id="dashboard" className="nav-link active-me" to={{ pathname: "/dashboard" }}>
                 <div className="sb-nav-link-icon">
                   <i className="fas fa-tachometer-alt"></i>
                 </div>
                 Dashboard
               </Link>
               {/* <div className="sb-sidenav-menu-heading">Interface</div> */}
-              <Link
+              <Link id="demand"
                 className="nav-link collapsed"
                 to={{}}
                 data-bs-toggle="collapse"
@@ -42,13 +42,13 @@ const Sidenav = () => {
                 data-bs-parent="#sidenavAccordion"
               >
                 <nav className="sb-sidenav-menu-nested nav">
-                  <Link
+                  <Link id="notification"
                     className="nav-link"
                     to={{ pathname: "/demandnotification" }}
                   >
                     Notification
                   </Link>
-                  <Link className="nav-link" to={{ pathname: "/annualdemand" }}>
+                  <Link id="annualdemand" className="nav-link" to={{ pathname: "/annualdemand" }}>
                     Annual Demand
                   </Link>
                 </nav>

@@ -23,7 +23,7 @@ import Pdf from "./pages/Report/Pdf";
 import Csv from "./pages/Report/Csv";
 import FileUpload from "./pages/Report/FIleUpload";
 import Landing from "./pages/screens/Landing";
-import Dashboard from "./pages/dashboard/Dashboard";
+import Dashboard from "./pages/dashboard/dashboard";
 import MasterLayout from "./pages/layouts/MasterLayout";
 import DemandNotification from "./pages/demand/Notification";
 
