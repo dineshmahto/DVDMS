@@ -1,20 +1,114 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setActiveSideMenu } from "../../store/activemenu/actions";
 
 const Sidenav = () => {
+  const dispatch = useDispatch();
+
+  /**
+   * Set side menu active
+   **/
+  //Check menu active parameters from the local storage if in case user refresh the page
+  const localActiveMenuItem = JSON.parse(
+    localStorage.getItem("ACTIVE_SIDE_MENU_ITEM")
+  );
+  let storeMenuActiveItem = useSelector(
+    (state) => state?.activemenu?.activeSideMenuItem
+  );
+
+  //console.log("Local Active Menu: "+ localActiveMenuItem.menu1);
+
+  //set active menu parameter here
+  //if user page refresh set menu active parameter from the local storage
+  const [activeMenuItem, setActiveMenuItem] = useState({
+    menu1: localActiveMenuItem ? localActiveMenuItem.menu1 : "dashboard",
+    isMenu1Active: localActiveMenuItem
+      ? localActiveMenuItem.isMenu1Active
+      : true,
+    subMenu2: localActiveMenuItem ? localActiveMenuItem.subMenu2 : "",
+    isSubMenu2Active: localActiveMenuItem
+      ? localActiveMenuItem.isSubMenu2Active
+      : false,
+    subMenu3: localActiveMenuItem ? localActiveMenuItem.subMenu3 : "",
+    isSubMenu3Active: localActiveMenuItem
+      ? localActiveMenuItem.isSubMenu3Active
+      : false,
+  });
+
+  useEffect(() => {
+    //set first time active menu parameter to local storage
+    dispatch(setActiveSideMenu(activeMenuItem));
+
+    //This part is to handle the open submenu collapse if the user refresh the page
+    if (localActiveMenuItem) {
+      //if submenu2 or submenu3 is true i.e menu1 is also active
+      //submenu2 and submenu3 value is taking from the current state
+      if (activeMenuItem.isSubMenu2Active || activeMenuItem.isSubMenu3Active) {
+        //find the topmost active menu by class name "active-me" i.e menu1
+        let activeMenu1Elements =
+          document.getElementsByClassName("active-me")[0];
+
+        //removing "collapsed" class from topmost active menu i.e menu1
+        activeMenu1Elements.classList.remove("collapsed");
+
+        //get value of data attribute from topmost active menu i.e menu1
+        //this data attribute value is the id name of the collapse submenu items container element
+        let showSubmenuElementID =
+          activeMenu1Elements.getAttribute("data-bs-target");
+
+        //Now find the element of id which hold submenu items
+        //and substring(1) is use for removing '#' from the id name string
+        let subMenuContainerElement = document.getElementById(
+          showSubmenuElementID.substring(1)
+        );
+
+        //lastly add 'show' class to show submenu
+        subMenuContainerElement.classList.add("show");
+      }
+    }
+  }, [activeMenuItem]);
+
+  const handleMenuItemClick = (
+    menu1,
+    isMenu1Active,
+    subMenu2,
+    isSubMenu2Active,
+    subMenu3,
+    isSubMenu3Active
+  ) => {
+    setActiveMenuItem((activeMenuItem) => ({
+      ...activeMenuItem,
+      menu1: menu1,
+      isMenu1Active: isMenu1Active,
+      subMenu2: subMenu2,
+      isSubMenu2Active: isSubMenu2Active,
+      subMenu3: subMenu3,
+      isSubMenu3Active: isSubMenu3Active,
+    }));
+  };
+
+  // const activeSideMenuItem = useSelector(state => state?.activemenu?.activeSideMenuItem?.menu1);
+  // console.log("Store Menu Item: "+useSelector(state => state?.activemenu?.activeSideMenuItem));
+
   return (
     <>
       <div id="layoutSidenav_nav">
         <nav
-          className="sb-sidenav accordion sb-sidenav-dark"
+          className="sb-sidenav fixed accordion sb-sidenav-dark"
           id="sidenavAccordion"
         >
           <div className="sb-sidenav-menu">
             <div className="nav">
               {/* <div className="sb-sidenav-menu-heading">Core</div> */}
               <Link
-                className="nav-link active-me"
+                className={`nav-link ${
+                  activeMenuItem.menu1 === "dashboard" ? "active-me" : ""
+                }`}
                 to={{ pathname: "/dashboard" }}
+                onClick={() =>
+                  handleMenuItemClick("dashboard", true, "", false, "", false)
+                }
               >
                 <div className="sb-nav-link-icon">
                   <i className="fas fa-tachometer-alt"></i>
@@ -24,12 +118,14 @@ const Sidenav = () => {
               {/* <div className="sb-sidenav-menu-heading">Interface</div> */}
               {/* Demand */}
               <Link
-                className="nav-link collapsed"
+                className={`nav-link collapsed ${
+                  activeMenuItem.menu1 === "demand" ? "active-me" : ""
+                }`}
                 to={{}}
                 data-bs-toggle="collapse"
-                data-bs-target="#collapseDemand"
+                data-bs-target="#demandLayouts"
                 aria-expanded="false"
-                aria-controls="collapseDemand"
+                aria-controls="demandLayouts"
               >
                 <div className="sb-nav-link-icon">
                   <i className="fas fa-columns"></i>
@@ -41,18 +137,49 @@ const Sidenav = () => {
               </Link>
               <div
                 className="collapse"
-                id="collapseDemand"
+                id="demandLayouts"
                 aria-labelledby="headingOne"
                 data-bs-parent="#sidenavAccordion"
               >
                 <nav className="sb-sidenav-menu-nested nav">
                   <Link
-                    className="nav-link"
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "notification"
+                        ? "active-me1"
+                        : ""
+                    }`}
                     to={{ pathname: "/demandnotification" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "demand",
+                        true,
+                        "notification",
+                        true,
+                        "",
+                        false
+                      )
+                    }
                   >
                     Notification
                   </Link>
-                  <Link className="nav-link" to={{ pathname: "/annualdemand" }}>
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "annualdemand"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/annualdemand" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "demand",
+                        true,
+                        "annualdemand",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
                     Annual Demand
                   </Link>
                 </nav>
@@ -60,12 +187,14 @@ const Sidenav = () => {
               {/* End of Demand SubListing */}
               {/* Stock */}
               <Link
-                className="nav-link collapsed"
+                className={`nav-link collapsed ${
+                  activeMenuItem.menu1 === "stock" ? "active-me" : ""
+                }`}
                 to={{}}
                 data-bs-toggle="collapse"
-                data-bs-target="#collapseStock"
+                data-bs-target="#stockLayouts"
                 aria-expanded="false"
-                aria-controls="collapseStock"
+                aria-controls="stockLayouts"
               >
                 <div className="sb-nav-link-icon">
                   <i className="fas fa-warehouse"></i>
@@ -77,23 +206,68 @@ const Sidenav = () => {
               </Link>
               <div
                 className="collapse"
-                id="collapseStock"
+                id="stockLayouts"
                 aria-labelledby="headingOne"
                 data-bs-parent="#sidenavAccordion"
               >
                 <nav className="sb-sidenav-menu-nested nav">
-                  <Link className="nav-link" to={{ pathname: "/stocklisting" }}>
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "stocklist"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/stocklisting" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "stock",
+                        true,
+                        "stocklist",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
                     Stock List
                   </Link>
                   <Link
-                    className="nav-link"
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "stockentry"
+                        ? "active-me1"
+                        : ""
+                    }`}
                     to={{ pathname: "/openstockentry" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "stock",
+                        true,
+                        "stockentry",
+                        true,
+                        "",
+                        false
+                      )
+                    }
                   >
                     Stock Entry
                   </Link>
                   <Link
-                    className="nav-link"
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "condemnation-register"
+                        ? "active-me1"
+                        : ""
+                    }`}
                     to={{ pathname: "/openCondeminationRegister" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "stock",
+                        true,
+                        "condemnation-register",
+                        true,
+                        "",
+                        false
+                      )
+                    }
                   >
                     Condemnation Register
                   </Link>
