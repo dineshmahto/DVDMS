@@ -1,8 +1,15 @@
 //Login
 export const LOGIN = "auth/authenticate";
 //Logout
-export const LOGOUT = "";
+export const LOGOUT = "auth/logout";
 // Demand
-export const GET_NOTIFICATION_LIST = "pagination/calls/notificationList";
+export const GET_NOTIFICATION_LIST = "pagination/notificationList";
 // Stock
 export const STOCK_LISTING = "pagination/calls/stocklisting";
+// Admin
+// Role Desk
+export const ROLE_LISTING = "pagination/roleList";
+export const ALL_ACTIVITY_TYPE_LIST = "admin/getAllActivityTypeList";
+export const ACTIVITY_LIST_BY_CODE = "admin/getActivityListByType";
+//User Desk
+export const USER_LISTING = "pagination/userList";

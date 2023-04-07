@@ -22,7 +22,7 @@ import * as CONSTANTS from "../../common/constant/constants";
 
 const useStyles = makeStyles({
   tableCell: {
-    padding: "10px",
+    padding: "10px !important",
     fontSize: "0.8rem !important",
   },
   lineHeight: {
@@ -98,31 +98,41 @@ const Notification = () => {
   ]);
 
   const callApi = async () => {
-    await getNotificationService(CONSTANTS?.GET_NOTIFICATION_LIST, {
-      pageNumber: controller.page,
-      pageSize: controller.rowsPerPage,
-    })
+    const jwt =
+      "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6M…DU1fQ.38ZZz4KQm6sA5Uh8jJJU7O6CxWkce03ZO-qSwyM2ZB8";
+    await getNotificationService(
+      CONSTANTS?.GET_NOTIFICATION_LIST,
+      {
+        pageNumber: controller.page,
+        pageSize: controller.rowsPerPage,
+      },
+      jwt
+    )
       .then((r) => {
         setLoading(false);
         console.log("Response", r?.data);
         setTotalPages(r?.data?.totalPages);
-        setTotalRows(r.data.totalElements);
-        setTableData(r.data.content);
+        setTotalRows(r?.data?.totalElements);
+        setTableData(r?.data?.content);
       })
       .catch((e) => {
         console.log("Error", e);
       });
   };
   useEffect(() => {
-    setLoading(true);
-
-    // setTimeout(() => {
-    //   callApi();
-    // }, 10000);
-    // return () => {
-    //   clearTimeout();
-    // };
-    callApi();
+    let isApiSubscribed = true;
+    if (isApiSubscribed) {
+      console.log(
+        "sessionStorage",
+        sessionStorage.getItem("DVDMS_KEEP_SECRET")
+      );
+      console.log("called");
+      setLoading(true);
+      callApi();
+    }
+    return () => {
+      isApiSubscribed = false;
+    };
   }, [controller]);
   const handlePageChange = (event, newPage) => {
     setController({

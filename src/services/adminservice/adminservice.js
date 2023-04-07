@@ -1,18 +1,18 @@
 import servicecall from "../servicecall/servicecall";
 import toastMessage from "../../common/toastmessage/toastmessage";
 
-const getNotificationService = async (endpoint, queryParam, jwt) => {
+const getAdminService = async (endpoint, queryParam, jwt) => {
+  console.log("jwt", jwt);
   return await servicecall
     .getData(endpoint, queryParam, jwt)
     .then((r) => {
       return r;
     })
     .catch((e) => {
-      toastMessage("Notification List", "Server can't respon", "error");
       return e;
     });
 };
-const postNotificationService = async (endpoint, queryParam) => {
+const postAdminService = async (endpoint, queryParam) => {
   return await servicecall
     .postData(endpoint, queryParam)
     .then((r) => {
@@ -24,4 +24,4 @@ const postNotificationService = async (endpoint, queryParam) => {
     });
 };
 
-export { getNotificationService, postNotificationService };
+export { getAdminService, postAdminService };

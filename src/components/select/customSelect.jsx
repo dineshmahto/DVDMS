@@ -1,23 +1,17 @@
 import React from "react";
 import Select, { components } from "react-select";
-const Option = (props) => {
-  return (
-    <>
-      <components.Option {...props}>{props.children}</components.Option>
-    </>
-  );
-};
-
 const CustomSelect = ({
   options,
   changeOptionsData,
   fetchingData,
   onChange,
   defaultValue,
+  id,
 }) => {
   return (
     <div>
       <Select
+        id={id}
         options={options}
         defaultValue={defaultValue || "Select"}
         fetchingData={fetchingData}

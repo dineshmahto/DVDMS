@@ -27,9 +27,9 @@ const Sidenav = () => {
                 className="nav-link collapsed"
                 to={{}}
                 data-bs-toggle="collapse"
-                data-bs-target="#collapseLayouts"
+                data-bs-target="#collapseDemand"
                 aria-expanded="false"
-                aria-controls="collapseLayouts"
+                aria-controls="collapseDemand"
               >
                 <div className="sb-nav-link-icon">
                   <i className="fas fa-columns"></i>
@@ -41,7 +41,7 @@ const Sidenav = () => {
               </Link>
               <div
                 className="collapse"
-                id="collapseLayouts"
+                id="collapseDemand"
                 aria-labelledby="headingOne"
                 data-bs-parent="#sidenavAccordion"
               >
@@ -63,9 +63,9 @@ const Sidenav = () => {
                 className="nav-link collapsed"
                 to={{}}
                 data-bs-toggle="collapse"
-                data-bs-target="#collapseLayouts"
+                data-bs-target="#collapseStock"
                 aria-expanded="false"
-                aria-controls="collapseLayouts"
+                aria-controls="collapseStock"
               >
                 <div className="sb-nav-link-icon">
                   <i className="fas fa-warehouse"></i>
@@ -77,7 +77,7 @@ const Sidenav = () => {
               </Link>
               <div
                 className="collapse"
-                id="collapseLayouts"
+                id="collapseStock"
                 aria-labelledby="headingOne"
                 data-bs-parent="#sidenavAccordion"
               >
@@ -96,6 +96,41 @@ const Sidenav = () => {
                     to={{ pathname: "/openCondeminationRegister" }}
                   >
                     Condemnation Register
+                  </Link>
+                </nav>
+              </div>
+
+              {/* End of Stock */}
+
+              {/* Admin */}
+              <Link
+                className="nav-link collapsed"
+                to={{}}
+                data-bs-toggle="collapse"
+                data-bs-target="#collapseAdmin"
+                aria-expanded="false"
+                aria-controls="collapseAdmin"
+              >
+                <div className="sb-nav-link-icon">
+                  <i className="fas fa-lock"></i>
+                </div>
+                Admin
+                <div className="sb-sidenav-collapse-arrow">
+                  <i className="fas fa-angle-down"></i>
+                </div>
+              </Link>
+              <div
+                className="collapse"
+                id="collapseAdmin"
+                aria-labelledby="headingOne"
+                data-bs-parent="#sidenavAccordion"
+              >
+                <nav className="sb-sidenav-menu-nested nav">
+                  <Link className="nav-link" to={{ pathname: "/listuser" }}>
+                    User Desk
+                  </Link>
+                  <Link className="nav-link" to={{ pathname: "/listrole" }}>
+                    Role Desk
                   </Link>
                 </nav>
               </div>

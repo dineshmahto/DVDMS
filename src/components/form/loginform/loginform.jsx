@@ -2,6 +2,7 @@ import {
   faArrowsRotate,
   faRightToBracket,
 } from "@fortawesome/free-solid-svg-icons";
+import { Paper } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, useEffect } from "react";
 import BasicButton from "../../button/basicbutton";
@@ -96,89 +97,78 @@ const LoginForm = () => {
 
   return (
     <>
-      <div
-        className="card"
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: " translate(-50%, -50%)",
-        }}
-      >
-        <div className="card-header card-head">
-          <FontAwesomeIcon icon={faRightToBracket} /> &nbsp; LogIn to DVDMS
-          NagaLand
+      <div className="p-2 border-0">
+        <div className="mb-1">
+          <InputFieldFloatLebel.WithError
+            type="text"
+            placeholder="UserID"
+            id="user_id"
+            errorMsg={userData.username === "" ? "Enter user ID" : ""}
+            onchange={(e) => {
+              setUSerData({ ...userData, username: e.target.value });
+            }}
+          />
         </div>
-        <div className="card-body">
-          <div className="mb-1">
-            <InputFieldFloatLebel.WithError
-              type="text"
-              placeholder="UserID"
-              id="user_id"
-              errorMsg={userData.username === "" ? "Enter user ID" : ""}
-              onchange={(e) => {
-                setUSerData({ ...userData, username: e.target.value });
-              }}
-            />
-          </div>
-          <div className="mb-1">
-            <InputFieldFloatLebel.WithError
-              type={`${isShowPassword ? "text" : "password"}`}
-              placeholder="Password"
-              id="password"
-              errorMsg={userData.password === "" ? "Enter password" : ""}
-              onchange={(e) => {
-                setUSerData({ ...userData, password: e.target.value });
-              }}
-            ></InputFieldFloatLebel.WithError>
-          </div>
-          <div className="mb-4 d-flex justify-content-end">
-            <SwitchCheckBox
-              labelText="Show Password"
-              type="checkbox"
-              onChange={() => {
-                console.log("show password");
-                setIsShowPassword(!isShowPassword);
-              }}
-            />
-          </div>
-          <div className="mb-4">
-            <div className="row">
-              <div className="col-2"> Captcha</div>
-              <div className="col-3">
-                <Canvas draw={draw} height={50} width={100} />
-              </div>
-              <div className="col-5">
-                <input
-                  className="form-control shadow-none"
-                  type="text"
-                  placeholder="Captcha"
-                  id="captcha"
-                  value={userData?.captcha}
-                  onChange={(e) => {
-                    setUSerData({ ...userData, captcha: e.target.value });
-                  }}
-                />
-              </div>
-              <div className="col-2">
-                <FontAwesomeIcon
-                  icon={faArrowsRotate}
-                  onClick={createCaptcha}
-                />
-              </div>
+        <div className="mb-1">
+          <InputFieldFloatLebel.WithError
+            type={`${isShowPassword ? "text" : "password"}`}
+            placeholder="Password"
+            id="password"
+            errorMsg={userData.password === "" ? "Enter password" : ""}
+            onchange={(e) => {
+              setUSerData({ ...userData, password: e.target.value });
+            }}
+          ></InputFieldFloatLebel.WithError>
+        </div>
+        <div className="mb-4 d-flex justify-content-end">
+          <SwitchCheckBox
+            labelText="Show Password"
+            type="checkbox"
+            onChange={() => {
+              console.log("show password");
+              setIsShowPassword(!isShowPassword);
+            }}
+          />
+        </div>
+        <div className="mb-4">
+          <div className="row">
+            <div className="col-2"> Captcha</div>
+            <div className="col-3">
+              <Canvas draw={draw} height={50} width={100} />
+            </div>
+            <div className="col-5">
+              <input
+                className="form-control shadow-none"
+                type="text"
+                placeholder="Captcha"
+                id="captcha"
+                value={userData?.captcha}
+                onChange={(e) => {
+                  setUSerData({ ...userData, captcha: e.target.value });
+                }}
+              />
+            </div>
+            <div className="col-2">
+              <FontAwesomeIcon icon={faArrowsRotate} onClick={createCaptcha} />
             </div>
           </div>
-          <div className="d-grid mb-3">
-            <BasicButton
-              disabled={isLoading ? isLoading : !isValid}
-              className="btn btn-bg-login"
-              type="submit"
-              buttonText="Login"
-              onClick={(e) => loginAction(e)}
-              isLoading={isLoading}
-              loadingText={<Spinner />}
-            />
-          </div>
+        </div>
+        <div className="d-flex justify-content-between">
+          <BasicButton
+            disabled={isLoading ? isLoading : !isValid}
+            className="btn btn-bg-login rounded-0"
+            type="submit"
+            buttonText="Login"
+            onClick={(e) => loginAction(e)}
+            isLoading={isLoading}
+            loadingText={<Spinner />}
+          />
+          <BasicButton
+            className="btn btn-bg-login rounded-0"
+            type="submit"
+            buttonText="Forgot Password"
+            isLoading={isLoading}
+          />
         </div>
       </div>
     </>
