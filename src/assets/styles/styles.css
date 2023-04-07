@@ -11292,5 +11292,34 @@ body{
   position: absolute;
 }
 .sb-sidenav .sb-sidenav-menu .nav .sb-sidenav-menu-nested {
-  margin-left: 2.7rem;
+  margin-left: 1.5rem;
+}
+.sb-sidenav-menu-nested{
+  border-left: 1px dotted #6d6868;
+}
+.sb-sidenav-menu-nested .nav-link{
+  padding-left: 30px!important;
+}
+.sb-sidenav-menu-nested .nav-link::before{
+  content: "";
+  display: block;
+  width: 25px;
+  height: 2px;
+  border-bottom: 1px dotted #6d6868;
+  left: 0;
+  position: absolute;
+}
+.sb-sidenav-menu-nested .nav-link.active-me1{
+  color: rgb(255, 255, 255);
+  background-color: #202053;
+}
+.sb-sidenav-menu-nested .nav-link.active-me1::after{
+	content: " ";
+	position: absolute;
+	left: 192px;
+	top: 6px;
+	border-top: 8px solid transparent;
+	border-right: 8px solid #f0f3f4;
+	border-left: none;
+	border-bottom: 8px solid transparent;
 }

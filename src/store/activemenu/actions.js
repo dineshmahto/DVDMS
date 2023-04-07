@@ -1,13 +1,15 @@
-import { SET_ACTIVE_SIDE_MENU, UNSET_ACTIVE_SIDE_MENU } from "./actionTypes";
+import { ACTIVE_SIDE_MENU, UNACTIVE_SIDE_MENU } from "./actionTypes";
 
-export const setActiveSideMenu = () => {
+export const setActiveSideMenu = (activeMenuItem) => {
     return {
-      type: SET_ACTIVE_SIDE_MENU,
+      type: ACTIVE_SIDE_MENU,
+      payload: activeMenuItem,
     };
   };
 
-  export const unsetActiveSideMenu = () => {
+  export const unsetActiveSideMenu = (activeMenuItem,) => {
     return {
-      type: UNSET_ACTIVE_SIDE_MENU,
+      type: UNACTIVE_SIDE_MENU,
+      payload: activeMenuItem,
     };
   };
