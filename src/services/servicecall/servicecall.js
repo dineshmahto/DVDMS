@@ -1,9 +1,9 @@
 import axios from "axios";
 import tokenhandle from "../../common/tokenhandle/tokenhandle";
-
+console.log(tokenhandle.getToken());
 const serviceCall = axios.create({
   baseURL: process.env.REACT_APP_API_END_POINT,
-  //timeout: 1000 * 5,
+  //timeout: 1000 * 30,
   headers: {
     "content-type": "application/json",
     Accept: "application/json",
@@ -12,11 +12,12 @@ const serviceCall = axios.create({
 });
 
 const methods = {
-  getData: (url, qeryString) =>
+  getData: (url, qeryString, headers) =>
     serviceCall({
       method: "GET",
       url: url,
       params: qeryString,
+      headers,
     }),
   postData: (url, formData, header = { token: tokenhandle.getToken() }) =>
     serviceCall({

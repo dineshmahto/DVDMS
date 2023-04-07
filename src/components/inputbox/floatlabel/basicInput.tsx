@@ -18,19 +18,19 @@ const BasicInput: React.FC<inputProps> = ({
   onChange,
   disabled,
   floatingLabel,
+  labelText,
 }) => {
   return (
     <>
       <div className={`${floatingLabel ? "form-floating" : ""}`}>
         <input
           type={type}
-          className={`form-control ${className}`}
+          className={`form-control shadow-none ${className}`}
           id={id}
           onChange={onChange}
           disabled={disabled}
           placeholder={placeholder}
         />
-        {floatingLabel && <label htmlFor={id}>{floatingLabel}</label>}
       </div>
     </>
   );

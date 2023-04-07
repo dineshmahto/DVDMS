@@ -57,6 +57,7 @@ interface tableProps {
   colouredHeader?: boolean | false;
   showTableActionBar: boolean | false;
   toolbarRequired?: boolean | false;
+  stickyHeader?: boolean | false;
 }
 
 const TableComponent: React.FC<tableProps> = ({
@@ -86,15 +87,21 @@ const TableComponent: React.FC<tableProps> = ({
   showTableActionBar,
   multipleSelect,
   toolbarRequired,
+  stickyHeader,
 }) => {
   const classes = useStyles();
-  console.log("width", customWidth);
   return (
     <Paper
       sx={
         overFlow
-          ? { width: "100%", overFlow: "hidden" }
-          : { width: "100%", overFlowX: "auto" }
+          ? {
+              width: "100%",
+              overflowX: "auto",
+            }
+          : {
+              width: "100%",
+              overflowX: "hidden",
+            }
       }
     >
       {toolbarRequired && (
@@ -146,9 +153,9 @@ const TableComponent: React.FC<tableProps> = ({
       )}
 
       <TableContainer
-        sx={{ width: customWidth, maxHeight: overFlow ? 440 : "" }}
+        sx={{ width: customWidth, maxHeight: overFlow ? 500 : "" }}
       >
-        <Table stickyHeader aria-label="sticky table">
+        <Table stickyHeader={stickyHeader} aria-label="sticky table">
           <caption>{caption}</caption>
           <TableHead>
             <TableRow hover>
@@ -239,8 +246,12 @@ const TableComponent: React.FC<tableProps> = ({
             <Pagination
               current={page}
               total={count}
+              showTotal={(count, range) =>
+                `${range[0]}-${range[1]} of ${count} items`
+              }
               showSizeChanger={true}
               onChange={onPageChange}
+              onShowSizeChange={onRowsPerPageChange}
               className="mb-2 me-2"
             />
           </div>

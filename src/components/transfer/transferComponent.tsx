@@ -6,11 +6,6 @@ import {
   faAngleRight,
   faAngleLeft,
 } from "@fortawesome/free-solid-svg-icons";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
 import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles({
@@ -60,7 +55,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
       <div className="container-fluid">
         <div className="row">
           <div
-            className="col-5 border rounded"
+            className="col border rounded"
             style={{
               height: "300px",
               overflowX: "hidden",
@@ -90,12 +85,15 @@ const TransferComponent: React.FC<transferComponentProps> = ({
             </ul>
           </div>
 
-          <div className="col-2 d-flex flex-column justify-content-center">
+          <div className="col-1 d-flex flex-column justify-content-center">
             <button
               className="btn btn-secondary btn-sm mb-1"
               onClick={handleMoveSelectedItemToRight}
             >
-              <FontAwesomeIcon icon={faAngleRight} />
+              <FontAwesomeIcon
+                icon={faAngleRight}
+                onClick={handleMoveSelectedItemToRight}
+              />
             </button>
             <button
               className="btn btn-secondary btn-sm mb-1"
@@ -117,7 +115,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
             </button>
           </div>
           <div
-            className="col-5 border rounded"
+            className="col border rounded"
             style={{
               height: "300px",
               overflowX: "hidden",

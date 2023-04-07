@@ -1,19 +1,19 @@
-import { React, useMemo, useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
-import BasicButton from "../../components/button/basicbutton";
-import SelectOption from "../../components/option/option";
-import toastMessage from "../../common/toastmessage/toastmessage";
-import DatePickers from "react-datepicker";
-import Paper from "@mui/material/Paper";
-import "react-datepicker/dist/react-datepicker.css";
+import { React, useState, useMemo } from "react";
+import { TableBody, TableRow, TableCell } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import TextField from "@mui/material/TextField";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { makeStyles } from "@mui/styles";
-import moment from "moment";
+import TableComponent from "../../components/tables/datatable/tableComponent";
+import BasicInput from "../../components/inputbox/floatlabel/basicInput";
+import BasicButton from "../../components/button/basicbutton";
 
-// styling the material ui Date Picker
+import toastMessage from "../../common/toastmessage/toastmessage";
+import moment from "moment";
+import HorizonatalLine from "../../components/horizontalLine/horizonatalLine";
+import SelectOption from "../../components/option/option";
+import SwitchCheckBox from "../../components/switch/switchcheckbox";
 const useStyles = makeStyles({
   root: {
     "& .MuiInputBase-root": {
@@ -24,8 +24,6 @@ const useStyles = makeStyles({
     },
   },
 });
-
-// Intial Data structure to show in the table
 const tempData = [
   {
     id: 1,
@@ -56,13 +54,15 @@ const tempData = [
     classificationValue: "",
     progName: [],
     progNameValue: "",
-    drugName: "",
+    drugName: [],
     drugNameValue: "",
     packaging: [],
     packagingValue: "",
     batchNo: "",
-    mnrDate: "",
-    expDate: "",
+    mnfDate: null,
+    mnfDateValue: "",
+    expDate: null,
+    expDateValue: "",
     source: [],
     sourceValue: "",
     challanNo: "",
@@ -80,8 +80,10 @@ const tempData = [
     packaging: [],
     packagingValue: "",
     batchNo: "",
-    mnrDate: "",
-    expDate: "",
+    mnfDate: null,
+    mnfDateValue: "",
+    expDate: null,
+    expDateValue: "",
 
     source: [],
     sourceValue: "",
@@ -100,8 +102,10 @@ const tempData = [
     packaging: [],
     packagingValue: "",
     batchNo: "",
-    mnrDate: "",
-    expDate: "",
+    mnfDate: null,
+    mnfDateValue: "",
+    expDate: null,
+    expDateValue: "",
     source: [],
     sourceValue: "",
     challanNo: "",
@@ -119,8 +123,10 @@ const tempData = [
     packaging: [],
     packagingValue: "",
     batchNo: "",
-    mnrDate: "",
-    expDate: "",
+    mnfDate: null,
+    mnfDateValue: "",
+    expDate: null,
+    expDateValue: "",
     source: [],
     sourceValue: "",
     challanNo: "",
@@ -138,8 +144,10 @@ const tempData = [
     packaging: [],
     packagingValue: "",
     batchNo: "",
-    mnrDate: "",
-    expDate: "",
+    mnfDate: null,
+    mnfDateValue: "",
+    expDate: null,
+    expDateValue: "",
     source: [],
     sourceValue: "",
     challanNo: "",
@@ -157,8 +165,10 @@ const tempData = [
     packaging: [],
     packagingValue: "",
     batchNo: "",
-    mnrDate: "",
-    expDate: "",
+    mnfDate: null,
+    mnfDateValue: "",
+    expDate: null,
+    expDateValue: "",
     source: [],
     sourceValue: "",
     challanNo: "",
@@ -176,8 +186,10 @@ const tempData = [
     packaging: [],
     packagingValue: "",
     batchNo: "",
-    mnrDate: "",
-    expDate: "",
+    mnfDate: null,
+    mnfDateValue: "",
+    expDate: null,
+    expDateValue: "",
     source: [],
     sourceValue: "",
     challanNo: "",
@@ -195,8 +207,10 @@ const tempData = [
     packaging: [],
     packagingValue: "",
     batchNo: "",
-    mnrDate: "",
-    expDate: "",
+    mnfDate: null,
+    mnfDateValue: "",
+    expDate: null,
+    expDateValue: "",
     source: [],
     sourceValue: "",
     challanNo: "",
@@ -214,8 +228,10 @@ const tempData = [
     packaging: [],
     packagingValue: "",
     batchNo: "",
-    mnrDate: "",
-    expDate: "",
+    mnfDate: null,
+    mnfDateValue: "",
+    expDate: null,
+    expDateValue: "",
     source: [],
     sourceValue: "",
     challanNo: "",
@@ -233,8 +249,10 @@ const tempData = [
     packaging: [],
     packagingValue: "",
     batchNo: "",
-    mnrDate: "",
-    expDate: "",
+    mnfDate: null,
+    mnfDateValue: "",
+    expDate: null,
+    expDateValue: "",
     source: [],
     sourceValue: "",
     challanNo: "",
@@ -263,7 +281,6 @@ const dummySelectData = [
     value: "May",
   },
 ];
-
 const keyCase = {
   RECEIVEDDATE: "receivedDate",
   RECEIVEDDATEVALUE: "receivedDateValue",
@@ -276,33 +293,24 @@ const keyCase = {
   PACKAGING: "packaging",
   PACKAGINGVALUE: "packagingValue",
   BATCHNO: "batchNo",
-  MNRDATE: "mnrDate",
+  MNFDATE: "mnfDate",
+  MNFDATEVALUE: "mnfDateValue",
   EXPDATE: "expDate",
+  EXPDATEVALUE: "expDateValue",
   SOURCE: "source",
   SOURCEVALUE: "sourceValue",
   CHALLONNO: "challanNo",
   BARCODENO: "barcodeNo",
 };
-const StockEntryDesk = () => {
+const StockEntry = () => {
   const classes = useStyles();
   const [data, setData] = useState(tempData);
   const [submitData, setSubmitData] = useState(tempData);
   const [errorRowId, setErrorRowId] = useState("");
-  const [selectedClassification, setSelectedClassification] = useState([]);
-  const [classification, setClassification] = useState(dummySelectData);
-
-  const [updatedClassification, setUpdatedClassification] = useState();
   const [trackClassificationList, setTrackClassificationList] = useState([]);
   const [updatedClassificationDropDownLsit, setNewClassificationDropDownList] =
     useState([]);
 
-  const [updatedProgramme, setUpdatedProgramme] = useState([]);
-  const [trackProgrammeSelectedList, setTrackProgrammeSelectedList] = useState(
-    []
-  );
-  const [updatedProgrammeDropDownList, setNewProgrammeDropDownList] = useState(
-    []
-  );
   const programmeList = [
     {
       id: 1,
@@ -351,28 +359,25 @@ const StockEntryDesk = () => {
       value: "Drug 6",
     },
   ];
-  const [programme, setprogramme] = useState([]);
-  const [drugName, setDrugName] = useState([]);
-  const [source, setSource] = useState([]);
 
-  const [receivedDate, setReceivedDate] = useState(() => data.map(() => null));
-  console.log("Received Date", receivedDate);
-  const [openDatePicker, setOpenDatePicker] = useState(() =>
-    data.map(() => false)
-  );
-  const [mnrDate, setMNRDate] = useState(() => data.map(() => ""));
-  const [expDate, setExpDate] = useState(() => data.map(() => ""));
-
+  const [controller, setController] = useState({
+    page: 0,
+    rowsPerPage: 10,
+  });
+  const [sortField, setSortField] = useState("");
+  const [order, setOrder] = useState("asc");
+  const [totalRows, setTotalRows] = useState(0);
   const fetchProgrammeList = () => {
     const cloneData = [...data];
     const updatedData = cloneData?.filter((item) => {
       if (item.id === 1) return (item.progName = programmeList);
       else return item;
     });
+    console.log("CehckData", updatedData);
     setData(updatedData);
+    // setData([...data, (data[0].progName = programmeList)]);
   };
 
-  //   function to update the drop down State value in UI
   const updateDropDownValue = (
     e,
     row,
@@ -403,7 +408,6 @@ const StockEntryDesk = () => {
       setData(updatedData);
     } else {
       if (dropDownSelectedList.length !== 0) {
-        console.log("entered in not empty");
         const cloneData = [...data];
         const elementExist = dropDownSelectedList?.find((element) => {
           return element === row.id;
@@ -452,7 +456,6 @@ const StockEntryDesk = () => {
     }
   };
 
-  // function to check the data on click of ADD Action Button
   const handleSubmitData = () => {
     let rowId;
     const isEmpty = data?.some(function (object) {
@@ -482,300 +485,274 @@ const StockEntryDesk = () => {
     }
   };
 
-  //   common Funtion to update the value of the initial Data state except the drop Down value
   const commonFunctionToUpdateValue = (rowId, value, key) => {
+    console.log("key", key);
+    console.log("value", value);
     const cloneData = [...data];
+    console.log("CommonData", cloneData);
     const filtered = cloneData?.filter((item) => {
       return item.id === rowId;
     });
     filtered[0][`${key}`] = value;
+    console.log(filtered);
     const tempData = [...submitData];
     tempData.slice(rowId - 1, 1, filtered);
+    console.log("submitData", submitData);
+    console.log(tempData);
+
     setData(tempData);
   };
 
   const columns = useMemo(() => [
     {
-      id: "id",
-      name: "id",
-      selector: (row) => row.id,
-      omit: true,
-    },
-    {
       id: "receivedDate",
       name: "RECEIVED DATE",
-      selector: (row) => row.receivedDate,
-      width: "200px",
-      cell: (row) => (
-        <>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              className={classes.root}
-              value={row.receivedDate}
-              onChange={(newValue) => {
-                commonFunctionToUpdateValue(
-                  row.id,
-                  newValue,
-                  keyCase.RECEIVEDDATE
-                );
-                commonFunctionToUpdateValue(
-                  row.id,
-                  moment(newValue).format("l"),
-                  keyCase.RECEIVEDDATEVALUE
-                );
-              }}
-              renderInput={(params) => <TextField {...params} />}
-            />
-          </LocalizationProvider>
-        </>
-      ),
+      sortable: false,
+      type: "YMDPicker",
     },
 
     {
       id: "classification",
       name: "CLASSIFICATION",
-      selector: (row) => row.classification,
-      width: "200px",
-      cell: (row) => (
-        <SelectOption
-          data={row.classification}
-          id={row.id + `classification`}
-          onChange={(e) => {
-            if (e.target.value != "None") {
-              updateDropDownValue(
-                e,
-                row,
-                trackClassificationList,
-                dummySelectData,
-                updatedClassificationDropDownLsit,
-                setNewClassificationDropDownList,
-                setTrackClassificationList,
-                keyCase.CLASSIFICATION,
-                keyCase.CLASSIFICATIONVALUE
-              );
-              fetchProgrammeList();
-            } else {
-              toastMessage(
-                "Stock Entry Desk",
-                "Select a valid drop down value from Classification",
-                "error"
-              );
-            }
-          }}
-        />
-      ),
+      sortable: false,
+      type: "select",
     },
     {
       id: "progName",
       name: "PROG NAME",
-      selector: (row) => row.progName,
-      width: "200px",
-      cell: (row) => (
-        <SelectOption
-          data={row.progName}
-          id={row.id + `progName`}
-          onChange={(e) => {
-            updateDropDownValue(
-              e,
-              row,
-              trackProgrammeSelectedList,
-              programmeList,
-              updatedProgrammeDropDownList,
-              setNewProgrammeDropDownList,
-              setTrackProgrammeSelectedList,
-              keyCase.PROGRAMMENAME,
-              keyCase.PROGRAMMENAMEVALUE
-            );
-          }}
-        />
-      ),
+      sortable: false,
+      type: "select",
     },
     {
       id: "drugName",
       name: "DRUG NAME",
-      selector: (row) => row.drugName,
-      width: "200px",
-      cell: (row) => (
-        <SelectOption
-          data={[]}
-          id={row.id + `drugName`}
-          onChange={(e) =>
-            commonFunctionToUpdateValue(
-              row.id,
-              e.target.value,
-              keyCase.DRUGNAME
-            )
-          }
-        />
-      ),
+      sortable: false,
+      type: "select",
     },
     {
       id: "packaging",
       name: "PACKAGING",
-      width: "200px",
-      selector: (row) => row.packaging,
-      cell: (row) => (
-        <SelectOption
-          data={[]}
-          id={row.id + `packaging`}
-          onChange={(e) =>
-            commonFunctionToUpdateValue(
-              row.id,
-              e.target.value,
-              keyCase.PACKAGING
-            )
-          }
-        />
-      ),
+      sortable: false,
+      type: "select",
     },
     {
       id: "batchNo",
       name: "BATCH NO",
-      width: "150px",
-      selector: (row) => row.batchNo,
-      cell: (row) => (
-        <input
-          id={row.id + `rqAmnt`}
-          type="text"
-          className="form-control"
-          onChange={(e) => {
-            commonFunctionToUpdateValue(
-              row.id,
-              e.target.value,
-              keyCase.BATCHNO
-            );
-          }}
-        />
-      ),
+      sortable: false,
+      type: "input",
     },
     {
-      id: "mnrDate",
-      name: "MNR DATE",
-      width: "150px",
-      selector: (row) => row.mnrDate,
-      cell: (row) => (
-        <input
-          id={row.id + `rqAmnt`}
-          type="text"
-          className="form-control"
-          onChange={(e) => {
-            commonFunctionToUpdateValue(
-              row.id,
-              e.target.value,
-              keyCase.MNRDATE
-            );
-          }}
-        />
-      ),
+      id: "mnfDate",
+      name: "MNF DATE",
+      sortable: false,
+      type: "YMPicker",
     },
     {
       id: "expDate",
       name: "EXP DATE",
-      width: "200px",
-      selector: (row) => row.expDate,
-      cell: (row) => (
-        <>
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              className={classes.root}
-              views={["year", "month"]}
-              openTo="month"
-              value={null}
-              disablePast
-              onChange={(newValue) => {
-                console.log("value", newValue);
-              }}
-              renderInput={(params) => <TextField {...params} />}
-            />
-          </LocalizationProvider>
-        </>
-      ),
+      sortable: false,
+      type: "YMPicker",
     },
 
     {
       id: "source",
       name: "SOURCE",
-      selector: (row) => row.source,
-      width: "200px",
-      cell: (row) => (
-        <SelectOption
-          data={[]}
-          onChange={(e) =>
-            commonFunctionToUpdateValue(row.id, e.target.value, keyCase.SOURCE)
-          }
-        />
-      ),
+      sortable: false,
+      type: "select",
     },
     {
       id: "challanNo",
       name: "CHALLAN NO",
-      selector: (row) => row.challanNo,
-      width: "150px",
-      cell: (row) => (
-        <input
-          id={row.id + `rqAmnt`}
-          type="text"
-          className="form-control"
-          onChange={(e) => {
-            commonFunctionToUpdateValue(
-              row.id,
-              e.target.value,
-              keyCase.CHALLONNO
-            );
-          }}
-        />
-      ),
+      sortable: false,
+      type: "input",
     },
     {
       id: "barcodeNo",
       name: "BARCODE NO",
-      selector: (row) => row.barcodeNo,
-      width: "150px",
-      cell: (row) => (
-        <input
-          id={row.id + `rqAmnt`}
-          type="text"
-          className="form-control"
-          onChange={(e) => {
-            commonFunctionToUpdateValue(
-              row.id,
-              e.target.value,
-              keyCase.BARCODENO
-            );
-          }}
-        />
-      ),
+      sortable: false,
+      type: "input",
     },
   ]);
-
-  //   styling the table row to highlight the error row in the table
-  const conditionalRowStyles = [
-    {
-      when: (row) => row.id === errorRowId,
-      style: {
-        backgroundColor: "red",
-        color: "white",
-        "&:hover": {
-          cursor: "pointer",
-        },
-      },
-    },
-  ];
   return (
-    <div className=" " id="stockEntry">
-      <Paper elevation={2}>
+    <>
+      <div className="container-fluid">
+        <div className="row mt-2">
+          <div className="col-4">
+            <p className="fs-6">STOCK ENTRY DESK</p>
+          </div>
+          <div className="col-8">
+            <div className="d-flex justify-content-around">
+              <div>
+                <SwitchCheckBox
+                  type="checkbox"
+                  labelText="FOR COVID 19"
+                  id="forCovid19"
+                />
+              </div>
+              <div>
+                <div className="row align-items-center">
+                  <div className="col-auto">
+                    <label>Institute Type</label>
+                  </div>
+                  <div className="col-auto">
+                    <SelectOption data={[]} />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <SwitchCheckBox
+                  type="checkbox"
+                  labelText="Received from Ministry"
+                  id="receivedForMinistry"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
         <div className="row">
-          <DataTable
-            title="Stock Entry Desk"
-            columns={columns}
-            data={data}
-            responsive={true}
-            onSelectedRowsChange={(rows) => {
-              console.log("Onselect", rows);
-            }}
-            conditionalRowStyles={conditionalRowStyles}
-            className="mb-2"
-          />
+          <HorizonatalLine text="Enter Drug Details" />
+        </div>
+        <div className="row mt-2">
+          <div className="col-12">
+            <TableComponent
+              columns={columns}
+              sortField={sortField}
+              page={controller.page}
+              count={totalRows}
+              order={order}
+              paginationRequired={false}
+              overFlow={true}
+              stickyHeader={true}
+              customWidth="max-content"
+              tableTitle="Stock Entry Desk"
+            >
+              <TableBody>
+                {data &&
+                  data?.map((row, index) => {
+                    console.log("Row Number", index + 1);
+                    console.log("Row", row);
+                    return (
+                      <TableRow key={row.name}>
+                        {columns.map((d, k) => {
+                          console.log("K", k);
+                          if (d.type == "input") {
+                            return (
+                              <TableCell key={k} align="right">
+                                <BasicInput
+                                  id={row.id + d.id}
+                                  type="text"
+                                  className="shadow-none"
+                                  placeholder="Amount"
+                                  onChange={(e) =>
+                                    commonFunctionToUpdateValue(
+                                      row.id,
+                                      e.target.value,
+                                      d.id
+                                    )
+                                  }
+                                />
+                              </TableCell>
+                            );
+                          } else if (d.type == "select") {
+                            console.log("Key", d.id);
+                            console.log("Data", row[d.id]);
+                            return (
+                              <TableCell>
+                                <SelectOption
+                                  data={row[d.id]}
+                                  onChange={(e) => {
+                                    if (e.target.value != "None") {
+                                      updateDropDownValue(
+                                        e,
+                                        row,
+                                        trackClassificationList,
+                                        dummySelectData,
+                                        updatedClassificationDropDownLsit,
+                                        setNewClassificationDropDownList,
+                                        setTrackClassificationList,
+                                        d.id,
+                                        `${d.id}Value`
+                                      );
+                                      if (
+                                        d.id == "classification" &&
+                                        index == 0
+                                      ) {
+                                        fetchProgrammeList();
+                                      }
+                                    }
+                                  }}
+                                  id={row.id + row[d.id]}
+                                />
+                              </TableCell>
+                            );
+                          } else if (d.type == "YMDPicker") {
+                            return (
+                              <TableCell>
+                                <LocalizationProvider
+                                  dateAdapter={AdapterDayjs}
+                                >
+                                  <DatePicker
+                                    className={classes.root}
+                                    value={row[d.id]}
+                                    onChange={(newValue) => {
+                                      commonFunctionToUpdateValue(
+                                        row.id,
+                                        newValue,
+                                        d.id
+                                      );
+                                      commonFunctionToUpdateValue(
+                                        row.id,
+                                        moment(newValue).format("l"),
+                                        `${d.id}Value`
+                                      );
+                                    }}
+                                    renderInput={(params) => (
+                                      <TextField {...params} />
+                                    )}
+                                  />
+                                </LocalizationProvider>
+                              </TableCell>
+                            );
+                          } else if (d.type == "YMPicker") {
+                            return (
+                              <TableCell>
+                                <LocalizationProvider
+                                  dateAdapter={AdapterDayjs}
+                                >
+                                  <DatePicker
+                                    id={row.id + d.id}
+                                    className={classes.root}
+                                    views={["year", "month"]}
+                                    openTo="month"
+                                    value={row.mnfDate}
+                                    disablePast
+                                    onChange={(newValue) => {
+                                      commonFunctionToUpdateValue(
+                                        row.id,
+                                        newValue,
+                                        d.id
+                                      );
+                                      commonFunctionToUpdateValue(
+                                        row.id,
+                                        moment(newValue).format("l"),
+                                        `${d.id}Value`
+                                      );
+                                    }}
+                                    renderInput={(params) => (
+                                      <TextField {...params} />
+                                    )}
+                                  />
+                                </LocalizationProvider>
+                              </TableCell>
+                            );
+                          }
+                        })}
+                      </TableRow>
+                    );
+                  })}
+              </TableBody>
+            </TableComponent>
+          </div>
         </div>
         <div className="row">
           <div className="d-flex justify-content-center">
@@ -787,9 +764,9 @@ const StockEntryDesk = () => {
             />
           </div>
         </div>
-      </Paper>
-    </div>
+      </div>
+    </>
   );
 };
 
-export default StockEntryDesk;
+export default StockEntry;
