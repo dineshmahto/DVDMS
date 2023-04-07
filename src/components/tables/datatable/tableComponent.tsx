@@ -90,8 +90,6 @@ const TableComponent: React.FC<tableProps> = ({
   stickyHeader,
 }) => {
   const classes = useStyles();
-  console.log("width", customWidth);
-  console.log("overflow", overFlow);
   return (
     <Paper
       sx={
