@@ -278,7 +278,9 @@ const Sidenav = () => {
 
               {/* Admin */}
               <Link
-                className="nav-link collapsed"
+                className={`nav-link collapsed ${
+                  activeMenuItem.menu1 === "admin" ? "active-me" : ""
+                }`}
                 to={{}}
                 data-bs-toggle="collapse"
                 data-bs-target="#collapseAdmin"
@@ -300,10 +302,40 @@ const Sidenav = () => {
                 data-bs-parent="#sidenavAccordion"
               >
                 <nav className="sb-sidenav-menu-nested nav">
-                  <Link className="nav-link" to={{ pathname: "/listuser" }}>
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "listuser" ? "active-me1" : ""
+                    }`}
+                    to={{ pathname: "/listuser" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "admin",
+                        true,
+                        "listuser",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
                     User Desk
                   </Link>
-                  <Link className="nav-link" to={{ pathname: "/listrole" }}>
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "listrole" ? "active-me1" : ""
+                    }`}
+                    to={{ pathname: "/listrole" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "admin",
+                        true,
+                        "listrole",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
                     Role Desk
                   </Link>
                 </nav>
