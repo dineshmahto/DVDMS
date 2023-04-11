@@ -1,10 +1,11 @@
 import axios from "axios";
-export default API = axios.create({
+const API = axios.create({
   baseURL: process.env.REACT_APP_API_END_POINT,
   headers: {
     "content-type": "application/json",
     Accept: "application/json",
   },
+  timeout: 5000,
 });
 
 API.interceptors.request.use(
@@ -27,3 +28,4 @@ API.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+export default API;
