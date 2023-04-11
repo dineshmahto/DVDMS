@@ -338,6 +338,69 @@ const Sidenav = () => {
                   >
                     Role Desk
                   </Link>
+
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "openProgramFundingInterface"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/openProgramFundingInterface" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "admin",
+                        true,
+                        "openProgramFundingInterface",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Program Funding Mapping
+                  </Link>
+
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "storetypedrugmapping"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/storetypedrugmapping" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "admin",
+                        true,
+                        "storetypedrugmapping",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    EDL Mapping
+                  </Link>
+
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "openBudgetListingInterface"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/openBudgetListingInterface" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "admin",
+                        true,
+                        "openBudgetListingInterface",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Budget Interface
+                  </Link>
                 </nav>
               </div>
 

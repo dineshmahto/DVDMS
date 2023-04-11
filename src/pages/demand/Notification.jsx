@@ -34,6 +34,7 @@ const Notification = () => {
   let classes = useStyles();
   const [totalPages, setTotalPages] = useState(0);
   const [tableData, setTableData] = useState([]);
+  console.log(typeof tableData, tableData?.length);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
@@ -272,9 +273,8 @@ const Notification = () => {
           <div className="d-flex justify-content-start">
             <BasicButton
               type="button"
-              outlineType={true}
               buttonText="New Notification (HQ)"
-              className="primary btn-sm"
+              className="btn btn-outline-primary btn-sm"
               onClick={(e) => {
                 navigate("/admin/openNotification");
               }}
@@ -358,90 +358,105 @@ const Notification = () => {
                   </TableRow>
                 ) : (
                   tableData &&
-                  tableData.map((data, index) => (
-                    <TableRow key={data.id}>
-                      <TableCell padding="none">
-                        <Checkbox
-                          onClick={(event) => handleClick(event, index, data)}
-                          color="primary"
-                          checked={selected.includes(index)}
-                          inputProps={{
-                            "aria-labelledby": `enhanced-table-checkbox-${index}`,
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {moment(data.notificationDate).format("DD/MM/YYYY")}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data.financialYear}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.demandTypeId?.demandName}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {moment(data?.submissionLastDate).format("DD/MM/YYYY")}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.instituteType?.typeName}
-                      </TableCell>
-
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.programmeList &&
-                        data?.programmeList.length > 0 ? (
-                          <span
-                            className="text-decoration-underline"
-                            onClick={() => {
-                              setModalTitle("Programme List");
-                              setPreviewList(data?.programmeList);
-                              setShow(true);
+                  tableData?.length > 0 &&
+                  tableData?.map((data, index) => {
+                    return (
+                      <TableRow key={data.id}>
+                        <TableCell padding="none">
+                          <Checkbox
+                            onClick={(event) => handleClick(event, index, data)}
+                            color="primary"
+                            checked={selected.includes(index)}
+                            inputProps={{
+                              "aria-labelledby": `enhanced-table-checkbox-${index}`,
                             }}
-                            style={{ fontSize: "0.7rem", cursor: "pointer" }}
-                          >
-                            VIEW PROGRAMME LIST
-                          </span>
-                        ) : (
-                          "NONE"
-                        )}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.drugList && data?.drugList.length > 0 ? (
-                          <span
-                            className="text-decoration-underline"
-                            onClick={() => {
-                              setModalTitle("Drug List");
-                              setPreviewList(data?.drugList);
-                              setShow(true);
-                            }}
-                            style={{ fontSize: "0.7rem" }}
-                          >
-                            VIEW DRUGLIST
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </TableCell>
+                          />
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {moment(data.notificationDate).format("DD/MM/YYYY")}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data.financialYear}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.demandTypeId?.demandName}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {moment(data?.submissionLastDate).format(
+                            "DD/MM/YYYY"
+                          )}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.instituteType?.typeName}
+                        </TableCell>
 
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.status === 10
-                          ? "	Compiled by HQ"
-                          : data?.status === 11
-                          ? " 	Closed"
-                          : data?.status === 1
-                          ? "Active"
-                          : data?.status === 3
-                          ? "Cancelled"
-                          : ""}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.staus === 10 || data?.status === 11 ? (
-                          <FontAwesomeIcon icon={faDownload} />
-                        ) : (
-                          ""
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.programmeList &&
+                          data?.programmeList.length > 0 ? (
+                            <span
+                              className="text-decoration-underline"
+                              onClick={() => {
+                                setModalTitle("Programme List");
+                                setPreviewList(data?.programmeList);
+                                setShow(true);
+                              }}
+                              style={{ fontSize: "0.7rem", cursor: "pointer" }}
+                            >
+                              VIEW PROGRAMME LIST
+                            </span>
+                          ) : (
+                            "NONE"
+                          )}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.drugList && data?.drugList.length > 0 ? (
+                            <span
+                              className="text-decoration-underline"
+                              onClick={() => {
+                                setModalTitle("Drug List");
+                                setPreviewList(data?.drugList);
+                                setShow(true);
+                              }}
+                              style={{ fontSize: "0.7rem" }}
+                            >
+                              VIEW DRUGLIST
+                            </span>
+                          ) : (
+                            ""
+                          )}
+                        </TableCell>
+
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.status === 10
+                            ? "	Compiled by HQ"
+                            : data?.status === 11
+                            ? " 	Closed"
+                            : data?.status === 1
+                            ? "Active"
+                            : data?.status === 3
+                            ? "Cancelled"
+                            : ""}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.staus === 10 || data?.status === 11 ? (
+                            <FontAwesomeIcon icon={faDownload} />
+                          ) : (
+                            ""
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+                {console.log(tableData?.length)}
+                {!loading && tableData && tableData.length === 0 && (
+                  <TableRow>
+                    <TableCell className="text-center" colSpan={12}>
+                      <p style={{ fontSize: "0.8rem" }}>
+                        NO DATA AVAILABE IN TABLE
+                      </p>
+                    </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </TableComponent>

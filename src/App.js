@@ -1,4 +1,5 @@
-import { Route, Routes, BrowserRouter } from "react-router-dom";
+import { lazy } from "react";
+import { Route, Routes } from "react-router-dom";
 import Home from "./pages/home/home";
 import "./App.css";
 import { Provider } from "react-redux";
@@ -30,11 +31,26 @@ import DemandNotification from "./pages/demand/Notification";
 import StockListing from "./pages/stock/stockListing";
 import StockEntry from "./pages/stock/stockEntry";
 import DrugCondemnationRegister from "./pages/stock/drugCondemnation";
-// Admin
-import RoleDesk from "./pages/admin/roledesk";
-import UserDesk from "./pages/admin/userdesk";
 import ProtectedRoute from "./routes/middleware/ProtectedRoute";
-import PageNotFound from "./pages/pagenotfound/pageNotFound";
+// Admin
+const RoleDesk = lazy(() => import("./pages/admin/roledesk/roledesk"));
+const UserDesk = lazy(() => import("./pages/admin/userdesk/userdesk"));
+const ProgrameFundingSource = lazy(() =>
+  import("./pages/admin/programefunding/programefundingsource")
+);
+const StoreTypeDrugMapping = lazy(() =>
+  import("./pages/admin/edlmapping/storetypedrugmapping")
+);
+const BudgetListDesk = lazy(() =>
+  import("./pages/admin/budgetdesk/budgetlistdesk")
+);
+const FundingDesk = lazy(() =>
+  import("../src/pages/admin/fundingdesk/fundingdesk")
+);
+const PageNotFound = lazy(() =>
+  import("../src/pages/pagenotfound/pageNotFound")
+);
+
 function App() {
   return (
     <div className="dvdms-root">
@@ -46,6 +62,19 @@ function App() {
               {/* admin */}
               <Route path="listrole" element={<RoleDesk />} />
               <Route path="listuser" element={<UserDesk />} />
+              <Route
+                path="openProgramFundingInterface"
+                element={<ProgrameFundingSource />}
+              />
+              <Route
+                path="storetypedrugmapping"
+                element={<StoreTypeDrugMapping />}
+              />
+              <Route
+                path="openBudgetListingInterface"
+                element={<BudgetListDesk />}
+              />
+              <Route path="FundingDesk" element={<FundingDesk />} />
               {/* admin */}
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="annualdemand" element={<Notification />} />

@@ -1,12 +1,12 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import { Paper } from "@mui/material";
 import { TableBody, TableRow, TableCell } from "@mui/material";
-import TableComponent from "../../components/tables/datatable/tableComponent";
-import HorizonatalLine from "../../components/horizontalLine/horizonatalLine";
-import Basicbutton from "../../components/button/basicbutton";
-import BasicModal from "../../components/modal/basicmodal";
-import SearchField from "../../components/search/search";
-import BasicInput from "../../components/inputbox/floatlabel/basicInput";
+import TableComponent from "../../../components/tables/datatable/tableComponent";
+import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
+import Basicbutton from "../../../components/button/basicbutton";
+import BasicModal from "../../../components/modal/basicmodal";
+import SearchField from "../../../components/search/search";
+import BasicInput from "../../../components/inputbox/floatlabel/basicInput";
 import { Spinner } from "react-bootstrap";
 import {
   faFloppyDisk,
@@ -15,12 +15,12 @@ import {
   faSearch,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import CustomSelect from "../../components/select/customSelect";
-import { getAdminService } from "../../services/adminservice/adminservice";
+import CustomSelect from "../../../components/select/customSelect";
+import { getAdminService } from "../../../services/adminservice/adminservice";
 import { makeStyles } from "@mui/styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import toastMessage from "../../common/toastmessage/toastmessage";
-import * as CONSTANTS from "../../common/constant/constants";
+import toastMessage from "../../../common/toastmessage/toastmessage";
+import * as CONSTANTS from "../../../common/constant/constants";
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -48,6 +48,10 @@ const UserDesk = () => {
   const [activityList, setActivityList] = useState([]);
   const [activityType, setActivityType] = useState([]);
   const [showActivityModal, setShowActivityModal] = useState(false);
+  const [roleList, setRoleList] = useState([]);
+  const [storeList, setStoreList] = useState([]);
+  const [dropDwonRoleList, setDropDownRoleList] = useState([]);
+  const [dropDownStoreList, setDropDownStoreList] = useState([]);
   const columns = useMemo(() => [
     {
       id: "username",
@@ -56,7 +60,7 @@ const UserDesk = () => {
     },
 
     {
-      id: "roleId",
+      id: "role",
       name: "Role",
       sortable: true,
     },
@@ -149,9 +153,6 @@ const UserDesk = () => {
   );
 
   const callApi = async () => {
-    const jwt =
-      "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6M…DU1fQ.38ZZz4KQm6sA5Uh8jJJU7O6CxWkce03ZO-qSwyM2ZB8";
-
     await getAdminService(CONSTANTS.USER_LISTING, null)
       .then((r) => {
         console.log(r);
@@ -159,6 +160,8 @@ const UserDesk = () => {
         setTotalPages(r?.data?.totalPages);
         setTotalRows(r?.data?.totalElements);
         setTableData(r?.data?.content);
+        setRoleList(r?.data?.roleList);
+        setStoreList(r?.data?.storeList);
         setLoading(false);
       })
       .catch((e) => {
@@ -248,7 +251,7 @@ const UserDesk = () => {
               ></textarea>
             </div>
           </div>
-          <div className="row mb-2">
+          {/* <div className="row mb-2">
             <div className="col-2">
               <label htmlFor="userType" class="col-form-label">
                 User Type:
@@ -257,13 +260,13 @@ const UserDesk = () => {
             <div className="col-6">
               <CustomSelect
                 id="userType"
-                options={[]}
+                options={dropDwonRoleList}
                 onChange={(choice) => {
                   console.log(choice?.value);
                 }}
               />
             </div>
-          </div>
+          </div> */}
 
           <div className="row mb-2">
             <div className="col-2">
@@ -285,7 +288,7 @@ const UserDesk = () => {
             <div className="col-6">
               <CustomSelect
                 id="storeName"
-                options={[]}
+                options={dropDownStoreList}
                 onChange={(choice) => {
                   console.log(choice?.value);
                 }}
@@ -302,7 +305,7 @@ const UserDesk = () => {
             <div className="col-6">
               <CustomSelect
                 id="role"
-                options={[]}
+                options={dropDwonRoleList}
                 onChange={(choice) => {
                   console.log(choice?.value);
                 }}
@@ -323,7 +326,7 @@ const UserDesk = () => {
                   }
                   type="button"
                   buttonText="Save"
-                  className="primary"
+                  className="btn btn-primary"
                   outlineType={true}
                 />
               </div>
@@ -379,8 +382,10 @@ const UserDesk = () => {
             <Basicbutton
               buttonText="Add New User"
               outlineType={true}
-              className="primary rounded-0 mb-2 me-1 mt-2"
+              className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
               onClick={() => {
+                setDropDownRoleList(roleList);
+                setDropDownStoreList(storeList);
                 setShowModal(true);
               }}
             />
@@ -422,64 +427,82 @@ const UserDesk = () => {
                   </TableRow>
                 ) : (
                   tableData &&
-                  tableData.map((data, index) => (
-                    <TableRow key={data.id}>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data.username}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data.roleId}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.store}
-                      </TableCell>
+                  tableData.length > 0 &&
+                  tableData.map((data, index) => {
+                    return (
+                      <TableRow key={data.id}>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data.username}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data.role}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.store}
+                        </TableCell>
 
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.firstName}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.lastName}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.emailId}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.mobileNumber}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.address}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.city}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.type}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        <span
-                          className="text-decoration-underline ms-1"
-                          style={{ fontSize: "0.7rem", cursor: "pointer" }}
-                        >
-                          <FontAwesomeIcon
-                            icon={faPenToSquare}
-                            className="me-2"
-                          />
-                        </span>
-                        <span className="m-1"> |</span>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.firstName}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.lastName}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.emailId}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.mobileNumber}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.address}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.city}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {data?.type}
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          <span
+                            className="text-decoration-underline ms-1"
+                            style={{
+                              fontSize: "0.7rem",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <FontAwesomeIcon
+                              icon={faPenToSquare}
+                              className="me-2"
+                            />
+                          </span>
+                          <span className="m-1"> |</span>
 
-                        <span
-                          className="text-decoration-underline"
-                          style={{ fontSize: "0.7rem", cursor: "pointer" }}
-                        >
-                          <FontAwesomeIcon
-                            icon={faTrash}
-                            className="ms-2"
-                            color="red"
-                          />
-                        </span>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                          <span
+                            className="text-decoration-underline"
+                            style={{
+                              fontSize: "0.7rem",
+                              cursor: "pointer",
+                            }}
+                          >
+                            <FontAwesomeIcon
+                              icon={faTrash}
+                              className="ms-2"
+                              color="red"
+                            />
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+                {!loading && tableData && (
+                  <TableRow>
+                    <TableCell className="text-center" colSpan={12}>
+                      <p style={{ fontSize: "0.8rem" }}>
+                        NO DATA AVAILABE IN TABLE
+                      </p>
+                    </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </TableComponent>
@@ -490,7 +513,11 @@ const UserDesk = () => {
       <BasicModal
         title="Create User"
         show={showModal}
-        close={() => setShowModal(false)}
+        close={() => {
+          setDropDownRoleList([]);
+          setDropDownStoreList([]);
+          setShowModal(false);
+        }}
         isStatic={false}
         scrollable={true}
         isCenterAlign={false}

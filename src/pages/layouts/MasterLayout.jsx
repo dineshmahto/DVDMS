@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { Outlet } from "react-router-dom";
 import { useEffect } from "react";
 import Footer from "./Footer";
@@ -52,7 +52,10 @@ const MasterLayout = () => {
             <div id="layoutSidenav_content">
               <main>
                 <div className="container-fluid px-4">
-                  <Outlet />
+                  <Suspense>
+                    <Outlet />
+                  </Suspense>
+
                   <div
                     className="chat"
                     style={{

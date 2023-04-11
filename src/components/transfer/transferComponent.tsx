@@ -55,11 +55,12 @@ const TransferComponent: React.FC<transferComponentProps> = ({
       <div className="container-fluid">
         <div className="row">
           <div
-            className="col border rounded"
+            className="col border rounded border-secondary"
             style={{
               height: "300px",
               overflowX: "hidden",
               overflowY: "scroll",
+              borderWidth: "0px !important",
             }}
           >
             <ul className="list-group">
@@ -115,7 +116,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
             </button>
           </div>
           <div
-            className="col border rounded"
+            className="col border rounded border-secondary"
             style={{
               height: "300px",
               overflowX: "hidden",
