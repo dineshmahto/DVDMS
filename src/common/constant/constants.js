@@ -2,6 +2,8 @@
 export const LOGIN = "auth/authenticate";
 //Logout
 export const LOGOUT = "auth/logout";
+//Dashboard
+export const GET_DASHBOARD_CARD_DATA = "dashboard/details";
 // Demand
 export const GET_NOTIFICATION_LIST = "pagination/notificationList";
 // Stock
