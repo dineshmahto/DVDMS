@@ -55,7 +55,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
       <div className="container-fluid">
         <div className="row">
           <div
-            className="col border rounded border-secondary"
+            className="col border rounded border-secondary p-0"
             style={{
               height: "300px",
               overflowX: "hidden",
@@ -70,7 +70,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
                   return (
                     <>
                       <li
-                        key={elem?.id}
+                        key={elem?.id + i}
                         className={`list-group-item ${
                           activeIndicies[i] ? classes.active : ""
                         }`}
@@ -116,7 +116,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
             </button>
           </div>
           <div
-            className="col border rounded border-secondary"
+            className="col border rounded border-secondary p-0"
             style={{
               height: "300px",
               overflowX: "hidden",

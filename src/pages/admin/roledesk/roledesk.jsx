@@ -10,10 +10,7 @@ import { TableBody, TableRow, TableCell } from "@mui/material";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import Basicbutton from "../../../components/button/basicbutton";
-import BasicModal from "../../../components/modal/basicmodal";
 import SearchField from "../../../components/search/search";
-import BasicInput from "../../../components/inputbox/floatlabel/basicInput";
-import TransferComponent from "../../../components/transfer/transferComponent";
 import { Spinner } from "react-bootstrap";
 import {
   faFloppyDisk,
@@ -23,13 +20,17 @@ import {
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
-import CustomSelect from "../../../components/select/customSelect";
+
 import { getAdminService } from "../../../services/adminservice/adminservice";
 import { makeStyles } from "@mui/styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import * as CONSTANTS from "../../../common/constant/constants";
-
+import CreateRoleModalForm from "./createrolemodalform";
+import EditRoleModal from "./editrolemodalform";
+import RoleActivityListModal from "./roleactivitylistmodal";
+import { useDispatch } from "react-redux";
+import { deleteRole } from "../../../store/admin/action";
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -40,6 +41,7 @@ const useStyles = makeStyles({
   },
 });
 const RoleDesk = () => {
+  const dispatch = useDispatch();
   const showActivitityTooltipRef = useRef();
   let classes = useStyles();
   const [sortField, setSortField] = useState("");
@@ -84,23 +86,222 @@ const RoleDesk = () => {
     },
   ]);
 
-  // Trnasfer component state declaration for adding new Role
-  const [tempArray, setTempArray] = useState([]);
-  const [rightTempArray, setRightTempArray] = useState([]);
-  const [selectedItem, setSelectedItem] = useState([]);
-  const [activeIndicies, setActiveIndicies] = useState([]);
-  const [firstClick, setFirstClick] = useState(false);
-  const [selectItemActiveIndices, setSelectedItemActiveIndices] = useState([]);
-  const [copyData, setCopyData] = useState([]);
-  const [transferableRoleList, setTransferableRoleList] = useState([]);
-
-  // Edit Role transfer Componet st
-
   // edit role modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [totalRoleList, setTotalRoleList] = useState([]);
   const [currentRoleList, setCurrentRoleList] = useState([]);
   const [availableRoleList, setAvailableRoleList] = useState([]);
+
+  const data1 = [
+    {
+      id: 1,
+      name: "Demand Notification (HQ)",
+    },
+    {
+      id: 2,
+      name: "Annual Demand (Sub Stores)",
+    },
+    {
+      id: 13,
+      name: "PO Appoval /Cancel(Head of Ins.)",
+    },
+    {
+      id: 62,
+      name: "Receive of Drugs (Indent/Transfer)",
+    },
+    {
+      id: 63,
+      name: "Receive Challan",
+    },
+    {
+      id: 64,
+      name: "Verify Challan",
+    },
+    {
+      id: 67,
+      name: "Accept Challan",
+    },
+    {
+      id: 72,
+      name: "Add Renew Delete Rate Contract",
+    },
+    {
+      id: 74,
+      name: "Add Edit Delete Supplier",
+    },
+    {
+      id: 11,
+      name: "Create/Cancel PO",
+    },
+    {
+      id: 82,
+      name: "Add Edit Delete User(HQ/DWH Admin)",
+    },
+    {
+      id: 101,
+      name: "Application Configuration (HQ)",
+    },
+    {
+      id: 105,
+      name: "Stock Drug Verification",
+    },
+    {
+      id: 106,
+      name: "Drug Condemnation Register",
+    },
+    {
+      id: 131,
+      name: "Transfer Request for Shortage",
+    },
+    {
+      id: 132,
+      name: "Transfer Request for Excess",
+    },
+    {
+      id: 134,
+      name: "Transfer of Drugs (Indent, Excess, Shortage)",
+    },
+    {
+      id: 142,
+      name: "Transfer Approval by HQ",
+    },
+    {
+      id: 161,
+      name: "Add  Edit Delete Store (HQ/DWH Admin)",
+    },
+    {
+      id: 141,
+      name: "Transfer/Indent Approval By Institute",
+    },
+    {
+      id: 4,
+      name: "Compile and freeze Annual Demand(HQ)",
+    },
+    {
+      id: 6,
+      name: "Compile and Freeze Supplementary Demand (HQ)",
+    },
+    {
+      id: 12,
+      name: "List PO",
+    },
+    {
+      id: 50,
+      name: "Issue and Return of Drugs",
+    },
+    {
+      id: 58,
+      name: "Generate and Modify Indent",
+    },
+    {
+      id: 59,
+      name: "View Indent",
+    },
+    {
+      id: 71,
+      name: "Rate Contract List",
+    },
+    {
+      id: 73,
+      name: "Add, Edit, Delete Drug (HQ)",
+    },
+    {
+      id: 81,
+      name: "List User",
+    },
+    {
+      id: 85,
+      name: "Add Edit Delete Role(HQ/DWH Admin)",
+    },
+    {
+      id: 102,
+      name: "Upload Stock (from a file)",
+    },
+    {
+      id: 103,
+      name: "Update Stock of PO",
+    },
+    {
+      id: 104,
+      name: "Stock Entry of Miscellaneous",
+    },
+    {
+      id: 121,
+      name: "Add Edit Delete Program (HQ)",
+    },
+    {
+      id: 122,
+      name: "Program Funding Desk (HQ)",
+    },
+    {
+      id: 123,
+      name: "Budget Allocation (HQ)",
+    },
+    {
+      id: 140,
+      name: "Approval Desk (Head of Institute)",
+    },
+    {
+      id: 150,
+      name: "List Programme Funding Source",
+    },
+    {
+      id: 201,
+      name: "Supplier Payment",
+    },
+    {
+      id: 173,
+      name: "Alert/SMS Configuration Desk (HQ)",
+    },
+    {
+      id: 172,
+      name: "Drug Configuration Desk (HQ)",
+    },
+    {
+      id: 171,
+      name: "PO Configuration Desk",
+    },
+    {
+      id: 154,
+      name: "Budget Interface (HQ)",
+    },
+    {
+      id: 153,
+      name: "Store Programme Drug Mapping (HQ)",
+    },
+    {
+      id: 152,
+      name: "Store Type Wise Drug Mapping (HQ)",
+    },
+    {
+      id: 151,
+      name: "Program Funding Mapping (HQ)",
+    },
+    {
+      id: 3,
+      name: "Supplementary Demand (Sub Stores)",
+    },
+    {
+      id: 7,
+      name: "Compile Annual Demand (DWH/Block)",
+    },
+    {
+      id: 14,
+      name: "Create Local Purchase",
+    },
+    {
+      id: 68,
+      name: "Update Challan",
+    },
+    {
+      id: 999,
+      name: "Global",
+    },
+    {
+      id: 95,
+      name: "Lock Unlcok user",
+    },
+  ];
   const handlePageChange = (newPage) => {
     console.log("newPage", newPage);
     setLoading(true);
@@ -162,514 +363,37 @@ const RoleDesk = () => {
     };
   }, [controller]);
 
-  const callActivityListApiByCode = async (code) => {
-    await getAdminService(`admin/getActivityListByType/${code}`)
-      .then((r) => {
-        console.log("typeCodeResponse", r?.data);
-        console.log(r?.data?.data);
-        setSelectedItem([]);
-        setRightTempArray([]);
-        setFirstClick(false);
-        setSelectedItemActiveIndices([]);
-        setTempArray([]);
-        setActiveIndicies(r?.data?.data?.map(() => false));
-        setTransferableRoleList(r?.data?.data);
-        setCopyData(r?.data?.data);
-      })
-      .catch((e) => {
-        setLoading(false);
-        toastMessage("Activity List Code", "Server can't respon", "error");
-        console.log("Error", e);
-      });
+  // const callActivityListApiByCode = async (code) => {
+  //   await getAdminService(`admin/getActivityListByType/${code}`)
+  //     .then((r) => {
+  //       console.log("typeCodeResponse", r?.data);
+  //       console.log(r?.data?.data);
+  //       setSelectedItem([]);
+  //       setRightTempArray([]);
+  //       setFirstClick(false);
+  //       setSelectedItemActiveIndices([]);
+  //       setTempArray([]);
+  //       setActiveIndicies(r?.data?.data?.map(() => false));
+  //       setTransferableRoleList(r?.data?.data);
+  //       setCopyData(r?.data?.data);
+  //     })
+  //     .catch((e) => {
+  //       setLoading(false);
+  //       toastMessage("Activity List Code", "Server can't respon", "error");
+  //       console.log("Error", e);
+  //     });
+  // };
+
+  const handleCloseCreateRoleModal = () => {
+    setShowModal(false);
+  };
+  const handleCloseEditRoleModal = () => {
+    setShowEditModal(false);
+  };
+  const handleActivityShowModal = () => {
+    setShowActivityModal(false);
   };
 
-  const handleRightListItemClick = (e, id, element, index) => {
-    const elementExist = rightTempArray?.filter((item) => {
-      return item.id === id;
-    });
-    if (elementExist.length === 0) {
-      setRightTempArray([...rightTempArray, element]);
-    } else {
-      for (let [i, item] of rightTempArray.entries()) {
-        if (item.id === id) {
-          rightTempArray.splice(i, 1);
-        }
-      }
-    }
-
-    if (firstClick) {
-      setSelectedItemActiveIndices(
-        selectItemActiveIndices.map((bool, j) => (j === index ? true : false))
-      );
-      setFirstClick(false);
-    } else {
-      const t = [...selectItemActiveIndices];
-      const ut = t.map((elem, i) => {
-        if (i === index) {
-          if (elem) {
-            return (t[index] = false);
-          } else if (!elem) {
-            return (t[index] = true);
-          }
-        } else {
-          return elem;
-        }
-      });
-      setSelectedItemActiveIndices(ut);
-    }
-  };
-
-  const handleLeftListItemClick = (e, id, element, index) => {
-    const elementExist = tempArray?.filter((item) => {
-      return item.id === id;
-    });
-    if (elementExist.length === 0) {
-      setTempArray([...tempArray, element]);
-    } else {
-      for (let [i, item] of tempArray?.entries()) {
-        if (item.id === id) {
-          tempArray.splice(i, 1);
-        }
-      }
-    }
-    if (!activeIndicies.at(index)) {
-      setActiveIndicies(
-        activeIndicies.map((bool, j) => (j === index ? true : bool))
-      );
-    } else {
-      setActiveIndicies(
-        activeIndicies.map((bool, j) => (j === index ? false : bool))
-      );
-    }
-  };
-
-  const handleMoveSelectedItemToRight = (
-    tempArray,
-    setFirstClick,
-    copyiedData,
-    setSelectedItemActiveIndices,
-    setRightTempArray,
-    setActiveIndicies,
-    activeIndicies,
-    setSelectedItem,
-    setData
-  ) => {
-    if (tempArray?.length > 0) {
-      setFirstClick(true);
-      const cloneData = [...copyiedData];
-      setSelectedItemActiveIndices(tempArray?.map(() => true));
-      setRightTempArray([]);
-      setActiveIndicies(activeIndicies.map((bool, j) => false));
-      const rightDispalyList = cloneData.filter((elem) => {
-        return tempArray.find((ele) => {
-          return ele.id === elem.id;
-        });
-      });
-      setSelectedItem(rightDispalyList);
-      const leftRearrangedList = cloneData.filter((elem) => {
-        return !tempArray.find((ele) => {
-          return ele.id === elem.id;
-        });
-      });
-      setData(leftRearrangedList);
-    }
-  };
-
-  const handleMoveSelectedItemToLeft = (
-    selectItemActiveIndices,
-    rightTempArray,
-    setFirstClick,
-    selectedItem,
-    setSelectedItemActiveIndices,
-    tempArray,
-    setTempArray,
-    data,
-    setData,
-    setSelectedItem,
-    setRightTempArray,
-    setActiveIndicies,
-    activeIndicies,
-    copyiedData
-  ) => {
-    const allACtiveClasses = selectItemActiveIndices.every((e) => e === true);
-    if (rightTempArray.length > 0) {
-      setFirstClick(true);
-      console.log("selectedItem", selectedItem);
-      const cloneData = [...selectedItem];
-      const rightDispalyList = cloneData.filter((elem) => {
-        return !rightTempArray.find((ele) => {
-          return ele.id === elem.id;
-        });
-      });
-      console.log("Right Display List", rightDispalyList);
-      setSelectedItemActiveIndices(rightDispalyList?.map(() => true));
-      const reverseBackElements = cloneData.filter((elem) => {
-        return rightTempArray.find((ele) => {
-          return ele.id === elem.id;
-        });
-      });
-      console.log("ReverseBackElements", reverseBackElements);
-      const updateTempArray = tempArray.filter((elem) => {
-        return !reverseBackElements.find((ele) => {
-          return ele.id === elem.id;
-        });
-      });
-      console.log("TempArray", updateTempArray);
-      setTempArray(updateTempArray);
-      console.log("copiedData", data);
-      const storeIntoOne = [...data];
-      reverseBackElements.map((elem) => {
-        storeIntoOne.push(elem);
-      });
-      console.log("storeIntoOne", storeIntoOne);
-      setData(storeIntoOne);
-      setSelectedItem(rightDispalyList);
-      setRightTempArray([]);
-      // update the selected List
-    } else if (allACtiveClasses) {
-      handleShiftAllElementToLeft(
-        copyiedData,
-        setSelectedItemActiveIndices,
-        setData,
-        setRightTempArray,
-        setTempArray,
-        setSelectedItem,
-        setActiveIndicies,
-        activeIndicies
-      );
-    }
-  };
-
-  const handleShiftAllElementToRight = (
-    copyiedData,
-    setFirstClick,
-    setSelectedItemActiveIndices,
-    setSelectedItem,
-    setRightTempArray,
-    setTempArray,
-    setData
-  ) => {
-    const cloneData = [...copyiedData];
-    setFirstClick(true);
-    setSelectedItemActiveIndices(cloneData?.map(() => true));
-    setSelectedItem(cloneData);
-    setRightTempArray([]);
-    setTempArray(cloneData);
-    setData([]);
-  };
-
-  const handleShiftAllElementToLeft = (
-    copyiedData,
-    setSelectedItemActiveIndices,
-    setData,
-    setRightTempArray,
-    setTempArray,
-    setSelectedItem,
-    setActiveIndicies,
-    activeIndicies
-  ) => {
-    const cloneData = [...copyiedData];
-    console.log("cloneData", cloneData);
-
-    setSelectedItemActiveIndices([]);
-    setData(cloneData);
-    setRightTempArray([]);
-    setTempArray([]);
-    setSelectedItem([]);
-    setActiveIndicies(activeIndicies.map((bool) => false));
-  };
-
-  const createRoleForm = () => {
-    return (
-      <div className="row">
-        <div className="col-10 offset-1">
-          <div className="row mb-2">
-            <div className="col-3">
-              <label for="inputPassword6" class="col-form-label">
-                Role Name :
-              </label>
-            </div>
-            <div className="col-9">
-              <BasicInput
-                type="text"
-                placeholder="Role Name is between 6 to 50 character"
-                labelText="Role Name"
-                id="roleName"
-              />
-            </div>
-          </div>
-
-          <div className="row mb-2">
-            <div className="col-3">
-              <label for="inputPassword6" class="col-form-label">
-                Role Description :
-              </label>
-            </div>
-            <div className="col-9">
-              <BasicInput
-                type="text"
-                placeholder="Enter Role Description"
-                labelText="Role Name"
-                id="roleDescription"
-              />
-            </div>
-          </div>
-
-          <div className="row mb-2">
-            <div className="col-3">
-              <label for="inputPassword6" class="col-form-label">
-                Activity Type :
-              </label>
-            </div>
-            <div className="col-9">
-              <CustomSelect
-                options={dropDownList}
-                onChange={(choice) => {
-                  console.log(choice?.value);
-                  callActivityListApiByCode(choice?.value);
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const showActivitiesModal = () => {
-    return (
-      <BasicModal
-        title="List of Activities"
-        show={showActivityModal}
-        close={() => setShowActivityModal(false)}
-        isStatic={false}
-        scrollable={true}
-        isCenterAlign={true}
-        fullScreen={false}
-        key="list_Activity"
-      >
-        {activityList &&
-          activityList.length > 0 &&
-          activityList.map((element, index) => {
-            return (
-              <>
-                <p key={index}>
-                  {" "}
-                  <span>{index + 1}. </span> {element?.activityName}
-                </p>
-              </>
-            );
-          })}
-      </BasicModal>
-    );
-  };
-
-  const addRoleModal = () => {
-    return (
-      <>
-        <BasicModal
-          title="Create Role"
-          show={showModal}
-          close={() => {
-            setTransferableRoleList([]);
-            setSelectedItem([]);
-            setRightTempArray([]);
-            setFirstClick(false);
-            setSelectedItemActiveIndices([]);
-            setTempArray([]);
-            setShowModal(false);
-          }}
-          isStatic={false}
-          scrollable={true}
-          isCenterAlign={false}
-          fullScreen={false}
-          size="lg"
-          key="create_role"
-        >
-          {createRoleForm()}
-          <div className="row m-1">
-            <TransferComponent
-              apiData={transferableRoleList}
-              activeIndicies={activeIndicies}
-              handleMoveSelectedItemToLeft={() => {
-                handleMoveSelectedItemToLeft(
-                  selectItemActiveIndices,
-                  rightTempArray,
-                  setFirstClick,
-                  selectedItem,
-                  setSelectedItemActiveIndices,
-                  tempArray,
-                  setTempArray,
-                  transferableRoleList,
-                  setTransferableRoleList,
-                  setSelectedItem,
-                  setRightTempArray,
-                  setActiveIndicies,
-                  activeIndicies,
-                  copyData
-                );
-              }}
-              handleMoveSelectedItemToRight={() => {
-                handleMoveSelectedItemToRight(
-                  tempArray,
-                  setFirstClick,
-                  copyData,
-                  setSelectedItemActiveIndices,
-                  setRightTempArray,
-                  setActiveIndicies,
-                  activeIndicies,
-                  setSelectedItem,
-                  setTransferableRoleList
-                );
-              }}
-              handleShiftAllElementToRight={() => {
-                handleShiftAllElementToRight(
-                  copyData,
-                  setFirstClick,
-                  setSelectedItemActiveIndices,
-                  setSelectedItem,
-                  setRightTempArray,
-                  setTempArray,
-                  setTransferableRoleList
-                );
-              }}
-              handleShiftAllElementToLeft={() => {
-                handleShiftAllElementToLeft(
-                  copyData,
-                  setSelectedItemActiveIndices,
-                  setTransferableRoleList,
-                  setRightTempArray,
-                  setTempArray,
-                  setSelectedItem,
-                  setActiveIndicies,
-                  activeIndicies
-                );
-              }}
-              handleLeftListItemClick={handleLeftListItemClick}
-              handleRightListItemClick={handleRightListItemClick}
-              selectedItem={selectedItem}
-              selectItemActiveIndices={selectItemActiveIndices}
-            />
-          </div>
-          <div className="row mt-1  mb-2">
-            <div className="col-12">
-              <div className="d-flex justify-content-center">
-                <Basicbutton
-                  icon={
-                    <FontAwesomeIcon icon={faFloppyDisk} className="me-1" />
-                  }
-                  type="button"
-                  buttonText="Save"
-                  className="primary"
-                  outlineType={true}
-                />
-              </div>
-            </div>
-          </div>
-        </BasicModal>
-      </>
-    );
-  };
-
-  const EditRoleModal = () => {
-    return (
-      <>
-        <BasicModal
-          title="Edit Role"
-          show={showEditModal}
-          close={() => {
-            setShowEditModal(false);
-          }}
-          isStatic={false}
-          scrollable={true}
-          isCenterAlign={false}
-          fullScreen={false}
-          size="lg"
-          key="create_role"
-        >
-          <div className="row m-1">
-            <TransferComponent
-              apiData={availableRoleList}
-              activeIndicies={activeIndicies}
-              handleMoveSelectedItemToLeft={() => {
-                handleMoveSelectedItemToLeft(
-                  selectItemActiveIndices,
-                  rightTempArray,
-                  setFirstClick,
-                  selectedItem,
-                  setSelectedItemActiveIndices,
-                  tempArray,
-                  setTempArray,
-                  data,
-                  setData,
-                  setSelectedItem,
-                  setRightTempArray,
-                  setActiveIndicies,
-                  activeIndicies,
-                  copyData
-                );
-              }}
-              handleMoveSelectedItemToRight={() => {
-                handleMoveSelectedItemToRight(
-                  tempArray,
-                  setFirstClick,
-                  copyData,
-                  setSelectedItemActiveIndices,
-                  setRightTempArray,
-                  setActiveIndicies,
-                  activeIndicies,
-                  setSelectedItem,
-                  setData
-                );
-              }}
-              handleShiftAllElementToRight={() => {
-                handleShiftAllElementToRight(
-                  copyData,
-                  setFirstClick,
-                  setSelectedItemActiveIndices,
-                  setSelectedItem,
-                  setRightTempArray,
-                  setTempArray,
-                  setData
-                );
-              }}
-              handleShiftAllElementToLeft={() => {
-                handleShiftAllElementToLeft(
-                  copyData,
-                  setSelectedItemActiveIndices,
-                  setData,
-                  setRightTempArray,
-                  setTempArray,
-                  setSelectedItem,
-                  setActiveIndicies,
-                  activeIndicies
-                );
-              }}
-              handleLeftListItemClick={handleLeftListItemClick}
-              handleRightListItemClick={handleRightListItemClick}
-              selectedItem={selectedItem}
-              selectItemActiveIndices={selectItemActiveIndices}
-            />
-          </div>
-          <div className="row mt-1  mb-2">
-            <div className="col-12">
-              <div className="d-flex justify-content-center">
-                <Basicbutton
-                  icon={
-                    <FontAwesomeIcon icon={faFloppyDisk} className="me-1" />
-                  }
-                  type="button"
-                  buttonText="Save"
-                  className="primary"
-                  outlineType={true}
-                />
-              </div>
-            </div>
-          </div>
-        </BasicModal>
-      </>
-    );
-  };
   return (
     <>
       <div className="row mt-2">
@@ -689,15 +413,8 @@ const RoleDesk = () => {
               outlineType={true}
               className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
               onClick={() => {
-                setSelectedItem([]);
-                setRightTempArray([]);
-                setFirstClick(false);
-                setSelectedItemActiveIndices([]);
-                setTempArray([]);
-                setActiveIndicies(data?.map(() => false));
-                setTransferableRoleList(data);
-                setCopyData(data);
-                setDropDownList(activityList);
+                dispatch(deleteRole(1));
+                // setDropDownList(activityList);
                 setShowModal(true);
               }}
             />
@@ -844,9 +561,20 @@ const RoleDesk = () => {
           </div>
         </div>
       </Paper>
-      {addRoleModal()}
-      {showActivitiesModal()}
-      {EditRoleModal()}
+      <CreateRoleModalForm
+        openCreateRoleModal={showModal}
+        handleCloseCreateRoleModal={handleCloseCreateRoleModal}
+        data={data1}
+      />
+      <EditRoleModal
+        openEditRoleModal={showEditModal}
+        handleCloseEditRoleModal={handleCloseEditRoleModal}
+        data={data1}
+      />
+      <RoleActivityListModal
+        showActivityModal={showActivityModal}
+        handleActivityShowModal={handleActivityShowModal}
+      />
     </>
   );
 };

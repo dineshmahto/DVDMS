@@ -10,7 +10,8 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ProgramList from "./pages/program/programlist/programlist";
 import Programme from "./pages/program/programme";
-import IssueList from "./pages/issues/issueList";
+
+//import IssueList from "./pages/issues/issueList";
 import Issue from "./pages/issues/issue";
 import TransferComponent from "./pages/drugList/transferComponent";
 import Test from "./pages/drugList/test";
@@ -19,19 +20,33 @@ import OpenIntentDesk from "./pages/openIntentDesk/intent";
 import Notification from "./pages/demand/Notification";
 import CentralDemand from "./pages/demand/CentralDemand";
 import PurchaseOrderList from "./pages/demand/PurchaseOrderList";
-import OpenNotification from "./pages/demand/OpenNotification";
+
 import Pdf from "./pages/Report/Pdf";
 import Csv from "./pages/Report/Csv";
 import FileUpload from "./pages/Report/FIleUpload";
 import Landing from "./pages/screens/Landing";
 import Dashboard from "./pages/dashboard/dashboard";
 import MasterLayout from "./pages/layouts/MasterLayout";
-import DemandNotification from "./pages/demand/Notification";
-// Stock Module
-import StockListing from "./pages/stock/stockListing";
-import StockEntry from "./pages/stock/stockEntry";
-import DrugCondemnationRegister from "./pages/stock/drugCondemnation";
+
+import StockEntry from "./pages/stock/stockEntry/stockEntry";
+import DrugCondemnationRegister from "./pages/stock/drugCondemnation/drugCondemnation";
 import ProtectedRoute from "./routes/middleware/ProtectedRoute";
+const OpenNotification = lazy(() => import("./pages/demand/OpenNotification"));
+const DemandNotification = lazy(() => import("./pages/demand/Notification"));
+
+// Stock Module
+const StockListing = lazy(() =>
+  import("./pages/stock/stockListing/stockListing")
+);
+const AddDrugCondemNation = lazy(() =>
+  import("./pages/stock/drugCondemnation/adddrugcondemnation")
+);
+const UpdateStockRack = lazy(() =>
+  import("./pages/stock/updateStockRack/updatestockrack")
+);
+const AddStockVerification = lazy(() =>
+  import("./pages/stock/stockVerification/addstockverification")
+);
 // Admin
 const RoleDesk = lazy(() => import("./pages/admin/roledesk/roledesk"));
 const UserDesk = lazy(() => import("./pages/admin/userdesk/userdesk"));
@@ -47,10 +62,21 @@ const BudgetListDesk = lazy(() =>
 const FundingDesk = lazy(() =>
   import("../src/pages/admin/fundingdesk/fundingdesk")
 );
+
 const PageNotFound = lazy(() =>
   import("../src/pages/pagenotfound/pageNotFound")
 );
+const DrugDesk = lazy(() => import("./pages/admin/drugdesk/drugdesk"));
+const IssueList = lazy(() => import("./pages/issues/issueListMUI"));
 
+// Issue
+const IssueDesk = lazy(() => import("./pages/issue/issueDesk/issuedesk"));
+const IssueToThirdParty = lazy(() =>
+  import("./pages/issue/issueDesk/issueToThirdParty/issuetothirdparty")
+);
+const IntentDetails = lazy(() =>
+  import("./pages/issue/issueDesk/intentIssue/intentissue")
+);
 function App() {
   return (
     <div className="dvdms-root">
@@ -74,20 +100,44 @@ function App() {
                 path="openBudgetListingInterface"
                 element={<BudgetListDesk />}
               />
+
               <Route path="FundingDesk" element={<FundingDesk />} />
+              <Route path="listDrug" element={<DrugDesk />} />
               {/* admin */}
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="annualdemand" element={<Notification />} />
+
+              {/* Stock */}
+
               <Route path="stocklisting" element={<StockListing />} />
               <Route path="openstockentry" element={<StockEntry />} />
+              <Route
+                path="openVerificationDesk"
+                element={<AddDrugCondemNation />}
+              />
               <Route
                 path="openCondeminationRegister"
                 element={<DrugCondemnationRegister />}
               />
+              <Route path="updateStockRackDesk" element={<UpdateStockRack />} />
+              <Route
+                path="openStockVerification"
+                element={<AddStockVerification />}
+              />
+              {/* End of Stock */}
+              {/* Issue */}
+              <Route path="openIssueDesk" element={<IssueDesk />} />
+              <Route
+                path="openIssueToThirdparty"
+                element={<IssueToThirdParty />}
+              />
+              <Route path="issueList" element={<IssueList />} />
+              <Route path="openIssueToSubstore" element={<IntentDetails />} />
               <Route
                 path="demandnotification"
                 element={<DemandNotification />}
               />
+              {/* End of Issue */}
               <Route path="purchaseorderlist" element={<PurchaseOrderList />} />
               <Route path="intent" element={<OpenIntentDesk />} />
               <Route path="pdf" element={<Pdf />} />

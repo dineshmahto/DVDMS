@@ -1,33 +1,57 @@
-import React, { useState, useMemo, useEffect } from "react";
-import HorizonatalLine from "../../components/horizontalLine/horizonatalLine";
-import TableComponent from "../../components/tables/datatable/tableComponent";
+import React, { useState, useMemo, useEffect, lazy, Suspense } from "react";
+import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
+import TableComponent from "../../../components/tables/datatable/tableComponent";
 import { TableBody, TableRow, TableCell } from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { makeStyles } from "@mui/styles";
 import moment from "moment";
 import { Spinner } from "react-bootstrap";
-import { useSortableTable } from "../../components/tables/datatable/useSortableTable";
-import { getStockservice } from "../../services/stockservice/stockservice";
+import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
+import { getStockservice } from "../../../services/stockservice/stockservice";
+import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import CustomTableCell from "../../../components/tables/customTableCell";
+const EditStockListModal = lazy(() => import("./editstocklistmodal"));
+
 const useStyles = makeStyles({
   tableCell: {
-    padding: "10px",
+    padding: "10px !important",
     fontSize: "0.8rem !important",
   },
   lineHeight: {
     lineHeight: "3",
   },
 });
+const tempData = [
+  {
+    id: 1,
+    storeName: "STATE WAREHOUSE",
+    drugName: "PARACETAMOL TAB. 500MG",
+    progName: "COVID19",
+    batchNo: "	21443792",
+    expDate: "NOV-2024",
+    mfgDate: "DEC-2021",
+    dToExp: "597",
+    avalQty: "579",
+    rack: "0 ",
+    instiute: "BOTH(NHM & DHS)",
+    source: "ECRP",
+  },
+];
 const StockListing = () => {
   let classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
-  const [tableData, setTableData] = useState([]);
+  const [tableData, setTableData] = useState(tempData);
   const [sortedData, handleSorting] = useSortableTable(tableData);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
   });
   const [loading, setLoading] = useState(false);
+  const [showStockEditListModal, setShowStockEditListModal] = useState(false);
+  const [modalData, setModalData] = useState("");
   const columns = useMemo(() => [
     {
       id: "storeName",
@@ -36,7 +60,7 @@ const StockListing = () => {
     },
 
     {
-      id: "dName",
+      id: "drugName",
       name: "DRUG NAME",
       sortable: true,
     },
@@ -72,8 +96,8 @@ const StockListing = () => {
       sortable: true,
     },
     {
-      id: "uPrice",
-      name: "UNIT PRICE",
+      id: "rack",
+      name: "RACK",
       sortable: true,
     },
     {
@@ -82,11 +106,21 @@ const StockListing = () => {
       sortable: true,
     },
     {
-      id: "donated",
-      name: "DONATED",
+      id: "source",
+      name: "SOURCE",
       sortable: true,
     },
+    {
+      id: "edit",
+      name: "EDIT",
+      sortable: false,
+    },
   ]);
+
+  const customeTableCell = styled(TableCell)`
+padding: 10px,
+fontSize: 0.8rem
+`;
   const handlePageChange = (event, newPage) => {
     setLoading(true);
     setController({
@@ -122,7 +156,7 @@ const StockListing = () => {
       });
   };
   useEffect(() => {
-    setLoading(true);
+    setLoading(false);
 
     setTimeout(() => {
       callApi();
@@ -173,7 +207,7 @@ const StockListing = () => {
                       {data?.storeName}
                     </TableCell>
                     <TableCell padding="none" className={classes.tableCell}>
-                      {data?.dName}
+                      {data?.drugName}
                     </TableCell>
                     <TableCell padding="none" className={classes.tableCell}>
                       {data?.progName}
@@ -205,13 +239,29 @@ const StockListing = () => {
                       {data?.avalQty}
                     </TableCell>
                     <TableCell padding="none" className={classes.tableCell}>
-                      {data?.uPrice}
+                      {data?.rack}
                     </TableCell>
                     <TableCell padding="none" className={classes.tableCell}>
                       {data?.instiute}
                     </TableCell>
                     <TableCell padding="none" className={classes.tableCell}>
-                      {data?.donated}
+                      {data?.source}
+                    </TableCell>
+                    <TableCell padding="none" className={classes.tableCell}>
+                      <span
+                        className="text-decoration-underline ms-1"
+                        style={{ fontSize: "0.8rem", cursor: "pointer" }}
+                        onClick={() => {
+                          console.log("clicked");
+                          setShowStockEditListModal(true);
+                          setModalData(data);
+                        }}
+                      >
+                        <FontAwesomeIcon
+                          icon={faPenToSquare}
+                          className="me-2"
+                        />
+                      </span>
                     </TableCell>
                   </TableRow>
                 ))
@@ -220,6 +270,13 @@ const StockListing = () => {
           </TableComponent>
         </div>
       </div>
+      <Suspense fallback={<Spinner />}>
+        <EditStockListModal
+          data={modalData}
+          openEditStockListModal={showStockEditListModal}
+          handleEditStockListModal={setShowStockEditListModal}
+        />
+      </Suspense>
     </>
   );
 };

@@ -1,7 +1,10 @@
 import React from "react";
 
 const ProgrameDesk = () => {
-  return <div>P</div>;
+  return (
+    <>
+    </>
+  );
 };
 
 export default ProgrameDesk;

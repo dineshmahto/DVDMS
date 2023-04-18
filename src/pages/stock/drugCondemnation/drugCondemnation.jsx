@@ -1,14 +1,28 @@
 import React, { useState, useMemo } from "react";
-import TableComponent from "../../components/tables/datatable/tableComponent";
-import HorizonatalLine from "../../components/horizontalLine/horizonatalLine";
-import CustomSelect from "../../components/select/customSelect";
-import SelectOption from "../../components/option/option";
-import { useSortableTable } from "../../components/tables/datatable/useSortableTable";
-import Basicbutton from "../../components/button/basicbutton";
-import SearchField from "../../components/search/search";
+import TableComponent from "../../../components/tables/datatable/tableComponent";
+import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
+import CustomSelect from "../../../components/select/customSelect";
+import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
+import Basicbutton from "../../../components/button/basicbutton";
+import SearchField from "../../../components/search/search";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { Paper } from "@mui/material";
+import { TableBody, TableRow, TableCell } from "@mui/material";
+import moment from "moment";
+import { Spinner } from "react-bootstrap";
+import { makeStyles } from "@mui/styles";
+const useStyles = makeStyles({
+  root: {
+    "& .MuiInputBase-root": {
+      "& .MuiButtonBase-root": {},
+      "& .MuiInputBase-input": {
+        padding: 8,
+      },
+    },
+  },
+});
 const DrugCondemnationRegister = () => {
+  const classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
@@ -23,15 +37,13 @@ const DrugCondemnationRegister = () => {
     {
       id: "drugName",
       name: "DRUG NAME",
-      sortable: false,
-      type: "YMDPicker",
+      sortable: true,
     },
 
     {
       id: "pName",
       name: "PROGRAM NAME",
-      sortable: false,
-      type: "select",
+      sortable: true,
     },
     {
       id: "batchNO",
@@ -40,22 +52,19 @@ const DrugCondemnationRegister = () => {
       type: "select",
     },
     {
-      id: "CondemQty",
+      id: "condemQty",
       name: "CONDEM QTY",
-      sortable: false,
-      type: "select",
+      sortable: true,
     },
     {
       id: "condemType",
       name: "CONDEM. TYPE",
-      sortable: false,
-      type: "select",
+      sortable: true,
     },
     {
       id: "reqDate",
       name: "REQUEST DATE",
-      sortable: false,
-      type: "input",
+      sortable: true,
     },
   ]);
 
@@ -150,7 +159,42 @@ const DrugCondemnationRegister = () => {
               onRowsPerPageChange={handleChangeRowsPerPage}
               handleSorting={handleSortingChange}
               checkBoxRequired={false}
-            ></TableComponent>
+            >
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell className="text-center" colSpan={12}>
+                      <Spinner />
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  tableData.length > 0 &&
+                  tableData.map((data, index) => (
+                    <TableRow key={data.id}>
+                      <TableCell padding="none" className={classes.tableCell}>
+                        {data?.dName}
+                      </TableCell>
+                      <TableCell padding="none" className={classes.tableCell}>
+                        {data?.progName}
+                      </TableCell>
+                      <TableCell padding="none" className={classes.tableCell}>
+                        {data?.batchNo}
+                      </TableCell>
+                      <TableCell padding="none" className={classes.tableCell}>
+                        {data?.condemQty}
+                      </TableCell>
+                      <TableCell padding="none" className={classes.tableCell}>
+                        {data?.condemType}
+                      </TableCell>
+
+                      <TableCell padding="none" className={classes.tableCell}>
+                        {moment(data?.reqDate).format("DD/MM/YYYY")}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </TableComponent>
           </div>
         </div>
       </Paper>

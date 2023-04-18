@@ -124,8 +124,8 @@ const FundingDesk = () => {
               />
             </LocalizationProvider>
             <div>
-              <Basicbutton type="submit" value="Submit" />
-              <Basicbutton type="reset" value="Reset" />
+              <Basicbutton type="submit" buttonText="Submit" />
+              <Basicbutton type="reset" buttonText="Reset" />
             </div>
           </Form>
         )}

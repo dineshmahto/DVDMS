@@ -51,7 +51,7 @@ const MasterLayout = () => {
             <Sidenav />
             <div id="layoutSidenav_content">
               <main>
-                <div className="container-fluid px-4">
+                <div className="container-fluid">
                   <Suspense>
                     <Outlet />
                   </Suspense>

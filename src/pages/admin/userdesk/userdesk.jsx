@@ -21,6 +21,10 @@ import { makeStyles } from "@mui/styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import * as CONSTANTS from "../../../common/constant/constants";
+import { Seo } from "../../../components/seo/seo";
+import CreateUserModalForm from "./createusermodalform";
+import EditUserModalForm from "./editusermodalform";
+import UserActivityListModal from "./useractivitylistmodal";
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -43,7 +47,8 @@ const UserDesk = () => {
     rowsPerPage: 10,
   });
   const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const [activityList, setActivityList] = useState([]);
   const [activityType, setActivityType] = useState([]);
@@ -182,160 +187,7 @@ const UserDesk = () => {
     };
   }, [controller]);
 
-  const createUserForm = () => {
-    return (
-      <div className="row">
-        <div className="col-10 offset-1">
-          <div className="row mb-2 align-items-center">
-            <div className="col-2">
-              <label htmlFor="userId" class="col-form-label">
-                User ID:
-              </label>
-            </div>
-            <div className="col-6">
-              <BasicInput type="text" placeholder="Role Name" id="userId" />
-            </div>
-            <div className="col-4">
-              <span class="form-text">Between 2 to 50 characters.</span>
-            </div>
-          </div>
-          <div className="row mb-2 align-items-center">
-            <div class="col-2">
-              <label htmlFor="firstName" class="col-form-label">
-                First Name
-              </label>
-            </div>
-            <div class="col-6">
-              <BasicInput type="text" placeholder="First Name" id="firstName" />
-            </div>
-            <div class="col-4">
-              <span class="form-text">Between 2 to 100 characters.</span>
-            </div>
-          </div>
 
-          <div className="row mb-2 align-items-center">
-            <div class="col-2">
-              <label htmlFor="lastName" class="col-form-label">
-                Last Name
-              </label>
-            </div>
-            <div class="col-6">
-              <BasicInput type="text" placeholder="Last Name" id="lastName" />
-            </div>
-            <div class="col-4">
-              <span class="form-text">Between 2 to 100 characters.</span>
-            </div>
-          </div>
-
-          <div className="row mb-2 align-items-center">
-            <div class="col-2">
-              <label htmlFor="email" class="col-form-label">
-                Email
-              </label>
-            </div>
-            <div class="col-6">
-              <BasicInput type="email" placeholder="Email" id="email" />
-            </div>
-          </div>
-          <div className="row mb-2 align-items-center">
-            <div class="col-2">
-              <label htmlFor="address" className="" class="col-form-label">
-                Address
-              </label>
-            </div>
-            <div class="col-6">
-              <textarea
-                rows="2"
-                className="form-control shadow-none"
-                cols="50"
-              ></textarea>
-            </div>
-          </div>
-          {/* <div className="row mb-2">
-            <div className="col-2">
-              <label htmlFor="userType" class="col-form-label">
-                User Type:
-              </label>
-            </div>
-            <div className="col-6">
-              <CustomSelect
-                id="userType"
-                options={dropDwonRoleList}
-                onChange={(choice) => {
-                  console.log(choice?.value);
-                }}
-              />
-            </div>
-          </div> */}
-
-          <div className="row mb-2">
-            <div className="col-2">
-              <label htmlFor="city" class="col-form-label">
-                City:
-              </label>
-            </div>
-            <div className="col-6">
-              <BasicInput type="text" placeholder="City" id="city" />
-            </div>
-          </div>
-
-          <div className="row mb-2">
-            <div className="col-2">
-              <label htmlFor="storeName" class="col-form-label">
-                Store Name:
-              </label>
-            </div>
-            <div className="col-6">
-              <CustomSelect
-                id="storeName"
-                options={dropDownStoreList}
-                onChange={(choice) => {
-                  console.log(choice?.value);
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="row mb-2">
-            <div className="col-2">
-              <label htmlFor="role" class="col-form-label">
-                Role:
-              </label>
-            </div>
-            <div className="col-6">
-              <CustomSelect
-                id="role"
-                options={dropDwonRoleList}
-                onChange={(choice) => {
-                  console.log(choice?.value);
-                }}
-              />
-            </div>
-            <div className="col-4">
-              <span class="form-text">
-                If Role is not here. Create the Role
-              </span>
-            </div>
-          </div>
-          <div className="row  mb-2">
-            <div className="col-12">
-              <div className="d-flex justify-content-center">
-                <Basicbutton
-                  icon={
-                    <FontAwesomeIcon icon={faFloppyDisk} className="me-1" />
-                  }
-                  type="button"
-                  buttonText="Save"
-                  className="btn btn-primary"
-                  outlineType={true}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   const showActivities = () => {
     return (
@@ -364,9 +216,18 @@ const UserDesk = () => {
       </BasicModal>
     );
   };
-
+  const handleCloseCreateUserModal = useCallback(() => {
+    setShowAddModal(false);
+  }, [showAddModal]);
+  const handleCloseEditUserModal = useCallback(() => {
+    setShowEditModal(false);
+  },[showEditModal]);
+  const handleCloseActivityListModal = useCallback(() => {
+    setShowActivityModal(true)
+  },[showActivityModal])
   return (
     <>
+      <Seo title="DVDMS | User Desk" description="User Desk" />
       <div className="row mt-2">
         <div className="d-flex justify-content-start">
           <p className="fs-6">USER LIST</p>
@@ -377,7 +238,7 @@ const UserDesk = () => {
         <HorizonatalLine text="USER List" />
       </div>
       <Paper>
-        <div className="row ">
+        <div className="row">
           <div className="d-flex flex-row justify-content-end">
             <Basicbutton
               buttonText="Add New User"
@@ -386,7 +247,7 @@ const UserDesk = () => {
               onClick={() => {
                 setDropDownRoleList(roleList);
                 setDropDownStoreList(storeList);
-                setShowModal(true);
+                setShowAddModal(true);
               }}
             />
           </div>
@@ -509,25 +370,18 @@ const UserDesk = () => {
           </div>
         </div>
       </Paper>
-
-      <BasicModal
-        title="Create User"
-        show={showModal}
-        close={() => {
-          setDropDownRoleList([]);
-          setDropDownStoreList([]);
-          setShowModal(false);
-        }}
-        isStatic={false}
-        scrollable={true}
-        isCenterAlign={false}
-        fullScreen={false}
-        size="lg"
-        key="create_role"
-      >
-        {createUserForm()}
-      </BasicModal>
-      {showActivities()}
+      <CreateUserModalForm
+        openCreateuserModal={showAddModal}
+        handleCloseCreateUserModal={handleCloseCreateUserModal}
+      />
+      <EditUserModalForm
+        openEdituserModal={showEditModal}
+        handleCloseEditUserModal={handleCloseEditUserModal}
+      />
+      <UserActivityListModal
+        showActivityModal={showActivityModal}
+        handleCloseActivityListModal={handleCloseActivityListModal}
+      />
     </>
   );
 };

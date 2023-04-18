@@ -1,14 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
-import loaderReducer from "../store/loader/reducer"
-import loginReducer from "../store/login/reducer"
-import activemenuReducer from "../store/activemenu/reducer";
+import createSagaMiddleware from "redux-saga";
+import mySaga from "./sagas";
+import reducers from "./reducers";
+const sagaMiddleware = createSagaMiddleware();
+const middleware = [sagaMiddleware];
 const store = configureStore({
-    reducer:{
-        loader: loaderReducer,
-        login: loginReducer,
-        activemenu: activemenuReducer
-    }
-
+  reducer: reducers,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: false,
+    }).concat(middleware),
 });
-
+sagaMiddleware.run(mySaga);
 export default store;

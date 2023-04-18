@@ -14,7 +14,7 @@ const BasicInput = (props: inputProps) => {
   return (
     <>
       <div className={`${floatingLabel ? "form-floating" : ""}`}>
-        <input className={`form-control shadow-none ${className}`} />
+        <input className={`form-control shadow-none ${className}`} {...props} />
       </div>
     </>
   );

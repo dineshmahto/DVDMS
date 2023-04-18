@@ -525,11 +525,20 @@ const OpenNotification = () => {
           <div className="d-flex">
             <label>Do you want notification for selected drugs </label>
             <RadioCheckBox
-              id1="selectDrugs1"
-              id2="selectDrugs2"
-              name="selectDrugs"
-              labelText1="Yes"
-              labelText2="No"
+              list={[
+                {
+                  id: "selectDrugs1",
+                  labelText: "Yes",
+                  value: "Yes",
+                  name: "selectDrugs",
+                },
+                {
+                  id: "selectDrugs2",
+                  labelText: "No",
+                  value: "No",
+                  name: "selectDrugs",
+                },
+              ]}
               onChange={(e) => {
                 console.log(e);
               }}
@@ -607,7 +616,7 @@ const OpenNotification = () => {
         </div>
         <div className="row mb-5">
           <div className="col-6">
-            <label for="remarks" class="form-label">
+            <label htmlFor="remarks" className="form-label">
               Remarks
             </label>
             <textarea className="form-control" rows="3" id="remarks"></textarea>

@@ -5,15 +5,15 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import TextField from "@mui/material/TextField";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { makeStyles } from "@mui/styles";
-import TableComponent from "../../components/tables/datatable/tableComponent";
-import BasicInput from "../../components/inputbox/floatlabel/basicInput";
-import BasicButton from "../../components/button/basicbutton";
+import TableComponent from "../../../components/tables/datatable/tableComponent";
+import BasicInput from "../../../components/inputbox/floatlabel/basicInput";
+import BasicButton from "../../../components/button/basicbutton";
 
-import toastMessage from "../../common/toastmessage/toastmessage";
+import toastMessage from "../../../common/toastmessage/toastmessage";
 import moment from "moment";
-import HorizonatalLine from "../../components/horizontalLine/horizonatalLine";
-import SelectOption from "../../components/option/option";
-import SwitchCheckBox from "../../components/switch/switchcheckbox";
+import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
+import SelectOption from "../../../components/option/option";
+import SwitchCheckBox from "../../../components/switch/switchcheckbox";
 const useStyles = makeStyles({
   root: {
     "& .MuiInputBase-root": {

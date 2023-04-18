@@ -55,6 +55,9 @@ const LoginForm = () => {
         setValid(false);
       } else {
         setLoading(true);
+        setTimeout(() => {
+          setLoading(false);
+        }, 5000);
         let loginResp = await loginservice(CONSTANTS.LOGIN, userData);
         if (loginResp.status === 200) {
           setLoading(false);
@@ -88,6 +91,7 @@ const LoginForm = () => {
   };
   const draw = (context) => {
     context.font = "25px Georgia";
+    context.fillStyle = "#ff00ff";
     context.strokeText(captchaValue.join(""), 0, 30);
   };
 
@@ -97,7 +101,7 @@ const LoginForm = () => {
 
   return (
     <>
-     <div className="container login-form-container">
+      <div className="container login-form-container">
         <div class="login-header-container">
           <h1 class="login-header">Login</h1>
         </div>
@@ -135,19 +139,37 @@ const LoginForm = () => {
             />
           </div>
           <div className="mb-4">
-            <div className="row">
+            <div className="row align-items-center">
               <div className="col-lg-2 col-md-2 col-sm-2"> Captcha</div>
               <div className="col-lg-3 col-md-3 col-sm-4">
-                <Canvas className="captcha-canvas" draw={draw} height={50} width={100} />
+                <Canvas
+                  className="captcha-canvas"
+                  draw={draw}
+                  height={50}
+                  width={100}
+                />
               </div>
               <div className="col-lg-7 col-md-7 col-sm-12">
                 <div className="input-group">
-                  <input type="text" id="captcha" className="form-control shadow-none" value={userData?.captcha} placeholder="Enter captcha"
-                  onChange={(e) => {
+                  <input
+                    type="text"
+                    id="captcha"
+                    className="form-control shadow-none"
+                    value={userData?.captcha}
+                    placeholder="Enter captcha"
+                    onChange={(e) => {
                       setUSerData({ ...userData, captcha: e.target.value });
-                    }}/>
-                  <button className="btn btn-outline-secondary captch-refresh-btn" type="button" title="Refresh Captcha">
-                    <FontAwesomeIcon icon={faArrowsRotate} onClick={createCaptcha} />
+                    }}
+                  />
+                  <button
+                    className="btn btn-outline-secondary captch-refresh-btn"
+                    type="button"
+                    title="Refresh Captcha"
+                  >
+                    <FontAwesomeIcon
+                      icon={faArrowsRotate}
+                      onClick={createCaptcha}
+                    />
                   </button>
                 </div>
               </div>
@@ -156,18 +178,18 @@ const LoginForm = () => {
           <div className="d-flex justify-content-between">
             <BasicButton
               disabled={isLoading ? isLoading : !isValid}
-              className="btn btn-bg-login rounded-0"
-              type="submit"
+              className="btn-bg-login rounded-0"
               buttonText="Login"
+              type="submit"
               onClick={(e) => loginAction(e)}
-              isLoading={isLoading}
+              isloading={isLoading}
               loadingText={<Spinner />}
             />
             <BasicButton
-              className="btn btn-bg-login rounded-0"
-              type="submit"
+              className="btn-bg-login rounded-0"
               buttonText="Forgot Password"
-              isLoading={isLoading}
+              type="submit"
+              isloading={isLoading}
             />
           </div>
         </div>

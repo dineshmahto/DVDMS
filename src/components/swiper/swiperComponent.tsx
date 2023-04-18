@@ -22,8 +22,8 @@ const SwiperComponent: React.FC<swiperProps> = ({ data }) => {
           disableOnInteraction: false,
         }}
         modules={[Autoplay, FreeMode]}
-        onSlideChange={() => console.log("slide change")}
-        onSwiper={(swiper) => console.log(swiper)}
+        onSlideChange={() => {}}
+        onSwiper={(swiper) => {}}
         className="mySwiper pb-2"
       >
         {data &&
