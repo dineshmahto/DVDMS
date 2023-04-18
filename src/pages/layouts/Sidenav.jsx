@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import $ from 'jquery';
 import { useDispatch, useSelector } from "react-redux";
 import { setActiveSideMenu } from "../../store/activemenu/actions";
+
 
 const Sidenav = () => {
   const dispatch = useDispatch();
@@ -46,25 +48,25 @@ const Sidenav = () => {
       //submenu2 and submenu3 value is taking from the current state
       if (activeMenuItem.isSubMenu2Active || activeMenuItem.isSubMenu3Active) {
         //find the topmost active menu by class name "active-me" i.e menu1
-        let activeMenu1Elements =
-          document.getElementsByClassName("active-me")[0];
+        let activeMenu1Elements = document.getElementsByClassName("active-me")[0];
 
         //removing "collapsed" class from topmost active menu i.e menu1
         activeMenu1Elements.classList.remove("collapsed");
 
         //get value of data attribute from topmost active menu i.e menu1
         //this data attribute value is the id name of the collapse submenu items container element
-        let showSubmenuElementID =
-          activeMenu1Elements.getAttribute("data-bs-target");
+        let showSubmenuElementID = activeMenu1Elements.getAttribute("data-bs-target");
 
         //Now find the element of id which hold submenu items
         //and substring(1) is use for removing '#' from the id name string
-        let subMenuContainerElement = document.getElementById(
-          showSubmenuElementID.substring(1)
+        let subMenuContainerElement = document.getElementById(showSubmenuElementID.substring(1)
         );
 
         //lastly add 'show' class to show submenu
         subMenuContainerElement.classList.add("show");
+      }else{
+
+        $('.sb-sidenav-menu').find('.show').removeClass('show');
       }
     }
   }, [activeMenuItem]);
