@@ -1,5 +1,15 @@
-import React from "react";
-
+import React, { useState, useEffect } from "react";
+import {
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "@mui/material";
+import { Collapse } from "@mui/material";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronUp, faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { Paper } from "@mui/material";
 const IssueListMUI = () => {
   const [passengersList, setPassengersList] = useState([]);
   const [passengersCount, setPassengersCount] = useState(0);
@@ -290,63 +300,53 @@ const IssueListMUI = () => {
     }
   };
   return (
-    <Card>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>Name</TableCell>
-            <TableCell>Trips</TableCell>
-            <TableCell>Airlines</TableCell>
-            <TableCell>Established</TableCell>
-            <TableCell>Head Quater</TableCell>
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell>Name</TableCell>
+          <TableCell>Trips</TableCell>
+          <TableCell>Airlines</TableCell>
+          <TableCell>Established</TableCell>
+          <TableCell>Head Quater</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {passengersList.map((passenger, index) => (
+          <TableRow key={passenger._id}>
+            <TableCell width="20%">{passenger.name}</TableCell>
+            <TableCell width="20%">{passenger.trips}</TableCell>
+            <TableCell width="30%">
+              {passenger.airline.length > 1 && (
+                <>
+                  <div className="d-flex justify-content-end">
+                    <FontAwesomeIcon
+                      icon={open.includes(index) ? faChevronUp : faChevronDown}
+                      onClick={() => handleClick(index)}
+                    />
+                  </div>
+                </>
+              )}
+
+              {passenger.airline.length > 1 && (
+                <Collapse in={open.includes(index)}>
+                  {passenger.airline &&
+                    passenger.airline.map((elem, index) => {
+                      return <div className="pt-2 pb-2 ">{elem?.slogan}</div>;
+                    })}
+                </Collapse>
+              )}
+
+              {passenger.airline.length === 1 &&
+                passenger.airline.map((elem, index) => {
+                  return <div className="">{elem?.slogan}</div>;
+                })}
+            </TableCell>
+            <TableCell width="10%">{passenger?.established}</TableCell>
+            <TableCell width="20%">{passenger?.head_quaters}</TableCell>
           </TableRow>
-        </TableHead>
-        <TableBody>
-          {passengersList.map((passenger, index) => (
-            <TableRow key={passenger._id}>
-              <TableCell width="20%">{passenger.name}</TableCell>
-              <TableCell width="20%">{passenger.trips}</TableCell>
-              <TableCell width="30%">
-                {passenger.airline.length > 1 && (
-                  <>
-                    <div className="d-flex justify-content-end">
-                      <FontAwesomeIcon
-                        icon={
-                          open.includes(index) ? faChevronUp : faChevronDown
-                        }
-                        onClick={() => handleClick(index)}
-                      />
-                    </div>
-                  </>
-                )}
-                {passenger.airline.length > 1 && (
-                  <Collapse in={open.includes(index)}>
-                    {passenger.airline &&
-                      passenger.airline.map((elem, index) => {
-                        return <div className="pt-2 pb-2">{elem?.slogan}</div>;
-                      })}
-                  </Collapse>
-                )}
-                {passenger.airline.length === 1 &&
-                  passenger.airline.map((elem, index) => {
-                    return <div className="">{elem?.slogan}</div>;
-                  })}
-              </TableCell>
-              <TableCell width="10%">{passenger?.established}</TableCell>
-              <TableCell width="20%">{passenger?.head_quaters}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <TablePagination
-        component="div"
-        onPageChange={handlePageChange}
-        page={controller.page}
-        count={passengersCount}
-        rowsPerPage={controller.rowsPerPage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-      />
-    </Card>
+        ))}
+      </TableBody>
+    </Table>
   );
 };
 
