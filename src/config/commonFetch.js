@@ -15,7 +15,7 @@ const commonPost = async (url, bodyData) => {
       return respone;
     })
     .catch((error) => {
-      return error;
+      return error?.response;
     });
 };
 

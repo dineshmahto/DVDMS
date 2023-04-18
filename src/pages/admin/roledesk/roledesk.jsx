@@ -31,6 +31,7 @@ import EditRoleModal from "./editrolemodalform";
 import RoleActivityListModal from "./roleactivitylistmodal";
 import { useDispatch } from "react-redux";
 import { deleteRole } from "../../../store/admin/action";
+import API from "../../../config/config";
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -327,6 +328,29 @@ const RoleDesk = () => {
     handleSorting(accessor, sortOrder, tableData);
     console.log("sortedData", sortedData);
     setTableData(sortedData);
+  };
+
+  const fetchApi = async (signal) => {
+    await API.get(CONSTANTS.ROLE_LISTING, {
+      pageNumber: controller.page,
+      pageSize: controller.rowsPerPage,
+    })
+      .then((response) => {
+        console.log("response", response);
+      })
+      .catch((error) => {
+        if (error.name === "AbortError") {
+          console.log("Request canceled", error.message);
+        } else {
+          if (error.response) {
+            console.log("Response", error.response);
+          } else if (error.request) {
+            console.log("Error Request", error.request);
+          } else {
+            console.log("Error", error.message);
+          }
+        }
+      });
   };
 
   const callApi = async () => {

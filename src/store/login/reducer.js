@@ -1,4 +1,9 @@
-import { SHOW_LOGIN_MODAL, CLOSE_LOGIN_MODAL } from "./actionTypes";
+import {
+  SHOW_LOGIN_MODAL,
+  CLOSE_LOGIN_MODAL,
+  LOGIN,
+  LOGIN_RESPONSE,
+} from "./actionTypes";
 
 const initialState = {
   show: false,
@@ -16,6 +21,17 @@ const login = (state = initialState, action) => {
       state = {
         ...state,
         show: false,
+      };
+      break;
+    case LOGIN:
+      state = {
+        ...state,
+      };
+      break;
+    case LOGIN_RESPONSE:
+      state = {
+        ...state,
+        loginResponse: action.payload,
       };
       break;
     default:

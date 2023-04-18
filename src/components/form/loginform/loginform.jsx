@@ -14,12 +14,15 @@ import { useNavigate } from "react-router-dom";
 import Canvas from "../../canvas/Canvas";
 import { Spinner } from "react-bootstrap";
 import { useDispatch } from "react-redux";
-import { closeLoginModal } from "../../../store/login/actions";
+import { closeLoginModal, login } from "../../../store/login/actions";
 import * as CONSTANTS from "../../../common/constant/constants";
+import { useSelector } from "react-redux";
 
 const LoginForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const loginResponse = useSelector((state) => state.login.loginResponse);
+  console.log("loginReposne", loginResponse);
   const [userData, setUSerData] = useState({
     username: "",
     password: "",
@@ -58,21 +61,33 @@ const LoginForm = () => {
         setTimeout(() => {
           setLoading(false);
         }, 5000);
-        let loginResp = await loginservice(CONSTANTS.LOGIN, userData);
-        if (loginResp.status === 200) {
-          setLoading(false);
-          console.log("loginResp", loginResp.status);
-          dispatch(closeLoginModal());
-          navigate("/dashboard");
-        } else if (loginResp.response.status === 400) {
-          setLoading(false);
-          toastMessage("Login Error", "Please enter valid ID", "error");
-        }
+        dispatch(login(userData));
+        // let loginResp = await loginservice(CONSTANTS.LOGIN, userData);
+        // if (loginResp.status === 200) {
+        //   setLoading(false);
+        //   console.log("loginResp", loginResp.status);
+        //   dispatch(closeLoginModal());
+        //   navigate("/dashboard");
+        // } else if (loginResp.response.status === 400) {
+        //   setLoading(false);
+        //   toastMessage("Login Error", "Please enter valid ID", "error");
+        // }
       }
     } else {
       toastMessage("Please ", "Work in progress...", "");
     }
   };
+
+  useEffect(() => {
+    if (loginResponse && loginResponse?.status === 200) {
+      setLoading(false);
+      dispatch(closeLoginModal());
+      navigate("/dashboard");
+    } else if (loginResponse && loginResponse?.status == 400) {
+      setLoading(false);
+      toastMessage("Login Error", "Please enter valid ID", "error");
+    }
+  }, [loginResponse]);
 
   const createCaptcha = () => {
     console.log("Recalled");
