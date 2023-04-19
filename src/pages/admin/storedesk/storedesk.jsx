@@ -12,16 +12,14 @@ import {
   faSearch,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import CustomSelect from "../../../components/select/customSelect";
-import { getAdminService } from "../../../services/adminservice/adminservice";
+
 import { makeStyles } from "@mui/styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toastMessage from "../../../common/toastmessage/toastmessage";
-import * as CONSTANTS from "../../../common/constant/constants";
 import { Seo } from "../../../components/seo/seo";
-import CreateUserModalForm from "./createusermodalform";
-import EditUserModalForm from "./editusermodalform";
-import UserActivityListModal from "./useractivitylistmodal";
+import { useDispatch, useSelector } from "react-redux";
+import { getStoreDeskList } from "../../../store/admin/action";
+
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -32,6 +30,11 @@ const useStyles = makeStyles({
   },
 });
 const StoreDesk = () => {
+  const dispatch = useDispatch();
+  const storeDeskListResponse = useSelector(
+    (state) => state.admin.storeDeskListResponse
+  );
+  console.log("storeDeskListResponse", storeDeskListResponse);
   let classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
@@ -56,7 +59,7 @@ const StoreDesk = () => {
   const [dropDownStoreList, setDropDownStoreList] = useState([]);
   const columns = useMemo(() => [
     {
-      id: "storeId",
+      id: "id",
       name: "STORE ID",
       sortable: true,
     },
@@ -67,17 +70,17 @@ const StoreDesk = () => {
       sortable: true,
     },
     {
-      id: "storeType",
+      id: "storeTypeId",
       name: "STORE TYPE",
       sortable: true,
     },
     {
-      id: "reportingStore",
+      id: "toStoreId",
       name: "REPORTING STORE",
       sortable: true,
     },
     {
-      id: "ownerList",
+      id: "ownerTypeId",
       name: "OWNER LIST",
       sortable: true,
     },
@@ -87,7 +90,7 @@ const StoreDesk = () => {
       sortable: true,
     },
     {
-      id: "block",
+      id: "blockId",
       name: "BLOCK",
       sortable: true,
     },
@@ -102,7 +105,7 @@ const StoreDesk = () => {
       sortable: true,
     },
     {
-      id: "longitute",
+      id: "longitude",
       name: "LONGITUTE",
       sortable: true,
     },
@@ -168,6 +171,34 @@ const StoreDesk = () => {
     },
     [sortField, order, tableData]
   );
+
+  useEffect(() => {
+    let isApiSubcribed = true;
+    if (isApiSubcribed) {
+      setLoading(true);
+      dispatch(
+        getStoreDeskList({
+          pageNumber: controller.page,
+          pageSize: controller.rowsPerPage,
+        })
+      );
+    }
+    return () => {
+      isApiSubcribed = false;
+    };
+  }, [controller]);
+
+  useEffect(() => {
+    if (storeDeskListResponse && storeDeskListResponse?.status === 200) {
+      setActivityList(storeDeskListResponse?.data?.activityTypeList);
+      setTotalRows(storeDeskListResponse?.data?.totalElements);
+      setTableData(storeDeskListResponse?.data?.content);
+      setLoading(false);
+    } else if (storeDeskListResponse && storeDeskListResponse?.status == 400) {
+      setLoading(false);
+      toastMessage("Login Error", "Please enter valid ID", "error");
+    }
+  }, [storeDeskListResponse]);
   return (
     <>
       <Seo title="DVDMS | Store Desk" description="Store Desk" />
@@ -231,62 +262,73 @@ const StoreDesk = () => {
                   tableData &&
                   tableData.length > 0 &&
                   tableData.map((data, index) => {
-                    {
-                      columns.map((d, k) => {
-                        if (d.id === "Action") {
-                          return (
-                            <TableCell
-                              padding="none"
-                              className={classes.tableCell}
-                            >
-                              <span
-                                className="text-decoration-underline ms-1"
-                                style={{
-                                  fontSize: "0.7rem",
-                                  cursor: "pointer",
-                                }}
+                    return (
+                      <TableRow hover key={data + index}>
+                        {columns.map((d, k) => {
+                          if (d.id === "deptOpd") {
+                            return (
+                              <TableCell
+                                padding="none"
+                                className={classes.tableCell}
                               >
-                                <FontAwesomeIcon
-                                  icon={faPenToSquare}
-                                  className="me-2"
-                                />
-                              </span>
-                              <span className="m-1"> |</span>
+                                {data[d.id] === false ? "FALSE" : ""}
+                              </TableCell>
+                            );
+                          } else if (d.id === "Action") {
+                            return (
+                              <TableCell
+                                padding="none"
+                                className={classes.tableCell}
+                              >
+                                <span
+                                  className="text-decoration-underline ms-1"
+                                  style={{
+                                    fontSize: "0.7rem",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <FontAwesomeIcon
+                                    icon={faPenToSquare}
+                                    className="me-2"
+                                  />
+                                </span>
+                                <span className="m-1"> |</span>
 
-                              <span
-                                className="text-decoration-underline"
+                                <span
+                                  className="text-decoration-underline"
+                                  style={{
+                                    fontSize: "0.7rem",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <FontAwesomeIcon
+                                    icon={faTrash}
+                                    className="ms-2"
+                                    color="red"
+                                  />
+                                </span>
+                              </TableCell>
+                            );
+                          } else {
+                            return (
+                              <TableCell
+                                key={k}
+                                padding="none"
                                 style={{
+                                  padding: "4px",
                                   fontSize: "0.7rem",
-                                  cursor: "pointer",
                                 }}
                               >
-                                <FontAwesomeIcon
-                                  icon={faTrash}
-                                  className="ms-2"
-                                  color="red"
-                                />
-                              </span>
-                            </TableCell>
-                          );
-                        } else {
-                          return (
-                            <TableCell
-                              key={k}
-                              padding="none"
-                              style={{
-                                padding: "4px",
-                                fontSize: "0.7rem",
-                              }}
-                            >
-                              {data[d.id]}
-                            </TableCell>
-                          );
-                        }
-                      });
-                    }
+                                {data[d.id]}
+                              </TableCell>
+                            );
+                          }
+                        })}
+                      </TableRow>
+                    );
                   })
                 )}
-                {!loading && tableData && (
+                {!loading && tableData.length === 0 && (
                   <TableRow>
                     <TableCell className="text-center" colSpan={12}>
                       <p style={{ fontSize: "0.8rem" }}>

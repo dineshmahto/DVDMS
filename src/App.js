@@ -19,7 +19,6 @@ import OpenIntentDesk from "./pages/openIntentDesk/intent";
 
 import Notification from "./pages/demand/Notification";
 import CentralDemand from "./pages/demand/CentralDemand";
-import PurchaseOrderList from "./pages/demand/PurchaseOrderList";
 
 import Pdf from "./pages/Report/Pdf";
 import Csv from "./pages/Report/Csv";
@@ -62,7 +61,10 @@ const BudgetListDesk = lazy(() =>
 const FundingDesk = lazy(() =>
   import("../src/pages/admin/fundingdesk/fundingdesk")
 );
-
+const ProgrameDesk = lazy(() =>
+  import("./pages/admin/programedesk/programedesk")
+);
+const StoreDesk = lazy(() => import("./pages/admin/storedesk/storedesk"));
 const PageNotFound = lazy(() =>
   import("../src/pages/pagenotfound/pageNotFound")
 );
@@ -76,6 +78,15 @@ const IssueToThirdParty = lazy(() =>
 );
 const IntentDetails = lazy(() =>
   import("./pages/issue/issueDesk/intentIssue/intentissue")
+);
+// End of Issue
+
+// Order Management
+const PurchaseOrderList = lazy(() =>
+  import("./pages/ordermanagement/purchaseorderlist/purchaseorderlist")
+);
+const SupplierList = lazy(() =>
+  import("./pages/ordermanagement/supplierlist/supplierlist")
 );
 function App() {
   return (
@@ -103,6 +114,8 @@ function App() {
 
               <Route path="FundingDesk" element={<FundingDesk />} />
               <Route path="listDrug" element={<DrugDesk />} />
+              <Route path="programpage" element={<ProgrameDesk />} />
+              <Route path="listStore" element={<StoreDesk />} />
               {/* admin */}
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="annualdemand" element={<Notification />} />
@@ -138,7 +151,16 @@ function App() {
                 element={<DemandNotification />}
               />
               {/* End of Issue */}
-              <Route path="purchaseorderlist" element={<PurchaseOrderList />} />
+
+              {/* Order Management Module */}
+              <Route
+                path="openPurchaseOrderList"
+                element={<PurchaseOrderList />}
+              />
+              <Route path="supplierpage" element={<SupplierList />} />
+
+              {/* End of Order Management Module */}
+
               <Route path="intent" element={<OpenIntentDesk />} />
               <Route path="pdf" element={<Pdf />} />
               <Route path="csv" element={<Csv />} />

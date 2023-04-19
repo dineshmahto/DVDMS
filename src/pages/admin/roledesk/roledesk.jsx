@@ -30,8 +30,9 @@ import CreateRoleModalForm from "./createrolemodalform";
 import EditRoleModal from "./editrolemodalform";
 import RoleActivityListModal from "./roleactivitylistmodal";
 import { useDispatch } from "react-redux";
-import { deleteRole } from "../../../store/admin/action";
+import { deleteRole, getRoleList } from "../../../store/admin/action";
 import API from "../../../config/config";
+import { useSelector } from "react-redux";
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -42,6 +43,8 @@ const useStyles = makeStyles({
   },
 });
 const RoleDesk = () => {
+  const roleListResponse = useSelector((state) => state.admin.roleListResponse);
+  console.log("roleListResponse", roleListResponse);
   const dispatch = useDispatch();
   const showActivitityTooltipRef = useRef();
   let classes = useStyles();
@@ -353,60 +356,36 @@ const RoleDesk = () => {
       });
   };
 
-  const callApi = async () => {
-    await getAdminService(CONSTANTS.ROLE_LISTING, {
-      pageNumber: controller.page,
-      pageSize: controller.rowsPerPage,
-    })
-      .then((r) => {
-        console.log(r?.data);
-        console.log(r?.data?.content);
-        setTotalRoleList(r?.data?.activityList);
-        setActivityList(r?.data?.activityTypeList);
-        setData(r?.data?.activityList);
-        setTotalPages(r?.data?.totalPages);
-        setTotalRows(r?.data?.totalElements);
-        setTableData(r?.data?.content);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setLoading(false);
-        toastMessage("Role List", "Server can't respon", "error");
-        console.log("Error", e);
-      });
-  };
-
   useEffect(() => {
     let isApiSubcribed = true;
     if (isApiSubcribed) {
       setLoading(true);
-      callApi();
+      dispatch(
+        getRoleList({
+          pageNumber: controller.page,
+          pageSize: controller.rowsPerPage,
+        })
+      );
     }
     return () => {
       isApiSubcribed = false;
     };
   }, [controller]);
 
-  // const callActivityListApiByCode = async (code) => {
-  //   await getAdminService(`admin/getActivityListByType/${code}`)
-  //     .then((r) => {
-  //       console.log("typeCodeResponse", r?.data);
-  //       console.log(r?.data?.data);
-  //       setSelectedItem([]);
-  //       setRightTempArray([]);
-  //       setFirstClick(false);
-  //       setSelectedItemActiveIndices([]);
-  //       setTempArray([]);
-  //       setActiveIndicies(r?.data?.data?.map(() => false));
-  //       setTransferableRoleList(r?.data?.data);
-  //       setCopyData(r?.data?.data);
-  //     })
-  //     .catch((e) => {
-  //       setLoading(false);
-  //       toastMessage("Activity List Code", "Server can't respon", "error");
-  //       console.log("Error", e);
-  //     });
-  // };
+  useEffect(() => {
+    if (roleListResponse && roleListResponse?.status === 201) {
+      setTotalRoleList(roleListResponse?.data?.activityList);
+      setActivityList(roleListResponse?.data?.activityTypeList);
+      setData(roleListResponse?.data?.activityList);
+      setTotalPages(roleListResponse?.data?.totalPages);
+      setTotalRows(roleListResponse?.data?.totalElements);
+      setTableData(roleListResponse?.data?.content);
+      setLoading(false);
+    } else if (roleListResponse && roleListResponse?.status == 400) {
+      setLoading(false);
+      toastMessage("Login Error", "Please enter valid ID", "error");
+    }
+  }, [roleListResponse]);
 
   const handleCloseCreateRoleModal = () => {
     setShowModal(false);
@@ -598,6 +577,7 @@ const RoleDesk = () => {
       <RoleActivityListModal
         showActivityModal={showActivityModal}
         handleActivityShowModal={handleActivityShowModal}
+        activityList={activityList}
       />
     </>
   );

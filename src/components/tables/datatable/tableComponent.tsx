@@ -89,6 +89,7 @@ const TableComponent: React.FC<tableProps> = ({
   toolbarRequired,
   stickyHeader,
 }) => {
+  console.log("count", count);
   const classes = useStyles();
   return (
     <Paper

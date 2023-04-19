@@ -2,6 +2,7 @@ import axios from "axios";
 const API = axios.create({
   baseURL: process.env.REACT_APP_API_END_POINT,
   headers: {
+    "Access-Control-Allow-Origin": "*",
     "content-type": "application/json",
     Accept: "application/json",
   },
@@ -12,7 +13,7 @@ API.interceptors.request.use(
   function (config) {
     const token = sessionStorage.getItem("DVDMS_KEEP_SECRET");
     config.headers = {
-      Authorization: `Bearer  ${token}`,
+      Authorization: `Bearer ${token}`,
     };
     return config;
   },

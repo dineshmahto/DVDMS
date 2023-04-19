@@ -25,6 +25,9 @@ import { Seo } from "../../../components/seo/seo";
 import CreateUserModalForm from "./createusermodalform";
 import EditUserModalForm from "./editusermodalform";
 import UserActivityListModal from "./useractivitylistmodal";
+import { useDispatch, useSelector } from "react-redux";
+import { getUserList } from "../../../store/admin/action";
+
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -35,6 +38,9 @@ const useStyles = makeStyles({
   },
 });
 const UserDesk = () => {
+  const userListResponse = useSelector((state) => state.admin.userListResponse);
+  console.log("userListResponse", userListResponse);
+  const dispatch = useDispatch();
   let classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
@@ -180,14 +186,35 @@ const UserDesk = () => {
     let isApiSubcribed = true;
     if (isApiSubcribed) {
       setLoading(true);
-      callApi();
+      dispatch(
+        getUserList({
+          pageNumber: controller.page,
+          pageSize: controller.rowsPerPage,
+        })
+      );
+      //callApi();
     }
     return () => {
       isApiSubcribed = false;
     };
   }, [controller]);
 
+  useEffect(() => {
+    if (userListResponse && userListResponse?.status === 200) {
+      setTotalPages(userListResponse?.data?.totalPages);
+      setTotalRows(userListResponse?.data?.totalElements);
+      setTableData(userListResponse?.data?.content);
+      setRoleList(userListResponse?.data?.roleList);
+      setStoreList(userListResponse?.data?.storeList);
 
+      setLoading(false);
+    } else if (userListResponse && userListResponse?.status == 400) {
+      setLoading(false);
+      toastMessage("Login Error", "Please enter valid ID", "error");
+    }
+  }, [userListResponse]);
+
+  useEffect(() => {});
 
   const showActivities = () => {
     return (
@@ -221,10 +248,10 @@ const UserDesk = () => {
   }, [showAddModal]);
   const handleCloseEditUserModal = useCallback(() => {
     setShowEditModal(false);
-  },[showEditModal]);
+  }, [showEditModal]);
   const handleCloseActivityListModal = useCallback(() => {
-    setShowActivityModal(true)
-  },[showActivityModal])
+    setShowActivityModal(true);
+  }, [showActivityModal]);
   return (
     <>
       <Seo title="DVDMS | User Desk" description="User Desk" />
@@ -356,7 +383,7 @@ const UserDesk = () => {
                     );
                   })
                 )}
-                {!loading && tableData && (
+                {!loading && tableData.length == 0 && (
                   <TableRow>
                     <TableCell className="text-center" colSpan={12}>
                       <p style={{ fontSize: "0.8rem" }}>

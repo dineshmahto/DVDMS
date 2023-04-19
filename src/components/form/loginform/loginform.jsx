@@ -17,7 +17,7 @@ import { useDispatch } from "react-redux";
 import { closeLoginModal, login } from "../../../store/login/actions";
 import * as CONSTANTS from "../../../common/constant/constants";
 import { useSelector } from "react-redux";
-
+import tokenhandle from "../../../common/tokenhandle/tokenhandle";
 const LoginForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -80,6 +80,8 @@ const LoginForm = () => {
 
   useEffect(() => {
     if (loginResponse && loginResponse?.status === 200) {
+      tokenhandle.storetoken(loginResponse?.data.access_token);
+      tokenhandle.storeProfileDetails(loginResponse?.data?.displayName);
       setLoading(false);
       dispatch(closeLoginModal());
       navigate("/dashboard");
