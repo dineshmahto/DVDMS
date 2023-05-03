@@ -11,7 +11,6 @@ import {
   GET_OFFLINE_ISSUE_LIST_RESPONSE,
   GET_RETURN_DESK_LIST,
   GET_RETURN_DESK_LIST_RESPONSE,
-  HANDLE_PAGE_CHANGE,
 } from "./actionTypes";
 
 export const getIssueDeskList = (pageDetails) => {

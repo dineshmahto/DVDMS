@@ -8,8 +8,6 @@ import store from "./store/store";
 //import DashBoard from "./pages/dashboard/dashboard";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import ProgramList from "./pages/program/programlist/programlist";
-import Programme from "./pages/program/programme";
 
 //import IssueList from "./pages/issues/issueList";
 import Issue from "./pages/issues/issue";
@@ -232,7 +230,7 @@ function App() {
               <Route path="pdf" element={<Pdf />} />
               <Route path="csv" element={<Csv />} />
               <Route path="openNotification" element={<OpenNotification />} />
-              <Route path="programmeList" element={<ProgramList />} />
+              {/* <Route path="programmeList" element={<ProgramList />} /> */}
               <Route path="TransferComponent" element={<TransferComponent />} />
 
               <Route path="test" element={<Test />} />

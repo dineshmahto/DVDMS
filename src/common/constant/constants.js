@@ -1,7 +1,7 @@
 //Login
 export const LOGIN = "auth/authenticate";
 //Logout
-export const LOGOUT = "auth/logout";
+export const LOGOUT = "logout";
 //Dashboard
 export const GET_DASHBOARD_CARD_DATA = "dashboard/details";
 // Demand

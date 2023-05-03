@@ -1,4 +1,4 @@
-import { call, put, take, takeEvery } from "redux-saga/effects";
+import { call, put, takeEvery } from "redux-saga/effects";
 import { Service } from "../../config/commonFetch";
 import * as CONSTANTS from "../../common/constant/constants";
 import {

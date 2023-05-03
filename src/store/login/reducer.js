@@ -3,6 +3,8 @@ import {
   CLOSE_LOGIN_MODAL,
   LOGIN,
   LOGIN_RESPONSE,
+  LOGOUT_RESPONSE,
+  LOGOUT,
 } from "./actionTypes";
 
 const initialState = {
@@ -32,6 +34,17 @@ const login = (state = initialState, action) => {
       state = {
         ...state,
         loginResponse: action.payload,
+      };
+      break;
+    case LOGOUT:
+      state = {
+        ...state,
+      };
+      break;
+    case LOGOUT_RESPONSE:
+      state = {
+        ...state,
+        logoutResponse: action?.payload,
       };
       break;
     default:

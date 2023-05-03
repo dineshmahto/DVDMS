@@ -3,6 +3,8 @@ import {
   CLOSE_LOGIN_MODAL,
   LOGIN,
   LOGIN_RESPONSE,
+  LOGOUT,
+  LOGOUT_RESPONSE,
 } from "./actionTypes";
 
 export const showLoginModal = () => {
@@ -27,5 +29,18 @@ export const loginResponse = (loginResponse) => {
   return {
     type: LOGIN_RESPONSE,
     payload: loginResponse,
+  };
+};
+
+export const logout = (logoutDetails) => {
+  return {
+    type: LOGOUT,
+    payload: logoutDetails,
+  };
+};
+export const logoutResponse = (logoutResponse) => {
+  return {
+    type: LOGOUT_RESPONSE,
+    payload: logoutResponse,
   };
 };

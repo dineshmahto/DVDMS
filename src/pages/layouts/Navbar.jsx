@@ -1,34 +1,29 @@
 import { useNavigate } from "react-router-dom";
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import tokenhandle from "../../common/tokenhandle/tokenhandle";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { showLoader, hideLoader } from "../../store/loader/actions";
-import * as CONSTANTS from "../../common/constant/constants";
-import { postService } from "../../services/commonservice/commonservice";
+import { loginResponse, logout } from "../../store/login/actions";
 import toastMessage from "../../common/toastmessage/toastmessage";
 const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const logout = async () => {
-    const details = JSON.parse(tokenhandle.getProfileDetail());
-    await postService(CONSTANTS.LOGOUT, {
-      username: details?.userName,
-    })
-      .then((r) => {
-        console.log("Response", r);
-        if (r.status === 200) {
-          dispatch(hideLoader());
-          tokenhandle.clearToken();
-          navigate("/");
-        }
-      })
-      .catch((e) => {
-        toastMessage("Logout", "Server can't respon", "error");
-      });
-  };
+  const logOutResponse = useSelector((state) => state?.login?.logoutResponse);
+  useEffect(() => {
+    if (logOutResponse && logOutResponse.status === 200) {
+      dispatch(hideLoader());
+      tokenhandle.clearToken();
+      dispatch(loginResponse(""));
+      navigate("/");
+    } else if (logOutResponse && logOutResponse?.status === 500) {
+      dispatch(hideLoader());
+      dispatch(loginResponse(""));
+      toastMessage("LOGOUT", "Something went wrong", "error");
+    }
+  }, [logOutResponse]);
   return (
     <>
       <nav className="sb-topnav navbar navbar-expand navbar-dark bg-dark2">
@@ -99,7 +94,12 @@ const Navbar = () => {
                   to={"/"}
                   onClick={() => {
                     dispatch(showLoader());
-                    logout();
+                    const details = JSON.parse(tokenhandle.getProfileDetail());
+                    dispatch(
+                      logout({
+                        username: details?.userName,
+                      })
+                    );
                   }}
                 >
                   <FontAwesomeIcon icon={faRightFromBracket} />

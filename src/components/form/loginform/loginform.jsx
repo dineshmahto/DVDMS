@@ -9,7 +9,6 @@ import BasicButton from "../../button/basicbutton";
 import SwitchCheckBox from "../../switch/switchcheckbox";
 import InputFieldFloatLebel from "../../inputbox/floatlabel/InputFieldFloatLabel";
 import toastMessage from "../../../common/toastmessage/toastmessage";
-import loginservice from "../../../services/loginservice/loginservice";
 import { useNavigate } from "react-router-dom";
 import Canvas from "../../canvas/Canvas";
 import { Spinner } from "react-bootstrap";

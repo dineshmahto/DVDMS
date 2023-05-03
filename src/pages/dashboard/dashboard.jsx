@@ -1,59 +1,30 @@
-import React,{ useEffect,useState } from 'react'
+import React, { useEffect, useState } from "react";
 import * as CONSTANTS from "../../common/constant/constants";
 //import {Link} from 'react-router-dom'
 import "./dashboard.css";
-import Chart from "chart.js/auto";
 import { Line } from "react-chartjs-2";
 import faker from "faker";
 import DashboardCardSmall from "../../components/card/DashboardCardSmall";
 import toastMessage from "../../common/toastmessage/toastmessage";
-import getDashboardCardData from '../../services/dashboardService/dashboardService';
-//import axios from 'axios';
 
+//import axios from 'axios';
 
 function Dashboard() {
   const [loading, setLoading] = useState(false);
   const [dashboardCardData, setDashboardCardData] = useState([]);
 
   const jwt = sessionStorage.getItem("DVDMS_KEEP_SECRET");
-  // const instance = axios.create({
-  //   baseURL: 'http://192.168.137.174:8081/dvdms/api/v1/',
-  //   headers: {
-  //     'Content-Type': 'application/json',
-  //     Accept: 'application/json',
-  //     Authorization: `Bearer ${jwt}`,
-  //   },
-  // });
-
-
-  const callApi = async () => {
-    // await instance.get('dashboard/details')
-    //   .then(response => {
-    //     console.log(response.data);
-    //   })
-    //   .catch(error => {
-    //     console.error(error);
-    //   });
-    await getDashboardCardData(CONSTANTS.GET_DASHBOARD_CARD_DATA, null, jwt)
-      .then((r) => {
-        console.log("Dashboard Card Data: "+r);
-         console.log(r?.data?.content);
-
-        setLoading(false);
-      })
-      .catch((e) => {
-        setLoading(false);
-        toastMessage("Dashboard Card Data", "Server can't respon", "error");
-        console.log("Error", e);
-      });
-  };
-
-  useEffect(() => {
-    callApi();
-  },[]);
 
   //Chart data
-  const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
+  const labels = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+  ];
 
   const data = {
     labels,

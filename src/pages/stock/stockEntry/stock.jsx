@@ -187,9 +187,9 @@ const Stock = () => {
     console.log("Data", data);
 
     const finalData = [...rows]?.map((ele) => {
-      // ele?.receivedDate = moment(ele?.receivedDate).format("l");
-      // ele?.manufacturerDate = moment(ele).format("l");
-      // ele?.expiryDate = moment(ele).format("l");
+      ele["receivedDate"] = moment(ele?.receivedDate).format("l");
+      ele["manufacturerDate"] = moment(ele).format("l");
+      ele["expiryDate"] = moment(ele).format("l");
       delete ele?.programme;
       delete ele?.drug;
       delete ele?.drugClass;
