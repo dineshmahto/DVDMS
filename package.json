@@ -28,6 +28,7 @@
     "dotenv": "^16.0.3",
     "faker": "^5.5.3",
     "formik": "^2.2.9",
+    "jquery": "^3.6.4",
     "lodash": "^4.17.21",
     "lottie-react": "^2.4.0",
     "moment": "^2.29.4",
