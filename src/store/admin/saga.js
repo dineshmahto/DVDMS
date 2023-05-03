@@ -1,7 +1,13 @@
 import { call, put, takeEvery } from "redux-saga/effects";
 import {
+  getBudgetIterfaceListResponse,
+  getDrugDeksListResponse,
+  getEdlMappingListResponse,
+  getFundingSourceListResponse,
   getProgramDeskListResponse,
+  getProgrameFundingSourceListResponse,
   getPurchaseOrderListResponse,
+  getRateContractDeskListResponse,
   getRoleListResponse,
   getStoreDeskListResponse,
   getSupplierListResponse,
@@ -12,8 +18,14 @@ import { Service } from "../../config/commonFetch";
 
 import {
   DELETE_ROLE,
+  GET_BUDGET_INTERFACE_LIST,
+  GET_DRUG_DESK_LIST,
+  GET_EDL_MAPPING,
+  GET_FUNDING_SOURCE_LIST,
   GET_PROGRAM_DESK_LIST,
+  GET_PROGRAM_FUNDING_SOURCE,
   GET_PURCHASE_ORDER_LIST,
+  GET_RATE_CONTRACT_DESK_LIST,
   GET_ROLE_LIST,
   GET_STORE_DESK_LIST,
   GET_SUPPLIER_LIST,
@@ -57,11 +69,9 @@ function* getUserList({ payload: pageDetails }) {
 function* getRoleList({ payload: pageDetails }) {
   console.log("pageDetails", pageDetails);
   try {
-    const response = yield call(
-      Service.commonFetch,
-      CONSTANTS.ROLE_LISTING,
-      pageDetails
-    );
+    const response = yield call(Service.commonFetch, CONSTANTS.ROLE_LISTING, {
+      params: pageDetails,
+    });
     console.log("Response", response);
     yield put(getRoleListResponse(response));
   } catch (error) {
@@ -76,7 +86,9 @@ function* getProgramDeskList({ payload: pageDetails }) {
     const response = yield call(
       Service.commonFetch,
       CONSTANTS.PROGRAME_DESK_LISTING,
-      pageDetails
+      {
+        params: pageDetails,
+      }
     );
     console.log("Response", response);
     yield put(getProgramDeskListResponse(response));
@@ -92,7 +104,9 @@ function* getStoreDeskList({ payload: pageDetails }) {
     const response = yield call(
       Service.commonFetch,
       CONSTANTS.STORE_DESK_LISTING,
-      pageDetails
+      {
+        params: pageDetails,
+      }
     );
     console.log("Response", response);
     yield put(getStoreDeskListResponse(response));
@@ -108,7 +122,9 @@ function* getPurchaseOrderList({ payload: pageDetails }) {
     const response = yield call(
       Service.commonFetch,
       CONSTANTS.PURCHASE_ORDER_LIST,
-      pageDetails
+      {
+        params: pageDetails,
+      }
     );
     console.log("Response", response);
     yield put(getPurchaseOrderListResponse(response));
@@ -121,16 +137,122 @@ function* getPurchaseOrderList({ payload: pageDetails }) {
 function* getSupplierList({ payload: pageDetails }) {
   console.log("pageDetails", pageDetails);
   try {
-    const response = yield call(
-      Service.commonFetch,
-      CONSTANTS.SUPPLIER_LIST,
-      pageDetails
-    );
+    const response = yield call(Service.commonFetch, CONSTANTS.SUPPLIER_LIST, {
+      params: pageDetails,
+    });
     console.log("Response", response);
     yield put(getSupplierListResponse(response));
   } catch (error) {
     console.log("Error", error);
     put(getSupplierListResponse(error));
+  }
+}
+
+function* getRateContractList({ payload: pageDetails }) {
+  console.log("pageDetails", pageDetails);
+  try {
+    const response = yield call(
+      Service.commonFetch,
+      CONSTANTS.RATE_CONTRACT_LIST,
+      {
+        params: pageDetails,
+      }
+    );
+    console.log("Response", response);
+    yield put(getRateContractDeskListResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(getRateContractDeskListResponse(error));
+  }
+}
+
+function* getFundingSourceList({ payload: pageDetails }) {
+  console.log("pageDetails", pageDetails);
+  try {
+    const response = yield call(
+      Service.commonFetch,
+      CONSTANTS.FUNDING_DESK_LIST,
+      {
+        params: pageDetails,
+      }
+    );
+    console.log("Response", response);
+    yield put(getFundingSourceListResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(getFundingSourceListResponse(error));
+  }
+}
+
+function* getBudgetInterfaceList({ payload: pageDetails }) {
+  console.log("pageDetails", pageDetails);
+  try {
+    const response = yield call(
+      Service.commonFetch,
+      CONSTANTS.BUDGET_INTERFACE_LIST,
+      {
+        params: pageDetails,
+      }
+    );
+    console.log("Response", response);
+    yield put(getBudgetIterfaceListResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(getBudgetIterfaceListResponse(error));
+  }
+}
+
+function* getDrugDeskList({ payload: pageDetails }) {
+  console.log("pageDetails", pageDetails);
+  try {
+    const response = yield call(
+      Service.commonFetch,
+      CONSTANTS.DRUG_DESK_LISTING,
+      {
+        params: pageDetails,
+      }
+    );
+    console.log("Response", response);
+    yield put(getDrugDeksListResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(getDrugDeksListResponse(error));
+  }
+}
+
+function* getEdlMappingList({ payload: pageDetails }) {
+  console.log("pageDetails", pageDetails);
+  try {
+    const response = yield call(
+      Service.commonFetch,
+      CONSTANTS.GET_EDL_MAPPING_LIST,
+      {
+        params: pageDetails,
+      }
+    );
+    console.log("Response", response);
+    yield put(getEdlMappingListResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(getEdlMappingListResponse(error));
+  }
+}
+
+function* getProgrameFundingSourceList({ payload: pageDetails }) {
+  console.log("pageDetails", pageDetails);
+  try {
+    const response = yield call(
+      Service.commonFetch,
+      CONSTANTS.GET_PROGRAME_FUNDING_MAPPING,
+      {
+        params: pageDetails,
+      }
+    );
+    console.log("Response", response);
+    yield put(getProgrameFundingSourceListResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(getProgrameFundingSourceListResponse(error));
   }
 }
 
@@ -142,5 +264,11 @@ function* AdminSaga() {
   yield takeEvery(GET_STORE_DESK_LIST, getStoreDeskList);
   yield takeEvery(GET_PURCHASE_ORDER_LIST, getPurchaseOrderList);
   yield takeEvery(GET_SUPPLIER_LIST, getSupplierList);
+  yield takeEvery(GET_RATE_CONTRACT_DESK_LIST, getRateContractList);
+  yield takeEvery(GET_FUNDING_SOURCE_LIST, getFundingSourceList);
+  yield takeEvery(GET_BUDGET_INTERFACE_LIST, getBudgetInterfaceList);
+  yield takeEvery(GET_DRUG_DESK_LIST, getDrugDeskList);
+  yield takeEvery(GET_EDL_MAPPING, getEdlMappingList);
+  yield takeEvery(GET_PROGRAM_FUNDING_SOURCE, getProgrameFundingSourceList);
 }
 export default AdminSaga;

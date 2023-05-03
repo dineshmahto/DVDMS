@@ -93,10 +93,10 @@ const PurchaseOrderList = () => {
     });
   };
 
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = (e) => {
     setController({
       ...controller,
-      rowsPerPage: parseInt(event.target.value, 10),
+      rowsPerPage: e,
       page: 0,
     });
   };

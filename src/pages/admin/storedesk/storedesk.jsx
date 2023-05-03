@@ -4,7 +4,6 @@ import { TableBody, TableRow, TableCell } from "@mui/material";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import Basicbutton from "../../../components/button/basicbutton";
-import BasicModal from "../../../components/modal/basicmodal";
 import SearchField from "../../../components/search/search";
 import { Spinner } from "react-bootstrap";
 import {
@@ -12,30 +11,21 @@ import {
   faSearch,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-
-import { makeStyles } from "@mui/styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import { Seo } from "../../../components/seo/seo";
 import { useDispatch, useSelector } from "react-redux";
 import { getStoreDeskList } from "../../../store/admin/action";
+import TablePagination from "../../../components/tables/datatable/tablepagination";
+import StyledTableRow from "../../../components/tables/datatable/customTableRow";
+import { getStockDeskListResponse } from "../../../store/stock/action";
+import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 
-const useStyles = makeStyles({
-  tableCell: {
-    padding: "10px !important",
-    fontSize: "0.8rem !important",
-  },
-  lineHeight: {
-    lineHeight: "3",
-  },
-});
 const StoreDesk = () => {
   const dispatch = useDispatch();
   const storeDeskListResponse = useSelector(
     (state) => state.admin.storeDeskListResponse
   );
-  console.log("storeDeskListResponse", storeDeskListResponse);
-  let classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
@@ -138,8 +128,12 @@ const StoreDesk = () => {
       page: newPage - 1,
     });
   };
-  const handleChangeRowsPerPage = (current, pageSize) => {
-    console.log(current, pageSize);
+  const handleChangeRowsPerPage = (e) => {
+    setController({
+      ...controller,
+      rowsPerPage: e,
+      page: 0,
+    });
   };
   const handleSortingChange = (accessor) => {
     const sortOrder =
@@ -185,18 +179,22 @@ const StoreDesk = () => {
     }
     return () => {
       isApiSubcribed = false;
+      dispatch(getStockDeskListResponse(""));
     };
   }, [controller]);
 
   useEffect(() => {
     if (storeDeskListResponse && storeDeskListResponse?.status === 200) {
       setActivityList(storeDeskListResponse?.data?.activityTypeList);
-      setTotalRows(storeDeskListResponse?.data?.totalElements);
-      setTableData(storeDeskListResponse?.data?.content);
+      setTotalRows(storeDeskListResponse?.data?.pageList?.totalElements);
+      setTableData(storeDeskListResponse?.data?.pageList?.content);
       setLoading(false);
+      dispatch(getStockDeskListResponse(""));
     } else if (storeDeskListResponse && storeDeskListResponse?.status == 400) {
       setLoading(false);
+
       toastMessage("Login Error", "Please enter valid ID", "error");
+      dispatch(getStockDeskListResponse(""));
     }
   }, [storeDeskListResponse]);
   return (
@@ -211,31 +209,27 @@ const StoreDesk = () => {
       <div className="row mt-2">
         <HorizonatalLine text="Store Management Desk" />
       </div>
+      <div className="row">
+        <div className="d-flex flex-row justify-content-between">
+          <Basicbutton
+            buttonText="Add New Store"
+            outlineType={true}
+            className="btn btn-primary rounded-0 mb-2 me-1 mt-2 ms-1"
+            onClick={() => {
+              setShowAddModal(true);
+            }}
+          />
+          <SearchField
+            className="me-1 mt-1"
+            iconPosition="end"
+            iconName={faSearch}
+            onChange={(e) => {
+              console.log(e);
+            }}
+          />
+        </div>
+      </div>
       <Paper>
-        <div className="row">
-          <div className="d-flex flex-row justify-content-end">
-            <Basicbutton
-              buttonText="Add New Store"
-              outlineType={true}
-              className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
-              onClick={() => {
-                setShowAddModal(true);
-              }}
-            />
-          </div>
-        </div>
-        <div className="row mb-1">
-          <div className="d-flex justify-content-end">
-            <SearchField
-              className="me-1 "
-              iconPosition="end"
-              iconName={faSearch}
-              onChange={(e) => {
-                console.log(e);
-              }}
-            />
-          </div>
-        </div>
         <div className="row">
           <div className="col-12">
             <TableComponent
@@ -253,33 +247,27 @@ const StoreDesk = () => {
             >
               <TableBody>
                 {loading ? (
-                  <TableRow>
+                  <StyledTableRow>
                     <TableCell className="text-center" colSpan={12}>
                       <Spinner />
                     </TableCell>
-                  </TableRow>
+                  </StyledTableRow>
                 ) : (
                   tableData &&
                   tableData.length > 0 &&
                   tableData.map((data, index) => {
                     return (
-                      <TableRow hover key={data + index}>
+                      <StyledTableRow key={data + index}>
                         {columns.map((d, k) => {
                           if (d.id === "deptOpd") {
                             return (
-                              <TableCell
-                                padding="none"
-                                className={classes.tableCell}
-                              >
+                              <StyledTableCell padding="none">
                                 {data[d.id] === false ? "FALSE" : ""}
-                              </TableCell>
+                              </StyledTableCell>
                             );
                           } else if (d.id === "Action") {
                             return (
-                              <TableCell
-                                padding="none"
-                                className={classes.tableCell}
-                              >
+                              <StyledTableCell padding="none">
                                 <span
                                   className="text-decoration-underline ms-1"
                                   style={{
@@ -307,38 +295,42 @@ const StoreDesk = () => {
                                     color="red"
                                   />
                                 </span>
-                              </TableCell>
+                              </StyledTableCell>
                             );
                           } else {
                             return (
-                              <TableCell
+                              <StyledTableCell
+                                className="text-center"
                                 key={k}
                                 padding="none"
-                                style={{
-                                  padding: "4px",
-                                  fontSize: "0.7rem",
-                                }}
                               >
                                 {data[d.id]}
-                              </TableCell>
+                              </StyledTableCell>
                             );
                           }
                         })}
-                      </TableRow>
+                      </StyledTableRow>
                     );
                   })
                 )}
                 {!loading && tableData.length === 0 && (
                   <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
+                    <StyledTableCell colSpan={12}>
                       <p style={{ fontSize: "0.8rem" }}>
                         NO DATA AVAILABE IN TABLE
                       </p>
-                    </TableCell>
+                    </StyledTableCell>
                   </TableRow>
                 )}
               </TableBody>
             </TableComponent>
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
           </div>
         </div>
       </Paper>

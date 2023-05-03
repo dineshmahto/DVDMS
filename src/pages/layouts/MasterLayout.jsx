@@ -55,47 +55,6 @@ const MasterLayout = () => {
                   <Suspense>
                     <Outlet />
                   </Suspense>
-
-                  <div
-                    className="chat"
-                    style={{
-                      position: "fixed",
-                      bottom: "10px",
-                      right: "10px",
-                      width: "50px",
-                      height: "50px",
-                      backgroundColor: "black",
-                      color: "white",
-                      borderRadius: "30px",
-                      zIndex: 100,
-                    }}
-                  >
-                    <div
-                      style={{
-                        position: "relative",
-                        top: "6px",
-                        left: "8px",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <FontAwesomeIcon
-                        icon={faComments}
-                        size="2x"
-                        onClick={() => setOpen(!open)}
-                      />
-                    </div>
-                    {/* <div
-                      className={`baseClass ${open ? `d-block` : "d-none"}`}
-                      style={{
-                        width: "100px",
-                        height: "150px",
-                      }}
-                    >
-                      <div className="card">
-                        <div className="card-body">TExt</div>
-                      </div>
-                    </div> */}
-                  </div>
                 </div>
               </main>
               <Footer />

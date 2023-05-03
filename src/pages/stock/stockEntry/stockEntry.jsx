@@ -1,5 +1,5 @@
 import { React, useState, useMemo } from "react";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { TableBody, TableRow, TableCell, Paper } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import TextField from "@mui/material/TextField";
@@ -612,148 +612,150 @@ const StockEntry = () => {
         <div className="row">
           <HorizonatalLine text="Enter Drug Details" />
         </div>
-        <div className="row mt-2">
-          <div className="col-12">
-            <TableComponent
-              columns={columns}
-              sortField={sortField}
-              page={controller.page}
-              count={totalRows}
-              order={order}
-              paginationRequired={false}
-              overFlow={true}
-              stickyHeader={true}
-              customWidth="max-content"
-              tableTitle="Stock Entry Desk"
-            >
-              <TableBody>
-                {data &&
-                  data?.map((row, index) => {
-                    console.log("Row Number", index + 1);
-                    console.log("Row", row);
-                    return (
-                      <TableRow key={row.name}>
-                        {columns.map((d, k) => {
-                          console.log("K", k);
-                          if (d.type == "input") {
-                            return (
-                              <TableCell key={k} align="right">
-                                <BasicInput
-                                  id={row.id + d.id}
-                                  type="text"
-                                  className="shadow-none"
-                                  placeholder="Amount"
-                                  onChange={(e) =>
-                                    commonFunctionToUpdateValue(
-                                      row.id,
-                                      e.target.value,
-                                      d.id
-                                    )
-                                  }
-                                />
-                              </TableCell>
-                            );
-                          } else if (d.type == "select") {
-                            console.log("Key", d.id);
-                            console.log("Data", row[d.id]);
-                            return (
-                              <TableCell>
-                                <SelectOption
-                                  data={row[d.id]}
-                                  onChange={(e) => {
-                                    if (e.target.value != "None") {
-                                      updateDropDownValue(
-                                        e,
-                                        row,
-                                        trackClassificationList,
-                                        dummySelectData,
-                                        updatedClassificationDropDownLsit,
-                                        setNewClassificationDropDownList,
-                                        setTrackClassificationList,
-                                        d.id,
-                                        `${d.id}Value`
-                                      );
-                                      if (
-                                        d.id == "classification" &&
-                                        index == 0
-                                      ) {
-                                        fetchProgrammeList();
-                                      }
-                                    }
-                                  }}
-                                  id={row.id + row[d.id]}
-                                />
-                              </TableCell>
-                            );
-                          } else if (d.type == "YMDPicker") {
-                            return (
-                              <TableCell>
-                                <LocalizationProvider
-                                  dateAdapter={AdapterDayjs}
-                                >
-                                  <DatePicker
-                                    className={classes.root}
-                                    value={row[d.id]}
-                                    onChange={(newValue) => {
-                                      commonFunctionToUpdateValue(
-                                        row.id,
-                                        newValue,
-                                        d.id
-                                      );
-                                      commonFunctionToUpdateValue(
-                                        row.id,
-                                        moment(newValue).format("l"),
-                                        `${d.id}Value`
-                                      );
-                                    }}
-                                    renderInput={(params) => (
-                                      <TextField {...params} />
-                                    )}
-                                  />
-                                </LocalizationProvider>
-                              </TableCell>
-                            );
-                          } else if (d.type == "YMPicker") {
-                            return (
-                              <TableCell>
-                                <LocalizationProvider
-                                  dateAdapter={AdapterDayjs}
-                                >
-                                  <DatePicker
+        <Paper>
+          <div className="row mt-2">
+            <div className="col-12">
+              <TableComponent
+                columns={columns}
+                sortField={sortField}
+                page={controller.page}
+                count={totalRows}
+                order={order}
+                paginationRequired={false}
+                overFlow={true}
+                stickyHeader={true}
+                customWidth="max-content"
+                tableTitle="Stock Entry Desk"
+              >
+                <TableBody>
+                  {data &&
+                    data?.map((row, index) => {
+                      console.log("Row Number", index + 1);
+                      console.log("Row", row);
+                      return (
+                        <TableRow key={row.name}>
+                          {columns.map((d, k) => {
+                            console.log("K", k);
+                            if (d.type == "input") {
+                              return (
+                                <TableCell key={k} align="right">
+                                  <BasicInput
                                     id={row.id + d.id}
-                                    className={classes.root}
-                                    views={["year", "month"]}
-                                    openTo="month"
-                                    value={row.mnfDate}
-                                    disablePast
-                                    onChange={(newValue) => {
+                                    type="text"
+                                    className="form-control shadow-none"
+                                    placeholder="Amount"
+                                    onChange={(e) =>
                                       commonFunctionToUpdateValue(
                                         row.id,
-                                        newValue,
+                                        e.target.value,
                                         d.id
-                                      );
-                                      commonFunctionToUpdateValue(
-                                        row.id,
-                                        moment(newValue).format("l"),
-                                        `${d.id}Value`
-                                      );
-                                    }}
-                                    renderInput={(params) => (
-                                      <TextField {...params} />
-                                    )}
+                                      )
+                                    }
                                   />
-                                </LocalizationProvider>
-                              </TableCell>
-                            );
-                          }
-                        })}
-                      </TableRow>
-                    );
-                  })}
-              </TableBody>
-            </TableComponent>
+                                </TableCell>
+                              );
+                            } else if (d.type == "select") {
+                              console.log("Key", d.id);
+                              console.log("Data", row[d.id]);
+                              return (
+                                <TableCell>
+                                  <SelectOption
+                                    data={row[d.id]}
+                                    onChange={(e) => {
+                                      if (e.target.value != "None") {
+                                        updateDropDownValue(
+                                          e,
+                                          row,
+                                          trackClassificationList,
+                                          dummySelectData,
+                                          updatedClassificationDropDownLsit,
+                                          setNewClassificationDropDownList,
+                                          setTrackClassificationList,
+                                          d.id,
+                                          `${d.id}Value`
+                                        );
+                                        if (
+                                          d.id == "classification" &&
+                                          index == 0
+                                        ) {
+                                          fetchProgrammeList();
+                                        }
+                                      }
+                                    }}
+                                    id={row.id + row[d.id]}
+                                  />
+                                </TableCell>
+                              );
+                            } else if (d.type == "YMDPicker") {
+                              return (
+                                <TableCell>
+                                  <LocalizationProvider
+                                    dateAdapter={AdapterDayjs}
+                                  >
+                                    <DatePicker
+                                      className={classes.root}
+                                      value={row[d.id]}
+                                      onChange={(newValue) => {
+                                        commonFunctionToUpdateValue(
+                                          row.id,
+                                          newValue,
+                                          d.id
+                                        );
+                                        commonFunctionToUpdateValue(
+                                          row.id,
+                                          moment(newValue).format("l"),
+                                          `${d.id}Value`
+                                        );
+                                      }}
+                                      renderInput={(params) => (
+                                        <TextField {...params} />
+                                      )}
+                                    />
+                                  </LocalizationProvider>
+                                </TableCell>
+                              );
+                            } else if (d.type == "YMPicker") {
+                              return (
+                                <TableCell>
+                                  <LocalizationProvider
+                                    dateAdapter={AdapterDayjs}
+                                  >
+                                    <DatePicker
+                                      id={row.id + d.id}
+                                      className={classes.root}
+                                      views={["year", "month"]}
+                                      openTo="month"
+                                      value={row.mnfDate}
+                                      disablePast
+                                      onChange={(newValue) => {
+                                        commonFunctionToUpdateValue(
+                                          row.id,
+                                          newValue,
+                                          d.id
+                                        );
+                                        commonFunctionToUpdateValue(
+                                          row.id,
+                                          moment(newValue).format("l"),
+                                          `${d.id}Value`
+                                        );
+                                      }}
+                                      renderInput={(params) => (
+                                        <TextField {...params} />
+                                      )}
+                                    />
+                                  </LocalizationProvider>
+                                </TableCell>
+                              );
+                            }
+                          })}
+                        </TableRow>
+                      );
+                    })}
+                </TableBody>
+              </TableComponent>
+            </div>
           </div>
-        </div>
+        </Paper>
         <div className="row">
           <div className="d-flex justify-content-center">
             <BasicButton

@@ -1,9 +1,21 @@
 import {
   DELETE_ROLE,
+  GET_BUDGET_INTERFACE_LIST,
+  GET_BUDGET_INTERFACE_LIST_RESPONSE,
+  GET_DRUG_DESK_LIST,
+  GET_DRUG_DESK_LIST_RESPONSE,
+  GET_EDL_MAPPING,
+  GET_EDL_MAPPING_RESPONSE,
+  GET_FUNDING_SOURCE_LIST,
+  GET_FUNDING_SOURCE_LIST_RESPONSE,
   GET_PROGRAM_DESK_LIST,
   GET_PROGRAM_DESK_LIST_RESPONSE,
+  GET_PROGRAM_FUNDING_SOURCE,
+  GET_PROGRAM_FUNDING_SOURCE_RESPONSE,
   GET_PURCHASE_ORDER_LIST,
   GET_PURCHASE_ORDER_LIST_RESPONSE,
+  GET_RATE_CONTRACT_DESK_LIST,
+  GET_RATE_CONTRACT_DESK_LIST_RESPONSE,
   GET_ROLE_LIST,
   GET_ROLE_LIST_RESPONSE,
   GET_STORE_DESK_LIST,
@@ -97,6 +109,72 @@ const admin = (state = initialState, action) => {
       state = {
         ...state,
         supplierListResponse: action.payload,
+      };
+      break;
+    case GET_RATE_CONTRACT_DESK_LIST:
+      state = {
+        ...state,
+      };
+      break;
+    case GET_RATE_CONTRACT_DESK_LIST_RESPONSE:
+      state = {
+        ...state,
+        rateContractListResponse: action.payload,
+      };
+      break;
+    case GET_FUNDING_SOURCE_LIST:
+      state = {
+        ...state,
+      };
+      break;
+    case GET_FUNDING_SOURCE_LIST_RESPONSE:
+      state = {
+        ...state,
+        fundingSourceListResponse: action.payload,
+      };
+      break;
+    case GET_BUDGET_INTERFACE_LIST:
+      state = {
+        ...state,
+      };
+      break;
+    case GET_BUDGET_INTERFACE_LIST_RESPONSE:
+      state = {
+        ...state,
+        budgetInterfaceListResponse: action.payload,
+      };
+      break;
+    case GET_DRUG_DESK_LIST:
+      state = {
+        ...state,
+      };
+      break;
+    case GET_DRUG_DESK_LIST_RESPONSE:
+      state = {
+        ...state,
+        drugDeskListResponse: action.payload,
+      };
+      break;
+    case GET_EDL_MAPPING:
+      state = {
+        ...state,
+      };
+      break;
+    case GET_EDL_MAPPING_RESPONSE:
+      state = {
+        ...state,
+        edlMappingListResponse: action.payload,
+      };
+      break;
+    case GET_PROGRAM_FUNDING_SOURCE:
+      state = {
+        ...state,
+      };
+      break;
+    case GET_PROGRAM_FUNDING_SOURCE_RESPONSE:
+      state = {
+        ...state,
+        programFundingSourceResponse: action.payload,
       };
       break;
     default:

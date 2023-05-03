@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useMemo,
-  useEffect,
-  useCallback,
-  useRef,
-} from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Paper } from "@mui/material";
 import { TableBody, TableRow, TableCell } from "@mui/material";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
@@ -13,47 +7,1284 @@ import Basicbutton from "../../../components/button/basicbutton";
 import SearchField from "../../../components/search/search";
 import { Spinner } from "react-bootstrap";
 import {
-  faFloppyDisk,
   faList,
   faPenToSquare,
   faSearch,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
-
-import { getAdminService } from "../../../services/adminservice/adminservice";
 import { makeStyles } from "@mui/styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toastMessage from "../../../common/toastmessage/toastmessage";
-import * as CONSTANTS from "../../../common/constant/constants";
 import CreateRoleModalForm from "./createrolemodalform";
 import EditRoleModal from "./editrolemodalform";
 import RoleActivityListModal from "./roleactivitylistmodal";
 import { useDispatch } from "react-redux";
 import { deleteRole, getRoleList } from "../../../store/admin/action";
-import API from "../../../config/config";
 import { useSelector } from "react-redux";
+import TablePagination from "../../../components/tables/datatable/tablepagination";
+import handleSortingFunc from "../../../components/tables/datatable/sortable";
+import StyledTableRow from "../../../components/tables/datatable/customTableRow";
 const useStyles = makeStyles({
   tableCell: {
-    padding: "10px !important",
+    padding: "8px !important",
     fontSize: "0.8rem !important",
   },
   lineHeight: {
     lineHeight: "3",
   },
 });
+
 const RoleDesk = () => {
   const roleListResponse = useSelector((state) => state.admin.roleListResponse);
   console.log("roleListResponse", roleListResponse);
   const dispatch = useDispatch();
-  const showActivitityTooltipRef = useRef();
   let classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
-  const [tableData, setTableData] = useState([]);
-  const [sortedData, handleSorting] = useSortableTable();
+  const [tableData, setTableData] = useState([
+    {
+      id: 1150,
+      name: "System Admin",
+      remark: "All rights excluding application services",
+      activityList: [],
+    },
+    {
+      id: 1157,
+      name: "Store Incharge (DMS/DWH)",
+      remark: "Store Incharge for DWH",
+      activityList: [
+        {
+          id: 102,
+          activityName: "Upload Stock (from a file)",
+          code: {
+            id: 10,
+            typeName: "Stock",
+            code: "sk",
+          },
+        },
+        {
+          id: 131,
+          activityName: "Transfer Request for Shortage",
+          code: {
+            id: 13,
+            typeName: "Transfer",
+            code: "tf",
+          },
+        },
+        {
+          id: 105,
+          activityName: "Stock Drug Verification",
+          code: {
+            id: 10,
+            typeName: "Stock",
+            code: "sk",
+          },
+        },
+        {
+          id: 59,
+          activityName: "View Indent",
+          code: {
+            id: 6,
+            typeName: "Issue ",
+            code: "is",
+          },
+        },
+        {
+          id: 104,
+          activityName: "Stock Entry of Miscellaneous",
+          code: {
+            id: 10,
+            typeName: "Stock",
+            code: "sk",
+          },
+        },
+        {
+          id: 62,
+          activityName: "Receive of Drugs (Indent/Transfer)",
+          code: {
+            id: 11,
+            typeName: "Receive",
+            code: "rv",
+          },
+        },
+        {
+          id: 81,
+          activityName: "List User",
+          code: {
+            id: 8,
+            typeName: "User Management",
+            code: "um",
+          },
+        },
+        {
+          id: 50,
+          activityName: "Issue and Return of Drugs",
+          code: {
+            id: 6,
+            typeName: "Issue ",
+            code: "is",
+          },
+        },
+        {
+          id: 63,
+          activityName: "Receive Challan",
+          code: {
+            id: 11,
+            typeName: "Receive",
+            code: "rv",
+          },
+        },
+        {
+          id: 132,
+          activityName: "Transfer Request for Excess",
+          code: {
+            id: 13,
+            typeName: "Transfer",
+            code: "tf",
+          },
+        },
+        {
+          id: 106,
+          activityName: "Drug Condemnation Register",
+          code: {
+            id: 10,
+            typeName: "Stock",
+            code: "sk",
+          },
+        },
+        {
+          id: 14,
+          activityName: "Create Local Purchase",
+          code: {
+            id: 2,
+            typeName: "Order Management",
+            code: "om",
+          },
+        },
+        {
+          id: 58,
+          activityName: "Generate and Modify Indent",
+          code: {
+            id: 6,
+            typeName: "Issue ",
+            code: "is",
+          },
+        },
+        {
+          id: 7,
+          activityName: "Compile Annual Demand (DWH/Block)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 140,
+          activityName: "Approval Desk (Head of Institute)",
+          code: {
+            id: 14,
+            typeName: "Approval",
+            code: "ap",
+          },
+        },
+        {
+          id: 134,
+          activityName: "Transfer of Drugs (Indent, Excess, Shortage)",
+          code: {
+            id: 13,
+            typeName: "Transfer",
+            code: "tf",
+          },
+        },
+        {
+          id: 2,
+          activityName: "Annual Demand (Sub Stores)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 142,
+          activityName: "Transfer Approval by HQ",
+          code: {
+            id: 14,
+            typeName: "Approval",
+            code: "ap",
+          },
+        },
+        {
+          id: 141,
+          activityName: "Transfer/Indent Approval By Institute",
+          code: {
+            id: 14,
+            typeName: "Approval",
+            code: "ap",
+          },
+        },
+      ],
+    },
+    {
+      id: 1155,
+      name: "Store Incharge (CMS/SWH)",
+      remark: "Store Incharge HQ",
+      activityList: [
+        {
+          id: 102,
+          activityName: "Upload Stock (from a file)",
+          code: {
+            id: 10,
+            typeName: "Stock",
+            code: "sk",
+          },
+        },
+        {
+          id: 64,
+          activityName: "Verify Challan",
+          code: {
+            id: 11,
+            typeName: "Receive",
+            code: "rv",
+          },
+        },
+        {
+          id: 67,
+          activityName: "Accept Challan",
+          code: {
+            id: 11,
+            typeName: "Receive",
+            code: "rv",
+          },
+        },
+        {
+          id: 105,
+          activityName: "Stock Drug Verification",
+          code: {
+            id: 10,
+            typeName: "Stock",
+            code: "sk",
+          },
+        },
+        {
+          id: 59,
+          activityName: "View Indent",
+          code: {
+            id: 6,
+            typeName: "Issue ",
+            code: "is",
+          },
+        },
+        {
+          id: 104,
+          activityName: "Stock Entry of Miscellaneous",
+          code: {
+            id: 10,
+            typeName: "Stock",
+            code: "sk",
+          },
+        },
+        {
+          id: 4,
+          activityName: "Compile and freeze Annual Demand(HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 62,
+          activityName: "Receive of Drugs (Indent/Transfer)",
+          code: {
+            id: 11,
+            typeName: "Receive",
+            code: "rv",
+          },
+        },
+        {
+          id: 81,
+          activityName: "List User",
+          code: {
+            id: 8,
+            typeName: "User Management",
+            code: "um",
+          },
+        },
+        {
+          id: 6,
+          activityName: "Compile and Freeze Supplementary Demand (HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 50,
+          activityName: "Issue and Return of Drugs",
+          code: {
+            id: 6,
+            typeName: "Issue ",
+            code: "is",
+          },
+        },
+        {
+          id: 103,
+          activityName: "Update Stock of PO",
+          code: {
+            id: 10,
+            typeName: "Stock",
+            code: "sk",
+          },
+        },
+        {
+          id: 63,
+          activityName: "Receive Challan",
+          code: {
+            id: 11,
+            typeName: "Receive",
+            code: "rv",
+          },
+        },
+        {
+          id: 106,
+          activityName: "Drug Condemnation Register",
+          code: {
+            id: 10,
+            typeName: "Stock",
+            code: "sk",
+          },
+        },
+        {
+          id: 12,
+          activityName: "List PO",
+          code: {
+            id: 2,
+            typeName: "Order Management",
+            code: "om",
+          },
+        },
+        {
+          id: 71,
+          activityName: "Rate Contract List",
+          code: {
+            id: 7,
+            typeName: "Drug",
+            code: "dr",
+          },
+        },
+        {
+          id: 7,
+          activityName: "Compile Annual Demand (DWH/Block)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 140,
+          activityName: "Approval Desk (Head of Institute)",
+          code: {
+            id: 14,
+            typeName: "Approval",
+            code: "ap",
+          },
+        },
+        {
+          id: 1,
+          activityName: "Demand Notification (HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 2,
+          activityName: "Annual Demand (Sub Stores)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 142,
+          activityName: "Transfer Approval by HQ",
+          code: {
+            id: 14,
+            typeName: "Approval",
+            code: "ap",
+          },
+        },
+      ],
+    },
+    {
+      id: 1153,
+      name: "QC Team",
+      remark: "Quality Control Team (HQ",
+      activityList: [
+        {
+          id: 71,
+          activityName: "Rate Contract List",
+          code: {
+            id: 7,
+            typeName: "Drug",
+            code: "dr",
+          },
+        },
+        {
+          id: 172,
+          activityName: "Drug Configuration Desk (HQ)",
+          code: {
+            id: 17,
+            typeName: "Configuration Management",
+            code: "cf",
+          },
+        },
+        {
+          id: 64,
+          activityName: "Verify Challan",
+          code: {
+            id: 11,
+            typeName: "Receive",
+            code: "rv",
+          },
+        },
+        {
+          id: 67,
+          activityName: "Accept Challan",
+          code: {
+            id: 11,
+            typeName: "Receive",
+            code: "rv",
+          },
+        },
+        {
+          id: 105,
+          activityName: "Stock Drug Verification",
+          code: {
+            id: 10,
+            typeName: "Stock",
+            code: "sk",
+          },
+        },
+        {
+          id: 59,
+          activityName: "View Indent",
+          code: {
+            id: 6,
+            typeName: "Issue ",
+            code: "is",
+          },
+        },
+        {
+          id: 81,
+          activityName: "List User",
+          code: {
+            id: 8,
+            typeName: "User Management",
+            code: "um",
+          },
+        },
+        {
+          id: 1,
+          activityName: "Demand Notification (HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 73,
+          activityName: "Add, Edit, Delete Drug (HQ)",
+          code: {
+            id: 7,
+            typeName: "Drug",
+            code: "dr",
+          },
+        },
+        {
+          id: 12,
+          activityName: "List PO",
+          code: {
+            id: 2,
+            typeName: "Order Management",
+            code: "om",
+          },
+        },
+      ],
+    },
+    {
+      id: 1152,
+      name: "Purchase Officer",
+      remark: "SWH Purchase Officer",
+      activityList: [
+        {
+          id: 67,
+          activityName: "Accept Challan",
+          code: {
+            id: 11,
+            typeName: "Receive",
+            code: "rv",
+          },
+        },
+        {
+          id: 59,
+          activityName: "View Indent",
+          code: {
+            id: 6,
+            typeName: "Issue ",
+            code: "is",
+          },
+        },
+        {
+          id: 201,
+          activityName: "Supplier Payment",
+          code: {
+            id: 20,
+            typeName: "Financial Management",
+            code: "fm",
+          },
+        },
+        {
+          id: 4,
+          activityName: "Compile and freeze Annual Demand(HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 72,
+          activityName: "Add Renew Delete Rate Contract",
+          code: {
+            id: 7,
+            typeName: "Drug",
+            code: "dr",
+          },
+        },
+        {
+          id: 122,
+          activityName: "Program Funding Desk (HQ)",
+          code: {
+            id: 12,
+            typeName: "Program Management",
+            code: "pm",
+          },
+        },
+        {
+          id: 123,
+          activityName: "Budget Allocation (HQ)",
+          code: {
+            id: 12,
+            typeName: "Program Management",
+            code: "pm",
+          },
+        },
+        {
+          id: 81,
+          activityName: "List User",
+          code: {
+            id: 8,
+            typeName: "User Management",
+            code: "um",
+          },
+        },
+        {
+          id: 6,
+          activityName: "Compile and Freeze Supplementary Demand (HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 151,
+          activityName: "Program Funding Mapping (HQ)",
+          code: {
+            id: 17,
+            typeName: "Configuration Management",
+            code: "cf",
+          },
+        },
+        {
+          id: 12,
+          activityName: "List PO",
+          code: {
+            id: 2,
+            typeName: "Order Management",
+            code: "om",
+          },
+        },
+        {
+          id: 171,
+          activityName: "PO Configuration Desk",
+          code: {
+            id: 17,
+            typeName: "Configuration Management",
+            code: "cf",
+          },
+        },
+        {
+          id: 14,
+          activityName: "Create Local Purchase",
+          code: {
+            id: 2,
+            typeName: "Order Management",
+            code: "om",
+          },
+        },
+        {
+          id: 74,
+          activityName: "Add Edit Delete Supplier",
+          code: {
+            id: 7,
+            typeName: "Drug",
+            code: "dr",
+          },
+        },
+        {
+          id: 71,
+          activityName: "Rate Contract List",
+          code: {
+            id: 7,
+            typeName: "Drug",
+            code: "dr",
+          },
+        },
+        {
+          id: 121,
+          activityName: "Add Edit Delete Program (HQ)",
+          code: {
+            id: 12,
+            typeName: "Program Management",
+            code: "pm",
+          },
+        },
+        {
+          id: 150,
+          activityName: "List Programme Funding Source",
+          code: {
+            id: 17,
+            typeName: "Configuration Management",
+            code: "cf",
+          },
+        },
+        {
+          id: 11,
+          activityName: "Create/Cancel PO",
+          code: {
+            id: 2,
+            typeName: "Order Management",
+            code: "om",
+          },
+        },
+        {
+          id: 154,
+          activityName: "Budget Interface (HQ)",
+          code: {
+            id: 17,
+            typeName: "Configuration Management",
+            code: "cf",
+          },
+        },
+        {
+          id: 1,
+          activityName: "Demand Notification (HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 2,
+          activityName: "Annual Demand (Sub Stores)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 142,
+          activityName: "Transfer Approval by HQ",
+          code: {
+            id: 14,
+            typeName: "Approval",
+            code: "ap",
+          },
+        },
+      ],
+    },
+    {
+      id: 1159,
+      name: "Medical Officer (MO)",
+      remark: "Medical Officer of CHC/PHC",
+      activityList: [
+        {
+          id: 131,
+          activityName: "Transfer Request for Shortage",
+          code: {
+            id: 13,
+            typeName: "Transfer",
+            code: "tf",
+          },
+        },
+        {
+          id: 105,
+          activityName: "Stock Drug Verification",
+          code: {
+            id: 10,
+            typeName: "Stock",
+            code: "sk",
+          },
+        },
+        {
+          id: 59,
+          activityName: "View Indent",
+          code: {
+            id: 6,
+            typeName: "Issue ",
+            code: "is",
+          },
+        },
+        {
+          id: 104,
+          activityName: "Stock Entry of Miscellaneous",
+          code: {
+            id: 10,
+            typeName: "Stock",
+            code: "sk",
+          },
+        },
+        {
+          id: 4,
+          activityName: "Compile and freeze Annual Demand(HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 62,
+          activityName: "Receive of Drugs (Indent/Transfer)",
+          code: {
+            id: 11,
+            typeName: "Receive",
+            code: "rv",
+          },
+        },
+        {
+          id: 6,
+          activityName: "Compile and Freeze Supplementary Demand (HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 50,
+          activityName: "Issue and Return of Drugs",
+          code: {
+            id: 6,
+            typeName: "Issue ",
+            code: "is",
+          },
+        },
+        {
+          id: 132,
+          activityName: "Transfer Request for Excess",
+          code: {
+            id: 13,
+            typeName: "Transfer",
+            code: "tf",
+          },
+        },
+        {
+          id: 58,
+          activityName: "Generate and Modify Indent",
+          code: {
+            id: 6,
+            typeName: "Issue ",
+            code: "is",
+          },
+        },
+        {
+          id: 7,
+          activityName: "Compile Annual Demand (DWH/Block)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 140,
+          activityName: "Approval Desk (Head of Institute)",
+          code: {
+            id: 14,
+            typeName: "Approval",
+            code: "ap",
+          },
+        },
+        {
+          id: 134,
+          activityName: "Transfer of Drugs (Indent, Excess, Shortage)",
+          code: {
+            id: 13,
+            typeName: "Transfer",
+            code: "tf",
+          },
+        },
+        {
+          id: 2,
+          activityName: "Annual Demand (Sub Stores)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 142,
+          activityName: "Transfer Approval by HQ",
+          code: {
+            id: 14,
+            typeName: "Approval",
+            code: "ap",
+          },
+        },
+        {
+          id: 141,
+          activityName: "Transfer/Indent Approval By Institute",
+          code: {
+            id: 14,
+            typeName: "Approval",
+            code: "ap",
+          },
+        },
+      ],
+    },
+    {
+      id: 1156,
+      name: "DWH Admin",
+      remark: "DWH Admin for District Ware House",
+      activityList: [
+        {
+          id: 74,
+          activityName: "Add Edit Delete Supplier",
+          code: {
+            id: 7,
+            typeName: "Drug",
+            code: "dr",
+          },
+        },
+        {
+          id: 82,
+          activityName: "Add Edit Delete User(HQ/DWH Admin)",
+          code: {
+            id: 8,
+            typeName: "User Management",
+            code: "um",
+          },
+        },
+        {
+          id: 161,
+          activityName: "Add  Edit Delete Store (HQ/DWH Admin)",
+          code: {
+            id: 16,
+            typeName: "Store Management",
+            code: "sm",
+          },
+        },
+        {
+          id: 81,
+          activityName: "List User",
+          code: {
+            id: 8,
+            typeName: "User Management",
+            code: "um",
+          },
+        },
+        {
+          id: 1,
+          activityName: "Demand Notification (HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 85,
+          activityName: "Add Edit Delete Role(HQ/DWH Admin)",
+          code: {
+            id: 8,
+            typeName: "User Management",
+            code: "um",
+          },
+        },
+      ],
+    },
+    {
+      id: 1158,
+      name: "District Medical Officer (DMO)",
+      remark: "District Medical & Health Officer",
+      activityList: [
+        {
+          id: 105,
+          activityName: "Stock Drug Verification",
+          code: {
+            id: 10,
+            typeName: "Stock",
+            code: "sk",
+          },
+        },
+        {
+          id: 59,
+          activityName: "View Indent",
+          code: {
+            id: 6,
+            typeName: "Issue ",
+            code: "is",
+          },
+        },
+        {
+          id: 4,
+          activityName: "Compile and freeze Annual Demand(HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 81,
+          activityName: "List User",
+          code: {
+            id: 8,
+            typeName: "User Management",
+            code: "um",
+          },
+        },
+        {
+          id: 171,
+          activityName: "PO Configuration Desk",
+          code: {
+            id: 17,
+            typeName: "Configuration Management",
+            code: "cf",
+          },
+        },
+        {
+          id: 14,
+          activityName: "Create Local Purchase",
+          code: {
+            id: 2,
+            typeName: "Order Management",
+            code: "om",
+          },
+        },
+        {
+          id: 71,
+          activityName: "Rate Contract List",
+          code: {
+            id: 7,
+            typeName: "Drug",
+            code: "dr",
+          },
+        },
+        {
+          id: 13,
+          activityName: "PO Appoval /Cancel(Head of Ins.)",
+          code: {
+            id: 2,
+            typeName: "Order Management",
+            code: "om",
+          },
+        },
+        {
+          id: 7,
+          activityName: "Compile Annual Demand (DWH/Block)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 140,
+          activityName: "Approval Desk (Head of Institute)",
+          code: {
+            id: 14,
+            typeName: "Approval",
+            code: "ap",
+          },
+        },
+        {
+          id: 2,
+          activityName: "Annual Demand (Sub Stores)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 141,
+          activityName: "Transfer/Indent Approval By Institute",
+          code: {
+            id: 14,
+            typeName: "Approval",
+            code: "ap",
+          },
+        },
+      ],
+    },
+    {
+      id: 1151,
+      name: "Director",
+      remark: "DHS and NHM Director",
+      activityList: [
+        {
+          id: 59,
+          activityName: "View Indent",
+          code: {
+            id: 6,
+            typeName: "Issue ",
+            code: "is",
+          },
+        },
+        {
+          id: 4,
+          activityName: "Compile and freeze Annual Demand(HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 122,
+          activityName: "Program Funding Desk (HQ)",
+          code: {
+            id: 12,
+            typeName: "Program Management",
+            code: "pm",
+          },
+        },
+        {
+          id: 123,
+          activityName: "Budget Allocation (HQ)",
+          code: {
+            id: 12,
+            typeName: "Program Management",
+            code: "pm",
+          },
+        },
+        {
+          id: 81,
+          activityName: "List User",
+          code: {
+            id: 8,
+            typeName: "User Management",
+            code: "um",
+          },
+        },
+        {
+          id: 6,
+          activityName: "Compile and Freeze Supplementary Demand (HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 12,
+          activityName: "List PO",
+          code: {
+            id: 2,
+            typeName: "Order Management",
+            code: "om",
+          },
+        },
+        {
+          id: 71,
+          activityName: "Rate Contract List",
+          code: {
+            id: 7,
+            typeName: "Drug",
+            code: "dr",
+          },
+        },
+        {
+          id: 13,
+          activityName: "PO Appoval /Cancel(Head of Ins.)",
+          code: {
+            id: 2,
+            typeName: "Order Management",
+            code: "om",
+          },
+        },
+        {
+          id: 121,
+          activityName: "Add Edit Delete Program (HQ)",
+          code: {
+            id: 12,
+            typeName: "Program Management",
+            code: "pm",
+          },
+        },
+        {
+          id: 150,
+          activityName: "List Programme Funding Source",
+          code: {
+            id: 17,
+            typeName: "Configuration Management",
+            code: "cf",
+          },
+        },
+        {
+          id: 140,
+          activityName: "Approval Desk (Head of Institute)",
+          code: {
+            id: 14,
+            typeName: "Approval",
+            code: "ap",
+          },
+        },
+        {
+          id: 11,
+          activityName: "Create/Cancel PO",
+          code: {
+            id: 2,
+            typeName: "Order Management",
+            code: "om",
+          },
+        },
+        {
+          id: 154,
+          activityName: "Budget Interface (HQ)",
+          code: {
+            id: 17,
+            typeName: "Configuration Management",
+            code: "cf",
+          },
+        },
+        {
+          id: 1,
+          activityName: "Demand Notification (HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 141,
+          activityName: "Transfer/Indent Approval By Institute",
+          code: {
+            id: 14,
+            typeName: "Approval",
+            code: "ap",
+          },
+        },
+      ],
+    },
+    {
+      id: 1154,
+      name: "Accountant",
+      remark: "Accountant for HQ",
+      activityList: [
+        {
+          id: 71,
+          activityName: "Rate Contract List",
+          code: {
+            id: 7,
+            typeName: "Drug",
+            code: "dr",
+          },
+        },
+        {
+          id: 201,
+          activityName: "Supplier Payment",
+          code: {
+            id: 20,
+            typeName: "Financial Management",
+            code: "fm",
+          },
+        },
+        {
+          id: 122,
+          activityName: "Program Funding Desk (HQ)",
+          code: {
+            id: 12,
+            typeName: "Program Management",
+            code: "pm",
+          },
+        },
+        {
+          id: 123,
+          activityName: "Budget Allocation (HQ)",
+          code: {
+            id: 12,
+            typeName: "Program Management",
+            code: "pm",
+          },
+        },
+        {
+          id: 81,
+          activityName: "List User",
+          code: {
+            id: 8,
+            typeName: "User Management",
+            code: "um",
+          },
+        },
+        {
+          id: 154,
+          activityName: "Budget Interface (HQ)",
+          code: {
+            id: 17,
+            typeName: "Configuration Management",
+            code: "cf",
+          },
+        },
+        {
+          id: 1,
+          activityName: "Demand Notification (HQ)",
+          code: {
+            id: 1,
+            typeName: "Demand",
+            code: "dm",
+          },
+        },
+        {
+          id: 12,
+          activityName: "List PO",
+          code: {
+            id: 2,
+            typeName: "Order Management",
+            code: "om",
+          },
+        },
+      ],
+    },
+  ]);
+
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
@@ -314,11 +1545,10 @@ const RoleDesk = () => {
       page: newPage - 1,
     });
   };
-  const handleChangeRowsPerPage = (current, pageSize) => {
-    console.log(current, pageSize);
+  const handleChangeRowsPerPage = (e) => {
     setController({
       ...controller,
-      rowsPerPage: pageSize,
+      rowsPerPage: e,
       page: 0,
     });
   };
@@ -327,33 +1557,7 @@ const RoleDesk = () => {
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    console.log("tableData", tableData);
-    handleSorting(accessor, sortOrder, tableData);
-    console.log("sortedData", sortedData);
-    setTableData(sortedData);
-  };
-
-  const fetchApi = async (signal) => {
-    await API.get(CONSTANTS.ROLE_LISTING, {
-      pageNumber: controller.page,
-      pageSize: controller.rowsPerPage,
-    })
-      .then((response) => {
-        console.log("response", response);
-      })
-      .catch((error) => {
-        if (error.name === "AbortError") {
-          console.log("Request canceled", error.message);
-        } else {
-          if (error.response) {
-            console.log("Response", error.response);
-          } else if (error.request) {
-            console.log("Error Request", error.request);
-          } else {
-            console.log("Error", error.message);
-          }
-        }
-      });
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
 
   useEffect(() => {
@@ -373,7 +1577,7 @@ const RoleDesk = () => {
   }, [controller]);
 
   useEffect(() => {
-    if (roleListResponse && roleListResponse?.status === 201) {
+    if (roleListResponse && roleListResponse?.status === 200) {
       setTotalRoleList(roleListResponse?.data?.activityList);
       setActivityList(roleListResponse?.data?.activityTypeList);
       setData(roleListResponse?.data?.activityList);
@@ -384,6 +1588,9 @@ const RoleDesk = () => {
     } else if (roleListResponse && roleListResponse?.status == 400) {
       setLoading(false);
       toastMessage("Login Error", "Please enter valid ID", "error");
+    } else if (roleListResponse && roleListResponse?.code === "ERR_NETWORK") {
+      setLoading(false);
+      toastMessage("Role List", "Internet Connection Problem");
     }
   }, [roleListResponse]);
 
@@ -408,33 +1615,29 @@ const RoleDesk = () => {
       <div className="row mt-2">
         <HorizonatalLine text="Role List" />
       </div>
-      <Paper>
-        <div className="row ">
-          <div className="d-flex flex-row justify-content-end">
-            <Basicbutton
-              buttonText="Add New Role"
-              outlineType={true}
-              className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
-              onClick={() => {
-                dispatch(deleteRole(1));
-                // setDropDownList(activityList);
-                setShowModal(true);
-              }}
-            />
-          </div>
+      <div className="row ">
+        <div className="d-flex flex-row justify-content-between">
+          <Basicbutton
+            buttonText="Add New Role"
+            outlineType={true}
+            className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
+            onClick={() => {
+              dispatch(deleteRole(1));
+              // setDropDownList(activityList);
+              setShowModal(true);
+            }}
+          />
+          <SearchField
+            className="me-1 "
+            iconPosition="end"
+            iconName={faSearch}
+            onChange={(e) => {
+              console.log(e);
+            }}
+          />
         </div>
-        <div className="row mb-1">
-          <div className="d-flex justify-content-end">
-            <SearchField
-              className="me-1 "
-              iconPosition="end"
-              iconName={faSearch}
-              onChange={(e) => {
-                console.log(e);
-              }}
-            />
-          </div>
-        </div>
+      </div>
+      <Paper elevation={2} className="mb-2">
         <div className="row">
           <div className="col-12">
             <TableComponent
@@ -462,18 +1665,30 @@ const RoleDesk = () => {
                   tableData.length > 0 &&
                   tableData.map((data, index) => {
                     return (
-                      <TableRow key={data.id}>
-                        <TableCell padding="none" className={classes.tableCell}>
+                      <StyledTableRow key={data.id}>
+                        <TableCell
+                          padding="none"
+                          className={[classes.tableCell, "text-center"]}
+                        >
                           {data.id}
                         </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
+                        <TableCell
+                          padding="none"
+                          className={[classes.tableCell, "text-center"]}
+                        >
                           {data.name}
                         </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
+                        <TableCell
+                          padding="none"
+                          className={[classes.tableCell, "text-center"]}
+                        >
                           {data?.remark}
                         </TableCell>
 
-                        <TableCell padding="none" className={classes.tableCell}>
+                        <TableCell
+                          padding="none"
+                          className={[classes.tableCell, "text-center"]}
+                        >
                           {data?.activityList &&
                           data?.activityList.length > 0 ? (
                             <>
@@ -546,7 +1761,7 @@ const RoleDesk = () => {
                             />
                           </span>
                         </TableCell>
-                      </TableRow>
+                      </StyledTableRow>
                     );
                   })
                 )}
@@ -561,6 +1776,13 @@ const RoleDesk = () => {
                 )}
               </TableBody>
             </TableComponent>
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
           </div>
         </div>
       </Paper>

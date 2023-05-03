@@ -8,7 +8,6 @@ const RadioCheckBox: React.FC<radiocheckBoxProps> = ({
   onChange,
   list,
 }) => {
-  console.log(list);
   return (
     <>
       {list &&
@@ -23,6 +22,7 @@ const RadioCheckBox: React.FC<radiocheckBoxProps> = ({
                 id={ele?.id}
                 value={ele?.value}
                 onChange={onChange}
+                checked={ele?.checked === ele?.value}
               />
               <label className="form-check-label" htmlFor={ele?.id}>
                 {ele?.labelText}

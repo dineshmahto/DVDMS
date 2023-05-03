@@ -14,7 +14,7 @@ import Programme from "./pages/program/programme";
 //import IssueList from "./pages/issues/issueList";
 import Issue from "./pages/issues/issue";
 import TransferComponent from "./pages/drugList/transferComponent";
-import Test from "./pages/drugList/test";
+
 import OpenIntentDesk from "./pages/openIntentDesk/intent";
 
 import Notification from "./pages/demand/Notification";
@@ -32,6 +32,9 @@ import DrugCondemnationRegister from "./pages/stock/drugCondemnation/drugCondemn
 import ProtectedRoute from "./routes/middleware/ProtectedRoute";
 const OpenNotification = lazy(() => import("./pages/demand/OpenNotification"));
 const DemandNotification = lazy(() => import("./pages/demand/Notification"));
+const OpenExtendNotification = lazy(() =>
+  import("./pages/demand/extendDemandNotification")
+);
 
 // Stock Module
 const StockListing = lazy(() =>
@@ -56,15 +59,17 @@ const StoreTypeDrugMapping = lazy(() =>
   import("./pages/admin/edlmapping/storetypedrugmapping")
 );
 const BudgetListDesk = lazy(() =>
-  import("./pages/admin/budgetdesk/budgetlistdesk")
+  import("./pages/admin/budgetinterface/budgetlistdesk")
 );
-const FundingDesk = lazy(() =>
-  import("../src/pages/admin/fundingdesk/fundingdesk")
-);
+
 const ProgrameDesk = lazy(() =>
   import("./pages/admin/programedesk/programedesk")
 );
 const StoreDesk = lazy(() => import("./pages/admin/storedesk/storedesk"));
+
+const FundingDeskList = lazy(() =>
+  import("./pages/admin/fundingsource/fundingdesk")
+);
 const PageNotFound = lazy(() =>
   import("../src/pages/pagenotfound/pageNotFound")
 );
@@ -73,11 +78,18 @@ const IssueList = lazy(() => import("./pages/issues/issueListMUI"));
 
 // Issue
 const IssueDesk = lazy(() => import("./pages/issue/issueDesk/issuedesk"));
+const ReturnDesk = lazy(() => import("./pages/issue/returnDesk/returndesk"));
 const IssueToThirdParty = lazy(() =>
   import("./pages/issue/issueDesk/issueToThirdParty/issuetothirdparty")
 );
 const IntentDetails = lazy(() =>
   import("./pages/issue/issueDesk/intentIssue/intentissue")
+);
+const IssueToCamp = lazy(() =>
+  import("./pages/issue/issueDesk/campIssue/issuetocamp")
+);
+const OffineIssue = lazy(() =>
+  import("./pages/issue/issueDesk/offlineIssue/offlineIssue")
 );
 // End of Issue
 
@@ -88,6 +100,30 @@ const PurchaseOrderList = lazy(() =>
 const SupplierList = lazy(() =>
   import("./pages/ordermanagement/supplierlist/supplierlist")
 );
+const RateContractList = lazy(() =>
+  import("./pages/ordermanagement/ratecontract/ratecontractdesk")
+);
+
+const ApprovalDeskList = lazy(() =>
+  import("./pages/ordermanagement/approvals/annualdemand/annulademand")
+);
+const ApprovalPurchaseOrderList = lazy(() =>
+  import("./pages/ordermanagement/approvals/purchaseorder/purchaseorder")
+);
+const ApprovalIntentApprovalList = lazy(() =>
+  import("./pages/ordermanagement/approvals/intentapproval/intentapproval")
+);
+const ApprovalTransferList = lazy(() =>
+  import("./pages/ordermanagement/approvals/transferapproval/transferapproval")
+);
+const ApprovalTransferListHq = lazy(() =>
+  import(
+    "./pages/ordermanagement/approvals/transferapprovalhq/transferapprovalhq"
+  )
+);
+
+const Test = lazy(() => import("./pages/drugList/test"));
+const DynamicRow = lazy(() => import("./pages/stock/stockEntry/stock"));
 function App() {
   return (
     <div className="dvdms-root">
@@ -112,7 +148,7 @@ function App() {
                 element={<BudgetListDesk />}
               />
 
-              <Route path="FundingDesk" element={<FundingDesk />} />
+              <Route path="openFundingList" element={<FundingDeskList />} />
               <Route path="listDrug" element={<DrugDesk />} />
               <Route path="programpage" element={<ProgrameDesk />} />
               <Route path="listStore" element={<StoreDesk />} />
@@ -123,7 +159,7 @@ function App() {
               {/* Stock */}
 
               <Route path="stocklisting" element={<StockListing />} />
-              <Route path="openstockentry" element={<StockEntry />} />
+              <Route path="openstockentry" element={<DynamicRow />} />
               <Route
                 path="openVerificationDesk"
                 element={<AddDrugCondemNation />}
@@ -140,16 +176,26 @@ function App() {
               {/* End of Stock */}
               {/* Issue */}
               <Route path="openIssueDesk" element={<IssueDesk />} />
+              <Route path="openReturnDesk" element={<ReturnDesk />} />
               <Route
                 path="openIssueToThirdparty"
                 element={<IssueToThirdParty />}
               />
               <Route path="issueList" element={<IssueList />} />
               <Route path="openIssueToSubstore" element={<IntentDetails />} />
+              <Route path="openIssueToCamp" element={<IssueToCamp />} />
+              <Route path="openOfflineIssue" element={<OffineIssue />} />
+
               <Route
-                path="demandnotification"
+                path="openNotificationDesk"
                 element={<DemandNotification />}
               />
+
+              <Route
+                path="openExtendNotificationForm"
+                element={<OpenExtendNotification />}
+              />
+
               {/* End of Issue */}
 
               {/* Order Management Module */}
@@ -158,7 +204,28 @@ function App() {
                 element={<PurchaseOrderList />}
               />
               <Route path="supplierpage" element={<SupplierList />} />
+              <Route
+                path="openRateContractListing"
+                element={<RateContractList />}
+              />
+              <Route path="openDemandApproval" element={<ApprovalDeskList />} />
 
+              <Route
+                path="openPurchaseOrderForApprovalList"
+                element={<ApprovalPurchaseOrderList />}
+              />
+              <Route
+                path="openApprovalDesk"
+                element={<ApprovalIntentApprovalList />}
+              />
+              <Route
+                path="openTransferApprovalDesk"
+                element={<ApprovalTransferList />}
+              />
+              <Route
+                path="openTransferManagerforHQ"
+                element={<ApprovalTransferListHq />}
+              />
               {/* End of Order Management Module */}
 
               <Route path="intent" element={<OpenIntentDesk />} />
@@ -167,6 +234,9 @@ function App() {
               <Route path="openNotification" element={<OpenNotification />} />
               <Route path="programmeList" element={<ProgramList />} />
               <Route path="TransferComponent" element={<TransferComponent />} />
+
+              <Route path="test" element={<Test />} />
+              <Route path="stock" element={<DynamicRow />} />
             </Route>
           </Route>
           <Route path="*" element={<PageNotFound />} />

@@ -2,18 +2,36 @@ import React, { useState, useMemo, useEffect, lazy, Suspense } from "react";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import { TableBody, TableRow, TableCell } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { makeStyles } from "@mui/styles";
 import moment from "moment";
-import { Spinner } from "react-bootstrap";
-import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
-import { getStockservice } from "../../../services/stockservice/stockservice";
-import { faFilePdf, faSearch } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronDown,
+  faFilePdf,
+  faSearch,
+  faChevronUp,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CustomSelect from "../../../components/select/customSelect";
 import Basicbutton from "../../../components/button/basicbutton";
 import SearchField from "../../../components/search/search";
 import { Link } from "react-router-dom";
+import { Paper } from "@mui/material";
+import handleSortingFunc from "../../../components/tables/datatable/sortable";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getIssueDeskList,
+  getIssueDeskListResponse,
+} from "../../../store/issue/action";
+import IconButton from "@mui/material/IconButton";
+import Box from "@mui/material/Box";
+import Collapse from "@mui/material/Collapse";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import Typography from "@mui/material/Typography";
+import StyledTableRow from "../../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../../components/tables/datatable/customTableCell";
+import TablePagination from "../../../components/tables/datatable/tablepagination";
+import { Spinner } from "react-bootstrap";
 
 const useStyles = makeStyles({
   tableCell: {
@@ -24,29 +42,19 @@ const useStyles = makeStyles({
     lineHeight: "3",
   },
 });
-const tempData = [
-  {
-    id: 1,
-    storeName: "STATE WAREHOUSE",
-    drugName: "PARACETAMOL TAB. 500MG",
-    progName: "COVID19",
-    batchNo: "	21443792",
-    expDate: "NOV-2024",
-    mfgDate: "DEC-2021",
-    dToExp: "597",
-    avalQty: "579",
-    rack: "0 ",
-    instiute: "BOTH(NHM & DHS)",
-    source: "ECRP",
-  },
-];
+
 const IssueDesk = () => {
+  const dispatch = useDispatch();
+  const issueDeskResponse = useSelector(
+    (state) => state.issuereturn?.issueDeskListResponse
+  );
+  console.log("issueDeskResponse", issueDeskResponse);
   let classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
+  const [totalRows, setTotalRows] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [tableData, setTableData] = useState(tempData);
-  const [sortedData, handleSorting] = useSortableTable(tableData);
+  const [tableData, setTableData] = useState([]);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
@@ -54,56 +62,28 @@ const IssueDesk = () => {
   const [loading, setLoading] = useState(false);
   const [showStockEditListModal, setShowStockEditListModal] = useState(false);
   const [modalData, setModalData] = useState("");
+  const [open, setOpen] = useState([]);
   const columns = useMemo(() => [
     {
-      id: "issueNumber",
+      id: "request_id",
       name: "ISSUE. NUMBER",
       sortable: true,
     },
 
     {
-      id: "issueDate",
+      id: "request_date",
       name: "ISSUE DATE",
       sortable: true,
     },
 
     {
-      id: "issuedTo",
+      id: "issueTo",
       name: "ISSUED TO",
       sortable: true,
     },
+
     {
-      id: "progName",
-      name: "PROGRAM NAME.",
-      sortable: true,
-    },
-    {
-      id: "drugName",
-      name: "DRUG NAME",
-      sortable: true,
-    },
-    {
-      id: "batchNo",
-      name: "BATCH NO",
-      sortable: true,
-    },
-    {
-      id: "expDate",
-      name: "EXPIRY DATE",
-      sortable: true,
-    },
-    {
-      id: "reqQty",
-      name: "REQ. QTY.",
-      sortable: true,
-    },
-    {
-      id: "issue",
-      name: "ISSUE/TRF QTY",
-      sortable: true,
-    },
-    {
-      id: "type",
+      id: "issueType",
       name: "TYPE",
       sortable: true,
     },
@@ -119,50 +99,70 @@ const IssueDesk = () => {
     },
   ]);
 
-  const handlePageChange = (event, newPage) => {
+  const handlePageChange = (newPage) => {
     setLoading(true);
+
     setController({
       ...controller,
       page: newPage - 1,
     });
   };
-  const handleChangeRowsPerPage = (current, pageSize) => {
-    console.log(current, pageSize);
+  const handleChangeRowsPerPage = (e) => {
+    setController({
+      ...controller,
+      rowsPerPage: e,
+      page: 0,
+    });
   };
   const handleSortingChange = (accessor) => {
     const sortOrder =
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    handleSorting(accessor, sortOrder);
-    setTableData(sortedData);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
 
-  const callApi = async () => {
-    await getStockservice("pagination/calls/stocklisting", {
-      pageNumber: controller.page,
-      pageSize: controller.rowsPerPage,
-    })
-      .then((r) => {
-        setLoading(false);
-        setTotalPages(r?.data?.totalPages);
-        // setTotalRows(r.data.totalElements);
-        setTableData(r.data.content);
-      })
-      .catch((e) => {
-        console.log("Error", e);
-      });
-  };
   useEffect(() => {
-    setLoading(false);
-
-    setTimeout(() => {
-      callApi();
-    }, 10000);
+    let isApiSubcribed = true;
+    if (isApiSubcribed) {
+      setLoading(true);
+      setTimeout(() => {
+        dispatch(
+          getIssueDeskList({
+            pageNumber: controller.page,
+            pageSize: controller.rowsPerPage,
+          })
+        );
+      }, 1000);
+    }
     return () => {
+      isApiSubcribed = false;
       clearTimeout();
+      dispatch(getIssueDeskListResponse(""));
     };
   }, [controller]);
+
+  useEffect(() => {
+    if (issueDeskResponse && issueDeskResponse?.status === 200) {
+      setTableData(issueDeskResponse?.data?.content);
+      setTotalRows(issueDeskResponse?.data?.totalElements);
+      setLoading(false);
+    }
+  }, [issueDeskResponse]);
+
+  const handleCollapse = (clickedIndex) => {
+    if (open.includes(clickedIndex)) {
+      const openCopy = open.filter((element) => {
+        return element !== clickedIndex;
+      });
+      setOpen(openCopy);
+    } else {
+      const openCopy = [...open];
+      openCopy.shift();
+      openCopy.push(clickedIndex);
+      setOpen(openCopy);
+    }
+  };
 
   return (
     <>
@@ -208,29 +208,35 @@ const IssueDesk = () => {
             </div>
             <div className="col-auto">
               <div>
-                <Basicbutton
-                  type="button"
-                  buttonText="Intent Issue"
-                  className="primary rounded-0"
-                />
+                <Link to={"/openIssueToSubstore"}>
+                  <Basicbutton
+                    type="button"
+                    buttonText="Intent Issue"
+                    className="primary rounded-0"
+                  />
+                </Link>
               </div>
             </div>
             <div className="col-auto">
               <div>
-                <Basicbutton
-                  type="button"
-                  buttonText="Offline Issue (Sub store)"
-                  className="primary rounded-0"
-                />
+                <Link to={"/openOfflineIssue"}>
+                  <Basicbutton
+                    type="button"
+                    buttonText="Offline Issue (Sub store)"
+                    className="primary rounded-0"
+                  />
+                </Link>
               </div>
             </div>
             <div className="col-auto">
               <div>
-                <Basicbutton
-                  type="button"
-                  buttonText="Camp Issue"
-                  className="primary rounded-0"
-                />
+                <Link to={"/openIssueToCamp"}>
+                  <Basicbutton
+                    type="button"
+                    buttonText="Camp Issue"
+                    className="primary rounded-0"
+                  />
+                </Link>
               </div>
             </div>
           </div>
@@ -239,95 +245,188 @@ const IssueDesk = () => {
       <div className="row mt-2">
         <HorizonatalLine text="Issued Details" />
       </div>
-      <div className="row mb-1">
-        <div className="d-flex justify-content-end">
-          <SearchField
-            className="me-1 mt-1"
-            iconPosition="end"
-            iconName={faSearch}
-            onChange={(e) => {
-              console.log(e);
-            }}
-          />
+      <Paper elevation={2}>
+        <div className="row mb-1">
+          <div className="d-flex justify-content-end">
+            <SearchField
+              className="me-1 mt-1"
+              iconPosition="end"
+              iconName={faSearch}
+              onChange={(e) => {
+                console.log(e);
+              }}
+            />
+          </div>
         </div>
-      </div>
-      <div className="row">
-        <div className="col-12">
-          <TableComponent
-            columns={columns}
-            sortField={sortField}
-            page={controller.page + 1}
-            count={totalPages}
-            rowsPerPage={controller.rowsPerPage}
-            order={order}
-            paginationRequired={true}
-            onPageChange={handlePageChange}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            handleSorting={handleSortingChange}
-            checkBoxRequired={false}
-          >
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell className="text-center" colSpan={12}>
-                    <Spinner />
-                  </TableCell>
-                </TableRow>
-              ) : (
-                tableData.length > 0 &&
-                tableData.map((data, index) => (
-                  <TableRow key={data.id}>
-                    <TableCell padding="none" className={classes.tableCell}>
-                      {data?.issueNumber}
-                    </TableCell>
-                    <TableCell padding="none" className={classes.tableCell}>
-                      {data?.issueDate}
-                    </TableCell>
-                    <TableCell padding="none" className={classes.tableCell}>
-                      {data?.issuedTo}
-                    </TableCell>
-                    <TableCell padding="none" className={classes.tableCell}>
-                      {data?.progName}
-                    </TableCell>
-                    <TableCell padding="none" className={classes.tableCell}>
-                      {data?.drugName}
-                    </TableCell>
 
-                    <TableCell padding="none" className={classes.tableCell}>
-                      {data?.batchNo}
-                    </TableCell>
-                    <TableCell padding="none" className={classes.tableCell}>
-                      {moment(data?.expDate).format("DD/MM/YYYY")}
-                    </TableCell>
-
-                    <TableCell padding="none" className={classes.tableCell}>
-                      {data?.reqQty}
-                    </TableCell>
-                    <TableCell padding="none" className={classes.tableCell}>
-                      {data?.issue}
-                    </TableCell>
-                    <TableCell padding="none" className={classes.tableCell}>
-                      {data?.type}
-                    </TableCell>
-                    <TableCell padding="none" className={classes.tableCell}>
-                      {data?.remarks}
-                    </TableCell>
-                    <TableCell padding="none" className={classes.tableCell}>
-                      <FontAwesomeIcon
-                        onClick={() => {
-                          console.log("clicked");
-                        }}
-                        icon={faFilePdf}
-                        className="me-2"
-                      />
+        <div className="row">
+          <div className="col-12">
+            <TableComponent
+              columns={columns}
+              sortField={sortField}
+              page={controller.page + 1}
+              count={totalPages}
+              rowsPerPage={controller.rowsPerPage}
+              order={order}
+              paginationRequired={true}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              handleSorting={handleSortingChange}
+              checkBoxRequired={true}
+            >
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell className="text-center" colSpan={12}>
+                      <Spinner />
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </TableComponent>
+                ) : (
+                  tableData &&
+                  tableData.length > 0 &&
+                  tableData.map((data, index) => (
+                    <>
+                      <StyledTableRow key={data.id}>
+                        <StyledTableCell>
+                          <IconButton
+                            aria-label="expand row"
+                            size="small"
+                            onClick={() => handleCollapse(index)}
+                          >
+                            <FontAwesomeIcon
+                              icon={
+                                open.includes(index)
+                                  ? faChevronUp
+                                  : faChevronDown
+                              }
+                            />
+                          </IconButton>
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data?.request_id}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data?.request_date}
+                        </StyledTableCell>
+
+                        <StyledTableCell padding="none">
+                          {data?.issueTo}
+                        </StyledTableCell>
+
+                        <StyledTableCell padding="none">
+                          {data?.issueType}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data?.remarks}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          <FontAwesomeIcon
+                            onClick={() => {
+                              console.log("clicked");
+                            }}
+                            icon={faFilePdf}
+                            className="me-2"
+                          />
+                        </StyledTableCell>
+                      </StyledTableRow>
+
+                      <TableRow>
+                        <TableCell
+                          style={{ paddingBottom: 0, paddingTop: 0 }}
+                          colSpan={6}
+                        >
+                          <Collapse
+                            in={open.includes(index)}
+                            timeout="auto"
+                            unmountOnExit
+                          >
+                            <Box sx={{ margin: 1 }}>
+                              <Typography
+                                variant="h6"
+                                gutterBottom
+                                component="div"
+                              >
+                                Transfer Details
+                              </Typography>
+                              <Table size="small" aria-label="purchases">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>Program Name</TableCell>
+                                    <TableCell>Drug Name</TableCell>
+                                    <TableCell>Batch No</TableCell>
+                                    <TableCell>Expiry Date</TableCell>
+                                    <TableCell>REQ QTY</TableCell>
+                                    <TableCell>ISSUE/TRF QTY</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {data?.transferDetail &&
+                                    data?.transferDetail.length > 0 &&
+                                    data?.transferDetail.map((ele) => {
+                                      return (
+                                        <>
+                                          <TableRow>
+                                            <TableCell
+                                              padding="none"
+                                              className={classes.tableCell}
+                                            >
+                                              {ele?.programName}
+                                            </TableCell>
+                                            <TableCell
+                                              padding="none"
+                                              className={classes.tableCell}
+                                            >
+                                              {ele?.drugName}
+                                            </TableCell>
+                                            <TableCell
+                                              padding="none"
+                                              className={classes.tableCell}
+                                            >
+                                              {ele?.batchNo}
+                                            </TableCell>
+                                            <TableCell
+                                              padding="none"
+                                              className={classes.tableCell}
+                                            >
+                                              {ele?.expiryDate}
+                                            </TableCell>
+                                            <TableCell
+                                              padding="none"
+                                              className={classes.tableCell}
+                                            >
+                                              {ele?.requestQty}
+                                            </TableCell>
+                                            <TableCell
+                                              padding="none"
+                                              className={classes.tableCell}
+                                            >
+                                              {ele?.transferQty}
+                                            </TableCell>
+                                          </TableRow>
+                                        </>
+                                      );
+                                    })}
+                                </TableBody>
+                              </Table>
+                            </Box>
+                          </Collapse>
+                        </TableCell>
+                      </TableRow>
+                    </>
+                  ))
+                )}
+              </TableBody>
+            </TableComponent>
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </div>
         </div>
-      </div>
+      </Paper>
     </>
   );
 };

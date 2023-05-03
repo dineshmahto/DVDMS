@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import SelectOption from "../../components/option/option";
 import { DatePicker } from "@mui/x-date-pickers";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import TextField from "@mui/material/TextField";
@@ -8,7 +7,20 @@ import HorizonatalLine from "../../components/horizontalLine/horizonatalLine";
 import TransferComponent from "../../components/transfer/transferComponent";
 import { makeStyles } from "@mui/styles";
 import RadioCheckBox from "../../components/switch/radiocheckbox";
-import { getNotificationService } from "../../services/notification/notificationservice";
+import CustomSelect from "../../components/select/customSelect";
+import { useDispatch, useSelector } from "react-redux";
+import { hideLoader } from "../../store/loader/actions";
+import API from "../../config/config";
+import {
+  getAllOpenNotification,
+  getDrugListByProgramId,
+  saveDemandNotification,
+} from "../../store/demand/action";
+import toastMessage from "../../common/toastmessage/toastmessage";
+import { Paper } from "@mui/material";
+import Basicbutton from "../../components/button/basicbutton";
+import moment from "moment";
+import { useNavigate } from "react-router";
 
 const useStyles = makeStyles({
   root: {
@@ -21,7 +33,29 @@ const useStyles = makeStyles({
   },
 });
 const OpenNotification = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const openNotificationListResponse = useSelector(
+    (state) => state?.demand?.openNotificationListResponse
+  );
+
+  const drugListByProgramIdResponse = useSelector(
+    (state) => state?.demand?.drugListByProgramIdResponse
+  );
+  const saveDemandNotificationResponse = useSelector(
+    (state) => state?.demand?.saveDemandNotificationResponse
+  );
+
+  console.log("programmeListResponse", openNotificationListResponse);
+  console.log("drugListByProgramIdResponse", drugListByProgramIdResponse);
+  console.log("saveDemandNotificationResponse", saveDemandNotificationResponse);
+
   const classes = useStyles();
+
+  const [periodicDropDownList, setPeriodicDropDownList] = useState([]);
+  const [financialYearDropDownList, setFinancialDropDownList] = useState([]);
+  const [demandTypeList, setDemandTypeList] = useState([]);
+
   // programme state variable
   const [programmeTempArray, setProgrammeTempArray] = useState([]);
   const [rightProgrammeTempArray, setRightProgrammeTempArray] = useState([]);
@@ -49,65 +83,127 @@ const OpenNotification = () => {
   const [show, setShow] = useState(false);
   const [searchValue, setSearchValue] = useState("");
 
-  const [lastDate, setLastDate] = useState();
-  const data = [
-    {
-      id: 1000000786,
-      name: "Tab. Ampicillin, Dispersible",
-    },
-    {
-      id: 10318,
-      name: "Tab. Levofloxacin 500mg",
-    },
-    {
-      id: 1000000794,
-      name: "Inj. Gentamycin Sulphate",
-    },
-    {
-      id: 1000000795,
-      name: "Inj. Fortified Procaine Penicillin",
-    },
-    {
-      id: 1000000796,
-      name: "Tab. Amoxycillin, Dispersible",
-    },
-    {
-      id: 1000000797,
-      name: "Cap. Chloramphenicol",
-    },
-  ];
-  console.log("dataLenght", data.length);
-  const callApi = async (endPoint, setData, setCopyData, setActiveIndicies) => {
-    await getNotificationService(endPoint)
-      .then((r) => {
-        // console.log("Response", r?.data.data);
-        // setActiveIndicies(r.data?.data?.map(() => false));
-        // setCopyData(r?.data?.data);
-        // setData(r?.data?.data);
+  const [totalProgramList, setTotalProgramList] = useState([]);
+  const [totalDrugList, setTotalDrugList] = useState([]);
+  const [drugListByProgramId, setDrugListByProgramId] = useState([]);
 
-        setActiveIndicies(data?.map(() => false));
-        setCopyData(data);
-        setData(data);
-      })
-      .catch((e) => {
-        console.log("Error", e);
-      });
-  };
+  const [disableComp, setDisableComp] = useState(false);
+
+  const [data, setData] = useState({
+    lastDate: "",
+    remarks: "",
+    periodic: "",
+    financialYear: "2023 - 2024",
+    demandType: "",
+    programWiseDrug: "1",
+    drugNotification: "1",
+  });
 
   useEffect(() => {
-    callApi(
-      "calls/getAllProgrammerLists",
-      setprogrammeData,
-      setCopyprogrmmeData,
-      setProgrammeActiveIndicies
-    );
-    callApi(
-      "calls/getAllDruglist",
-      setDrugData,
-      setCopyDrugData,
-      setDrugActiveIndicies
-    );
+    let isApiSubcribed = true;
+    if (isApiSubcribed) {
+      dispatch(getAllOpenNotification());
+    }
+    return () => {
+      isApiSubcribed = false;
+    };
   }, []);
+
+  useEffect(() => {
+    if (
+      openNotificationListResponse &&
+      openNotificationListResponse?.status === 200
+    ) {
+      setTotalProgramList(openNotificationListResponse?.data?.programDrugLists);
+      setProgrammeActiveIndicies(
+        openNotificationListResponse?.data?.programDrugLists?.map(() => false)
+      );
+      setCopyprogrmmeData(openNotificationListResponse?.data?.programDrugLists);
+      setprogrammeData(openNotificationListResponse?.data?.programDrugLists);
+
+      setDrugActiveIndicies(
+        openNotificationListResponse?.data?.drugLists?.map(() => false)
+      );
+      setCopyDrugData(openNotificationListResponse?.data?.drugLists);
+      setDrugData(openNotificationListResponse?.data?.drugLists);
+
+      setTotalDrugList(openNotificationListResponse?.data?.drugLists);
+
+      setPeriodicDropDownList(openNotificationListResponse?.data?.periodic);
+      setFinancialDropDownList(
+        openNotificationListResponse?.data?.financialYearList
+      );
+      setDemandTypeList(openNotificationListResponse?.data?.demandTypeList);
+      setSelectedDrugItem([]);
+    } else if (
+      openNotificationListResponse &&
+      openNotificationListResponse?.status == 400
+    ) {
+      // setLoading(false);
+      toastMessage("Login Error", "Please enter valid ID", "error");
+    }
+  }, [openNotificationListResponse]);
+
+  useEffect(() => {
+    if (
+      drugListByProgramIdResponse &&
+      drugListByProgramIdResponse?.status === 200
+    ) {
+      setDrugListByProgramId(drugListByProgramIdResponse?.data);
+
+      const leftSelectedDrugList = totalDrugList.filter((elem) => {
+        return !drugListByProgramIdResponse?.data.find((ele) => {
+          return ele.id === elem.id;
+        });
+      });
+      console.log("leftSelectedDrugList", leftSelectedDrugList);
+      setDrugFirstClick(true);
+      setDrugTempArray(drugListByProgramIdResponse?.data);
+      setSelectedDrugItemActiveIndices(
+        drugListByProgramIdResponse?.data?.map(() => true)
+      );
+      setSelectedDrugItem(drugListByProgramIdResponse?.data);
+      setDrugActiveIndicies(
+        drugListByProgramIdResponse?.data?.map(() => false)
+      );
+      setCopyDrugData(totalDrugList);
+      setDrugData(leftSelectedDrugList);
+
+      setData({
+        ...data,
+        drugNotification: "0",
+      });
+      setDisableComp(true);
+      // if (leftSelectedDrugList.length === 0) {
+      //   console.log("Enters");
+      //   setData({
+      //     ...data,
+      //     drugNotification: "0",
+      //   });
+      // }
+    } else if (
+      drugListByProgramIdResponse &&
+      drugListByProgramIdResponse?.status === 400
+    ) {
+      toastMessage("Drug List By Id", "Failed to Load", "error");
+    }
+  }, [drugListByProgramIdResponse]);
+
+  useEffect(() => {
+    if (
+      saveDemandNotificationResponse &&
+      saveDemandNotificationResponse?.status === 201
+    ) {
+      navigate("/openNotificationDesk");
+    } else {
+      toastMessage(
+        "Create  Notification",
+        "Failed to Create Notification",
+        "error"
+      );
+    }
+  }, [saveDemandNotificationResponse]);
+
   const handleDrugLeftListItemClick = (e, id, element, index) => {
     const elementExist = drugTempArray?.filter((item) => {
       return item.id === id;
@@ -153,6 +249,7 @@ const OpenNotification = () => {
       );
       setDrugFirstClick(false);
     } else {
+      console.log("enters here");
       const t = [...selectDrugItemActiveIndices];
       const ut = t.map((elem, i) => {
         if (i === index) {
@@ -243,9 +340,12 @@ const OpenNotification = () => {
     setSelectedItem,
     setData
   ) => {
+    console.log("tempArray", tempArray);
     if (tempArray?.length > 0) {
       setFirstClick(true);
+
       const cloneData = [...copyiedData];
+      console.log("cloneData", cloneData);
       setSelectedItemActiveIndices(tempArray?.map(() => true));
       setRightTempArray([]);
       setActiveIndicies(activeIndicies.map((bool, j) => false));
@@ -254,12 +354,15 @@ const OpenNotification = () => {
           return ele.id === elem.id;
         });
       });
+      console.log("rigthDisplayList", rightDispalyList);
+
       setSelectedItem(rightDispalyList);
       const leftRearrangedList = cloneData.filter((elem) => {
         return !tempArray.find((ele) => {
           return ele.id === elem.id;
         });
       });
+      console.log("leftRearranged", leftRearrangedList);
       setData(leftRearrangedList);
     }
   };
@@ -272,22 +375,26 @@ const OpenNotification = () => {
     setSelectedItemActiveIndices,
     tempArray,
     setTempArray,
-    copyiedData,
+    data,
+
     setData,
     setSelectedItem,
     setRightTempArray,
     setActiveIndicies,
-    activeIndicies
+    activeIndicies,
+    copyiedData
   ) => {
     const allACtiveClasses = selectItemActiveIndices.every((e) => e === true);
     if (rightTempArray.length > 0) {
       setFirstClick(true);
       const cloneData = [...selectedItem];
+      console.log("cloneData", cloneData);
       const rightDispalyList = cloneData.filter((elem) => {
         return !rightTempArray.find((ele) => {
           return ele.id === elem.id;
         });
       });
+      console.log("rightDisplayList", rightDispalyList);
       setSelectedItemActiveIndices(rightDispalyList?.map(() => true));
       const reverseBackElements = cloneData.filter((elem) => {
         return rightTempArray.find((ele) => {
@@ -295,16 +402,21 @@ const OpenNotification = () => {
         });
       });
 
+      console.log("reverseBackElements", reverseBackElements);
+
       const updateTempArray = tempArray.filter((elem) => {
         return !reverseBackElements.find((ele) => {
           return ele.id === elem.id;
         });
       });
+      console.log("updateTempArray", updateTempArray);
       setTempArray(updateTempArray);
-      const storeIntoOne = [...copyiedData];
+      const storeIntoOne = [...data];
+      console.log("copyiedData", data);
       reverseBackElements.map((elem) => {
         storeIntoOne.push(elem);
       });
+      console.log("storeintoOne", storeIntoOne);
       setData(storeIntoOne);
       setSelectedItem(rightDispalyList);
       setRightTempArray([]);
@@ -361,9 +473,72 @@ const OpenNotification = () => {
     setSelectedItem([]);
     setActiveIndicies(activeIndicies.map((bool) => false));
   };
+
+  const handleSubmitData = () => {
+    if (
+      data.lastDate === "" ||
+      data.remarks === "" ||
+      data.financialYear === "" ||
+      data.periodic === "" ||
+      data.demandType === ""
+    ) {
+      toastMessage(
+        "Create Notification",
+        "Select all the Required Fields",
+        "error"
+      );
+    } else if (
+      data?.programWiseDrug === "1" &&
+      selectedProgrammeItem.length === 0
+    ) {
+      toastMessage(
+        "Create Notification",
+        "Select the Program to be mapped",
+        "error"
+      );
+    } else if (
+      data?.programWiseDrug === "0" &&
+      data?.drugNotification === "0"
+    ) {
+      toastMessage(
+        "Create Notification",
+        "Select at least one either Program wise or Drug wise Mapping",
+        "error"
+      );
+    }
+  };
+
+  const resetComponent = () => {
+    setDrugFirstClick(false);
+    setDrugTempArray([]);
+    setSelectedDrugItemActiveIndices([]);
+    setSelectedDrugItem([]);
+    setDrugActiveIndicies(totalDrugList?.map(() => false));
+    setCopyDrugData(totalDrugList);
+    setDrugData(totalDrugList);
+
+    setProgrammeTempArray([]);
+    setSelectedProgrammeItemActiveIndices([]);
+    setSelectedProgrammeItem([]);
+
+    setProgrammeActiveIndicies(
+      openNotificationListResponse?.data?.programDrugLists?.map(() => false)
+    );
+    setCopyprogrmmeData(openNotificationListResponse?.data?.programDrugLists);
+    setprogrammeData(openNotificationListResponse?.data?.programDrugLists);
+  };
+
+  const getDrugListByProgId = () => {
+    console.log("programTempArray", programmeTempArray);
+    let list = [];
+    programmeTempArray?.forEach((ele) => {
+      list.push(ele.id);
+    });
+    dispatch(getDrugListByProgramId({ programId: list.toString() }));
+  };
   return (
     <>
-      <div className="container-fluid">
+      <Paper className="p-2 mt-2">
         <div className="row mt-3">
           <div className="d-flex">
             <div className="col">
@@ -373,9 +548,7 @@ const OpenNotification = () => {
                     Store Name
                   </label>
                 </div>
-                <div className="col-7 m-0">
-                  <SelectOption className="d-inline" id="storeName" data={[]} />
-                </div>
+                <div className="col-7 m-0">State WareHouse</div>
               </div>
             </div>
             <div className="col">
@@ -386,7 +559,20 @@ const OpenNotification = () => {
                   </label>
                 </div>
                 <div className="col-7">
-                  <SelectOption id="financialYear" data={[]} />
+                  <CustomSelect
+                    defaultValue={{ value: "2023-2024", label: "2023-2024" }}
+                    options={[
+                      { value: "select", label: "Select" },
+                      { value: "2023-2024", label: "2023-2024" },
+                    ]}
+                    onChange={(selectedOption) => {
+                      console.log(selectedOption?.value);
+                      setData({
+                        ...data,
+                        financialYear: selectedOption?.value,
+                      });
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -398,7 +584,15 @@ const OpenNotification = () => {
                   </label>
                 </div>
                 <div className="col-7">
-                  <SelectOption id="demandType" data={[]} />
+                  <CustomSelect
+                    options={demandTypeList}
+                    onChange={(selectedOption) => {
+                      setData({
+                        ...data,
+                        demandType: selectedOption?.value,
+                      });
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -413,10 +607,15 @@ const OpenNotification = () => {
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DatePicker
                       className={classes.root}
-                      value={lastDate}
+                      value={data?.lastDate}
                       onChange={(newValue) => {
                         console.log("NewValue", newValue);
+                        setData({
+                          ...data,
+                          lastDate: newValue,
+                        });
                       }}
+                      disablePast={true}
                       renderInput={(params) => <TextField {...params} />}
                     />
                   </LocalizationProvider>
@@ -431,97 +630,158 @@ const OpenNotification = () => {
                   </label>
                 </div>
                 <div className="col-7">
-                  <SelectOption id="periodic" data={[]} />
+                  <CustomSelect
+                    options={periodicDropDownList}
+                    onChange={(selectedOption) => {
+                      setData({
+                        ...data,
+                        periodic: selectedOption?.value,
+                      });
+                    }}
+                  />
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="row mt-2">
-          <HorizonatalLine text="New Request" />
-        </div>
+
+        <HorizonatalLine text="New Request" />
+
         <div className="row">
           <div className="d-flex">
             <label>Do you want program-wise drug demands from the stores</label>
             <RadioCheckBox
-              id1="programWiseDrug1"
-              id2="programWiseDrug2"
-              name="programWiseDrug"
-              labelText1="Yes"
-              labelText2="No"
+              list={[
+                {
+                  id: "programWiseDrug1",
+                  labelText: "Yes",
+                  value: "1",
+                  name: "programWiseDrug",
+                  checked: data?.programWiseDrug,
+                },
+                {
+                  id: "programWiseDrug2",
+                  labelText: "No",
+                  value: "0",
+                  name: "programWiseDrug",
+                  checked: data?.programWiseDrug,
+                },
+              ]}
               onChange={(e) => {
-                console.log(e);
+                console.log(e.target.value);
+                resetComponent(e);
+                if (e.target.value === "0") {
+                  setDisableComp(false);
+                  console.log("enters");
+                  setData({
+                    ...data,
+                    drugNotification: "1",
+                    programWiseDrug: e.target.value,
+                  });
+                } else {
+                  setData({
+                    ...data,
+                    drugNotification: "0",
+                    programWiseDrug: e.target.value,
+                  });
+                }
               }}
             />
           </div>
         </div>
-        <div className="row mt-2">
-          <HorizonatalLine text="Programme List" />
-        </div>
-        <div className="row">
-          <TransferComponent
-            apiData={programmeData}
-            activeIndicies={programmeActiveIndicies}
-            handleMoveSelectedItemToLeft={() => {
-              handleMoveSelectedItemToLeft(
-                selectProgrammeItemActiveIndices,
-                rightProgrammeTempArray,
-                setProgrammeFirstClick,
-                selectedProgrammeItem,
-                setSelectedProgrammeItemActiveIndices,
-                programmeTempArray,
-                setProgrammeTempArray,
-                copyProgrmmeData,
-                setprogrammeData,
-                setSelectedProgrammeItem,
-                setRightProgrammeTempArray,
-                setProgrammeActiveIndicies,
-                programmeActiveIndicies
-              );
-            }}
-            handleMoveSelectedItemToRight={() => {
-              handleMoveSelectedItemToRight(
-                programmeTempArray,
-                setProgrammeFirstClick,
-                copyProgrmmeData,
-                setSelectedProgrammeItemActiveIndices,
-                setRightProgrammeTempArray,
-                setProgrammeActiveIndicies,
-                programmeActiveIndicies,
-                setSelectedProgrammeItem,
-                setprogrammeData
-              );
-            }}
-            handleShiftAllElementToRight={() => {
-              handleShiftAllElementToRight(
-                copyProgrmmeData,
-                setProgrammeFirstClick,
-                setSelectedProgrammeItemActiveIndices,
-                setSelectedProgrammeItem,
-                setRightProgrammeTempArray,
-                setProgrammeTempArray,
-                setprogrammeData
-              );
-            }}
-            handleShiftAllElementToLeft={() => {
-              handleShiftAllElementToLeft(
-                copyProgrmmeData,
-                setSelectedProgrammeItemActiveIndices,
-                setprogrammeData,
-                setRightProgrammeTempArray,
-                setProgrammeTempArray,
-                setSelectedProgrammeItem,
-                setProgrammeActiveIndicies,
-                programmeActiveIndicies
-              );
-            }}
-            handleLeftListItemClick={handleLeftListItemClick}
-            handleRightListItemClick={handleRightListItemClick}
-            selectedItem={selectedProgrammeItem}
-            selectItemActiveIndices={selectProgrammeItemActiveIndices}
-          />
-        </div>
-        <div className="row">
+
+        <HorizonatalLine text="Programme List" />
+
+        {data?.programWiseDrug === "1" ? (
+          <>
+            <TransferComponent
+              apiData={programmeData}
+              activeIndicies={programmeActiveIndicies}
+              handleMoveSelectedItemToLeft={() => {
+                handleMoveSelectedItemToLeft(
+                  selectProgrammeItemActiveIndices,
+                  rightProgrammeTempArray,
+                  setProgrammeFirstClick,
+                  selectedProgrammeItem,
+                  setSelectedProgrammeItemActiveIndices,
+                  programmeTempArray,
+                  setProgrammeTempArray,
+                  programmeData,
+
+                  setprogrammeData,
+                  setSelectedProgrammeItem,
+                  setRightProgrammeTempArray,
+                  setProgrammeActiveIndicies,
+                  programmeActiveIndicies,
+                  copyProgrmmeData
+                );
+                if (programmeTempArray.length > 1) {
+                  console.log("Dinesh");
+                  getDrugListByProgId();
+                } else if (programmeTempArray.length === 1) {
+                  resetComponent();
+                }
+                console.log("programeTempArray", programmeTempArray.length);
+                //getDrugListByProgId();
+              }}
+              handleMoveSelectedItemToRight={() => {
+                handleMoveSelectedItemToRight(
+                  programmeTempArray,
+                  setProgrammeFirstClick,
+                  copyProgrmmeData,
+                  setSelectedProgrammeItemActiveIndices,
+                  setRightProgrammeTempArray,
+                  setProgrammeActiveIndicies,
+                  programmeActiveIndicies,
+                  setSelectedProgrammeItem,
+                  setprogrammeData
+                );
+                getDrugListByProgId();
+              }}
+              handleShiftAllElementToRight={() => {
+                handleShiftAllElementToRight(
+                  copyProgrmmeData,
+                  setProgrammeFirstClick,
+                  setSelectedProgrammeItemActiveIndices,
+                  setSelectedProgrammeItem,
+                  setRightProgrammeTempArray,
+                  setProgrammeTempArray,
+                  setprogrammeData
+                );
+                console.log("totalProgramList", totalProgramList);
+                //getDrugListByProgId();
+                let list = [];
+                totalProgramList?.forEach((ele) => {
+                  list.push(ele.id);
+                });
+                dispatch(
+                  getDrugListByProgramId({
+                    programId: list.toString(),
+                  })
+                );
+              }}
+              handleShiftAllElementToLeft={() => {
+                handleShiftAllElementToLeft(
+                  copyProgrmmeData,
+                  setSelectedProgrammeItemActiveIndices,
+                  setprogrammeData,
+                  setRightProgrammeTempArray,
+                  setProgrammeTempArray,
+                  setSelectedProgrammeItem,
+                  setProgrammeActiveIndicies,
+                  programmeActiveIndicies
+                );
+                resetComponent();
+              }}
+              handleLeftListItemClick={handleLeftListItemClick}
+              handleRightListItemClick={handleRightListItemClick}
+              selectedItem={selectedProgrammeItem}
+              selectItemActiveIndices={selectProgrammeItemActiveIndices}
+            />
+          </>
+        ) : null}
+
+        <div className="row mt-3">
           <div className="d-flex">
             <label>Do you want notification for selected drugs </label>
             <RadioCheckBox
@@ -529,100 +789,161 @@ const OpenNotification = () => {
                 {
                   id: "selectDrugs1",
                   labelText: "Yes",
-                  value: "Yes",
+                  value: "1",
                   name: "selectDrugs",
+                  checked: data?.drugNotification,
                 },
                 {
                   id: "selectDrugs2",
                   labelText: "No",
-                  value: "No",
+                  value: "0",
                   name: "selectDrugs",
+                  checked: data?.drugNotification,
                 },
               ]}
               onChange={(e) => {
-                console.log(e);
+                resetComponent(e);
+                setDisableComp(false);
+                if (e.target.value === "0") {
+                  setDisableComp(true);
+                  setData({
+                    ...data,
+                    programWiseDrug: "1",
+                    drugNotification: e.target.value,
+                  });
+                } else {
+                  setData({
+                    ...data,
+                    programWiseDrug: "0",
+                    drugNotification: e.target.value,
+                  });
+                }
               }}
             />
           </div>
         </div>
-        <div className="row mt-2">
-          <HorizonatalLine text="Drug List List" />
-        </div>
-        <div className="row">
-          <TransferComponent
-            apiData={drugData}
-            activeIndicies={drugActiveIndicies}
-            handleMoveSelectedItemToLeft={() => {
-              handleMoveSelectedItemToLeft(
-                selectDrugItemActiveIndices,
-                drugRightTempArray,
-                setDrugFirstClick,
-                selectedDrugItem,
-                setSelectedDrugItemActiveIndices,
-                drugTempArray,
-                setDrugTempArray,
-                copyDrugData,
-                setDrugData,
-                setSelectedDrugItem,
-                setDrugRightTempArray,
-                setDrugActiveIndicies,
-                drugActiveIndicies
-              );
-            }}
-            handleMoveSelectedItemToRight={() => {
-              handleMoveSelectedItemToRight(
-                drugTempArray,
-                setDrugFirstClick,
-                copyDrugData,
-                setSelectedDrugItemActiveIndices,
-                setDrugRightTempArray,
-                setDrugActiveIndicies,
-                drugActiveIndicies,
-                setSelectedDrugItem,
-                setDrugData
-              );
-            }}
-            handleShiftAllElementToRight={() => {
-              handleShiftAllElementToRight(
-                copyDrugData,
-                setDrugFirstClick,
-                setSelectedDrugItemActiveIndices,
-                setSelectedDrugItem,
-                setDrugRightTempArray,
-                setDrugTempArray,
-                setDrugData
-              );
-            }}
-            handleShiftAllElementToLeft={() => {
-              handleShiftAllElementToLeft(
-                copyDrugData,
-                setSelectedDrugItemActiveIndices,
-                setDrugData,
-                setDrugRightTempArray,
-                setDrugTempArray,
-                setSelectedDrugItem,
-                setDrugActiveIndicies,
-                drugActiveIndicies
-              );
-            }}
-            handleLeftListItemClick={handleDrugLeftListItemClick}
-            handleRightListItemClick={handleDrugRightListItemClick}
-            selectedItem={selectedDrugItem}
-            selectItemActiveIndices={selectDrugItemActiveIndices}
-          />
-        </div>
-        <div className="row mt-2">
-          <HorizonatalLine text="Remarks" />
-        </div>
+
+        <HorizonatalLine text="Drug List List" />
+
+        <TransferComponent
+          isDisabled={disableComp}
+          apiData={drugData}
+          activeIndicies={drugActiveIndicies}
+          handleMoveSelectedItemToLeft={() => {
+            handleMoveSelectedItemToLeft(
+              selectDrugItemActiveIndices,
+              drugRightTempArray,
+              setDrugFirstClick,
+              selectedDrugItem,
+              setSelectedDrugItemActiveIndices,
+              drugTempArray,
+              setDrugTempArray,
+              drugData,
+
+              setDrugData,
+              setSelectedDrugItem,
+              setDrugRightTempArray,
+              setDrugActiveIndicies,
+              drugActiveIndicies,
+              copyDrugData
+            );
+          }}
+          handleMoveSelectedItemToRight={() => {
+            setData({
+              ...data,
+              drugNotification: "1",
+              programWiseDrug: "0",
+            });
+            handleMoveSelectedItemToRight(
+              drugTempArray,
+              setDrugFirstClick,
+              copyDrugData,
+              setSelectedDrugItemActiveIndices,
+              setDrugRightTempArray,
+              setDrugActiveIndicies,
+              drugActiveIndicies,
+              setSelectedDrugItem,
+              setDrugData
+            );
+          }}
+          handleShiftAllElementToRight={() => {
+            handleShiftAllElementToRight(
+              copyDrugData,
+              setDrugFirstClick,
+              setSelectedDrugItemActiveIndices,
+              setSelectedDrugItem,
+              setDrugRightTempArray,
+              setDrugTempArray,
+              setDrugData
+            );
+          }}
+          handleShiftAllElementToLeft={() => {
+            handleShiftAllElementToLeft(
+              copyDrugData,
+              setSelectedDrugItemActiveIndices,
+              setDrugData,
+              setDrugRightTempArray,
+              setDrugTempArray,
+              setSelectedDrugItem,
+              setDrugActiveIndicies,
+              drugActiveIndicies
+            );
+          }}
+          handleLeftListItemClick={handleDrugLeftListItemClick}
+          handleRightListItemClick={handleDrugRightListItemClick}
+          selectedItem={selectedDrugItem}
+          selectItemActiveIndices={selectDrugItemActiveIndices}
+        />
+
+        <HorizonatalLine text="Remarks" />
+
         <div className="row mb-5">
           <div className="col-6">
             <label htmlFor="remarks" className="form-label">
               Remarks
             </label>
-            <textarea className="form-control" rows="3" id="remarks"></textarea>
+            <textarea
+              name="remarks"
+              className="form-control"
+              rows="3"
+              id="remarks"
+              onChange={(e) =>
+                setData({
+                  ...data,
+                  remarks: e.target.value,
+                })
+              }
+            ></textarea>
+          </div>
+
+          <div className="row d-flex justify-content-end mt-2">
+            <div>
+              <Basicbutton
+                buttonText="Submit"
+                className="primary"
+                onClick={() => {
+                  const unmappedDrugList = selectedDrugItem.filter((elem) => {
+                    return !drugListByProgramId?.find((ele) => {
+                      return ele.id === elem.id;
+                    });
+                  });
+
+                  console.log("unmappedDrugList", unmappedDrugList);
+                  //handleSubmitData();
+
+                  console.log("data", data);
+                  const reqData = data;
+                  reqData.lastDate = moment(data?.lastDate).format("l");
+                  reqData.program = selectedProgrammeItem;
+                  reqData.drugList = selectedDrugItem;
+                  console.log("Request Data", reqData);
+                  dispatch(saveDemandNotification(reqData));
+                }}
+              />
+            </div>
           </div>
         </div>
-      </div>
+      </Paper>
     </>
   );
 };

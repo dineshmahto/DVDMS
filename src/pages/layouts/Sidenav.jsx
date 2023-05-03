@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import $ from 'jquery';
+import $ from "jquery";
 import { useDispatch, useSelector } from "react-redux";
 import { setActiveSideMenu } from "../../store/activemenu/actions";
-
+import { showLoader } from "../../store/loader/actions";
 
 const Sidenav = () => {
   const dispatch = useDispatch();
@@ -48,25 +48,27 @@ const Sidenav = () => {
       //submenu2 and submenu3 value is taking from the current state
       if (activeMenuItem.isSubMenu2Active || activeMenuItem.isSubMenu3Active) {
         //find the topmost active menu by class name "active-me" i.e menu1
-        let activeMenu1Elements = document.getElementsByClassName("active-me")[0];
+        let activeMenu1Elements =
+          document.getElementsByClassName("active-me")[0];
 
         //removing "collapsed" class from topmost active menu i.e menu1
         activeMenu1Elements.classList.remove("collapsed");
 
         //get value of data attribute from topmost active menu i.e menu1
         //this data attribute value is the id name of the collapse submenu items container element
-        let showSubmenuElementID = activeMenu1Elements.getAttribute("data-bs-target");
+        let showSubmenuElementID =
+          activeMenu1Elements.getAttribute("data-bs-target");
 
         //Now find the element of id which hold submenu items
         //and substring(1) is use for removing '#' from the id name string
-        let subMenuContainerElement = document.getElementById(showSubmenuElementID.substring(1)
+        let subMenuContainerElement = document.getElementById(
+          showSubmenuElementID.substring(1)
         );
 
         //lastly add 'show' class to show submenu
         subMenuContainerElement.classList.add("show");
-      }else{
-
-        $('.sb-sidenav-menu').find('.show').removeClass('show');
+      } else {
+        $(".sb-sidenav-menu").find(".show").removeClass("show");
       }
     }
   }, [activeMenuItem]);
@@ -146,16 +148,16 @@ const Sidenav = () => {
                 <nav className="sb-sidenav-menu-nested nav">
                   <Link
                     className={`nav-link ${
-                      activeMenuItem.subMenu2 === "notification"
+                      activeMenuItem.subMenu2 === "openNotificationDesk"
                         ? "active-me1"
                         : ""
                     }`}
-                    to={{ pathname: "/demandnotification" }}
+                    to={{ pathname: "/openNotificationDesk" }}
                     onClick={() =>
                       handleMenuItemClick(
                         "demand",
                         true,
-                        "notification",
+                        "openNotificationDesk",
                         true,
                         "",
                         false
@@ -171,7 +173,7 @@ const Sidenav = () => {
                         : ""
                     }`}
                     to={{ pathname: "/annualdemand" }}
-                    onClick={() =>
+                    onClick={() => {
                       handleMenuItemClick(
                         "demand",
                         true,
@@ -179,8 +181,8 @@ const Sidenav = () => {
                         true,
                         "",
                         false
-                      )
-                    }
+                      );
+                    }}
                   >
                     Annual Demand
                   </Link>
@@ -275,9 +277,100 @@ const Sidenav = () => {
                   </Link>
                 </nav>
               </div>
-
               {/* End of Stock */}
 
+              {/* Issue */}
+
+              <Link
+                className={`nav-link collapsed ${
+                  activeMenuItem.menu1 === "issue" ? "active-me" : ""
+                }`}
+                to={{}}
+                data-bs-toggle="collapse"
+                data-bs-target="#issue"
+                aria-expanded="false"
+                aria-controls="issue"
+              >
+                <div className="sb-nav-link-icon">
+                  <i className="fas fa-warehouse"></i>
+                </div>
+                Issue
+                <div className="sb-sidenav-collapse-arrow">
+                  <i className="fas fa-angle-down"></i>
+                </div>
+              </Link>
+              <div
+                className="collapse"
+                id="issue"
+                aria-labelledby="headingOne"
+                data-bs-parent="#sidenavAccordion"
+              >
+                <nav className="sb-sidenav-menu-nested nav">
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "openIssueDesk"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/openIssueDesk" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "issue",
+                        true,
+                        "openIssueDesk",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Issue Desk
+                  </Link>
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "openReturnDesk"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/openReturnDesk" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "issue",
+                        true,
+                        "openReturnDesk",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Return Desk
+                  </Link>
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 ===
+                      "openStockForMisConsumptionDesk"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/openStockForMisConsumptionDesk" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "issue",
+                        true,
+                        "openStockForMisConsumptionDesk",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Miscellaneous Consumption
+                  </Link>
+                </nav>
+              </div>
+
+              {/* End of Issue */}
               {/* Admin */}
               <Link
                 className={`nav-link collapsed ${
@@ -321,6 +414,66 @@ const Sidenav = () => {
                     }
                   >
                     User Desk
+                  </Link>
+
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "listDrug" ? "active-me1" : ""
+                    }`}
+                    to={{ pathname: "/listDrug" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "admin",
+                        true,
+                        "listDrug",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Drug Desk
+                  </Link>
+
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "listStore"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/listStore" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "admin",
+                        true,
+                        "listStore",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Store Desk
+                  </Link>
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "programpage"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/programpage" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "admin",
+                        true,
+                        "programpage",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Program Desk
                   </Link>
                   <Link
                     className={`nav-link ${
@@ -403,11 +556,31 @@ const Sidenav = () => {
                   >
                     Budget Interface
                   </Link>
+
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "openFundingList"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/openFundingList" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "admin",
+                        true,
+                        "openFundingList",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Funding Source
+                  </Link>
                 </nav>
               </div>
 
               {/* End of Stock */}
-
               <Link
                 className="nav-link collapsed"
                 to={{}}

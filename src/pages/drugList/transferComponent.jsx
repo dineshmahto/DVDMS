@@ -248,8 +248,11 @@ function TransferComponent() {
   useMemo(() => {
     const searchData = [...apiData];
     if (searchValue != "") {
-      const searchedResult = searchData?.filter(({ genericName }) => {
-        return genericName.toLowerCase().includes(searchValue.toLowerCase());
+      const searchedResult = searchData?.filter(({ name }) => {
+        if (searchValue === "") {
+          return;
+        }
+        return name?.toLowerCase()?.indexOf(searchValue.toLowerCase()) > -1;
       });
       setApiData(searchedResult);
     } else {

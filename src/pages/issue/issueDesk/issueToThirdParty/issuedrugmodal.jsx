@@ -67,6 +67,7 @@ const IssueDrugModal = ({
             columns={columns}
             paginationRequired={false}
             checkBoxRequired={false}
+            colouredHeader={true}
           >
             <TableBody>
               {loading ? (
@@ -142,14 +143,12 @@ const IssueDrugModal = ({
               type="button"
               buttonText="ADD DRUG(S)"
               className="warning rounded-0 me-1"
-              outlineType={true}
             />
 
             <Basicbutton
               type="button"
               buttonText="CANCEL"
               className="danger rounded-0"
-              outlineType={true}
               onClick={handleAddDrugModal}
             />
           </div>

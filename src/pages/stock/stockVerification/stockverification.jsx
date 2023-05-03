@@ -2,32 +2,24 @@ import React, { useState, useMemo } from "react";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import CustomSelect from "../../../components/select/customSelect";
-import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
 import Basicbutton from "../../../components/button/basicbutton";
 import SearchField from "../../../components/search/search";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faPlus, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { Paper } from "@mui/material";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { TableBody } from "@mui/material";
 import moment from "moment";
 import { Spinner } from "react-bootstrap";
-import { makeStyles } from "@mui/styles";
-const useStyles = makeStyles({
-  root: {
-    "& .MuiInputBase-root": {
-      "& .MuiButtonBase-root": {},
-      "& .MuiInputBase-input": {
-        padding: 8,
-      },
-    },
-  },
-});
+import StyledTableRow from "../../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../../components/tables/datatable/customTableCell";
+import TablePagination from "../../../components/tables/datatable/tablepagination";
+import handleSortingFunc from "../../../components/tables/datatable/sortable";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+
 const StockVerification = () => {
-  const classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
   const [tableData, setTableData] = useState([]);
-  const [sortedData, handleSorting] = useSortableTable(tableData);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
@@ -78,23 +70,26 @@ const StockVerification = () => {
     },
   ]);
 
-  const handlePageChange = (event, newPage) => {
+  const handlePageChange = (newPage) => {
     setLoading(true);
     setController({
       ...controller,
       page: newPage - 1,
     });
   };
-  const handleChangeRowsPerPage = (current, pageSize) => {
-    console.log(current, pageSize);
+  const handleChangeRowsPerPage = (e) => {
+    setController({
+      ...controller,
+      rowsPerPage: e,
+      page: 0,
+    });
   };
   const handleSortingChange = (accessor) => {
     const sortOrder =
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    handleSorting(accessor, sortOrder);
-    setTableData(sortedData);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
   return (
     <>
@@ -160,63 +155,52 @@ const StockVerification = () => {
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page + 1}
-              count={totalPages}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
               handleSorting={handleSortingChange}
               checkBoxRequired={false}
             >
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
+                  <StyledTableRow>
+                    <StyledTableCell colSpan={12}>
                       <Spinner />
-                    </TableCell>
-                  </TableRow>
+                    </StyledTableCell>
+                  </StyledTableRow>
                 ) : (
                   tableData.length > 0 &&
                   tableData.map((data, index) => (
-                    <TableRow hover>
+                    <StyledTableRow>
                       {columns.map((d, k) => {
                         if (d.id === "lastVerifiedDate") {
                           return (
-                            <TableCell
-                              key={k}
-                              padding="none"
-                              style={{
-                                padding: "4px",
-                                fontSize: "0.7rem",
-                              }}
-                            >
+                            <StyledTableCell key={k} padding="none">
                               {moment(data[d.id]).format("DD/MM/YYYY")}
-                            </TableCell>
+                            </StyledTableCell>
                           );
                         } else {
                           return (
-                            <TableCell
-                              key={k}
-                              padding="none"
-                              style={{
-                                padding: "4px",
-                                fontSize: "0.7rem",
-                              }}
-                            >
+                            <StyledTableCell key={k} padding="none">
                               {data[d.id]}
-                            </TableCell>
+                            </StyledTableCell>
                           );
                         }
                       })}
-                    </TableRow>
+                    </StyledTableRow>
                   ))
                 )}
               </TableBody>
             </TableComponent>
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
           </div>
         </div>
+
+        {selected}
       </Paper>
     </>
   );

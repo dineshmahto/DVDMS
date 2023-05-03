@@ -1,29 +1,42 @@
-import React, { useState, useMemo, Suspense, lazy } from "react";
+import React, { useState, useMemo, useEffect, lazy, Suspense } from "react";
+import HorizonatalLine from "../../../../components/horizontalLine/horizonatalLine";
 import TableComponent from "../../../../components/tables/datatable/tableComponent";
 import { TableBody, TableRow, TableCell } from "@mui/material";
-import { Checkbox, Collapse } from "@mui/material";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronUp, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { makeStyles } from "@mui/styles";
-const IntentIssueRejectModal = lazy(() => import("./intentissueconfirmmodal"));
-const tempData = [
-  {
-    intentNo: "42530",
-    intentDate: "2022-07-14 00:00:00.0",
-    fromStore: "DISTRICT HOSPITAL DIMAPUR",
-    progName: ["COVID19", "COVID19", "COVID19", "COVID19", "COVID19"],
-    drugName: [
-      "ONDENSETRON INJ. 2MG/ML(2ML)",
-      "MORPHINE SULPHATE INJ. 10 MG(1 ML VIAL)",
-      "METRONIDAZOLE INJ. 500MG/100ML(100ML)",
-      "SUCCINYL CHOLINE INJ. 50MG/ML(2ML)",
-      "DOBUTAMINE INJ. 250/5ML(5 AMP)",
-    ],
-    reqQty: ["200", "50", "1000", "50", "50"],
-    status: "APPROVED",
-    remarks: "",
-  },
-];
+import moment from "moment";
+import {
+  faChevronDown,
+  faFilePdf,
+  faSearch,
+  faChevronUp,
+  faArrowLeft,
+} from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import CustomSelect from "../../../../components/select/customSelect";
+import Basicbutton from "../../../../components/button/basicbutton";
+import SearchField from "../../../../components/search/search";
+import { Link } from "react-router-dom";
+import { Paper } from "@mui/material";
+import handleSortingFunc from "../../../../components/tables/datatable/sortable";
+import { useDispatch, useSelector } from "react-redux";
+
+import IconButton from "@mui/material/IconButton";
+import Box from "@mui/material/Box";
+import Collapse from "@mui/material/Collapse";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import Typography from "@mui/material/Typography";
+import StyledTableRow from "../../../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../../../components/tables/datatable/customTableCell";
+import TablePagination from "../../../../components/tables/datatable/tablepagination";
+import { Spinner } from "react-bootstrap";
+import {
+  getIntentIssueList,
+  getIntentIssueListResponse,
+} from "../../../../store/issue/action";
+import Checkbox from "@mui/material/Checkbox";
+import { useNavigate } from "react-router-dom";
+
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -33,55 +46,51 @@ const useStyles = makeStyles({
     lineHeight: "3",
   },
 });
+
 const IntentIssue = () => {
-  const classes = useStyles();
-  const [tableData, setTableData] = useState(tempData);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const intentIssueListResponse = useSelector(
+    (state) => state.issuereturn?.intentIssueListResponse
+  );
+  console.log("intentIssueListResponse", intentIssueListResponse);
+  let classes = useStyles();
+  const [sortField, setSortField] = useState("");
+  const [order, setOrder] = useState("asc");
   const [totalRows, setTotalRows] = useState(0);
-  const [open, setOpen] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
+  const [tableData, setTableData] = useState([]);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
   });
-  const [sortField, setSortField] = useState("");
-  const [order, setOrder] = useState("asc");
+  const [loading, setLoading] = useState(false);
+  const [showStockEditListModal, setShowStockEditListModal] = useState(false);
+  const [modalData, setModalData] = useState("");
+  const [open, setOpen] = useState([]);
   const [selected, setSelected] = useState([]);
   const [selectedRow, setSelectedRow] = useState([]);
   const columns = useMemo(() => [
     {
-      id: "intentNo",
-      name: "INTENT NUMBER",
-      sortable: true,
+      id: "action",
+      name: "Action",
+      sortable: false,
     },
     {
-      id: "intentDate",
-      name: "INTENT. DATE",
+      id: "request_id",
+      name: "INTENT. NUMBER",
+      sortable: true,
+    },
+
+    {
+      id: "request_date",
+      name: "INTENT DATE",
       sortable: true,
     },
 
     {
       id: "fromStore",
       name: "FROM STORE",
-      sortable: true,
-    },
-
-    {
-      id: "progName",
-      name: "PROGRAMME NAME",
-      sortable: true,
-    },
-    {
-      id: "drugName",
-      name: "DRUG NAME",
-      sortable: true,
-    },
-    {
-      id: "reqQty",
-      name: "REQUESTED QTY",
-      sortable: true,
-    },
-    {
-      id: "status",
-      name: "STATUS",
       sortable: true,
     },
     {
@@ -91,22 +100,56 @@ const IntentIssue = () => {
     },
   ]);
 
-  const [showIssueRejectModal, setIssueRejectModal] = useState(false);
+  const handlePageChange = (newPage) => {
+    setLoading(true);
 
-  const handlePageChange = (event, newPage) => {
     setController({
       ...controller,
-      page: newPage,
+      page: newPage - 1,
     });
   };
-
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = (e) => {
     setController({
       ...controller,
-      rowsPerPage: parseInt(event.target.value, 10),
+      rowsPerPage: e,
       page: 0,
     });
   };
+  const handleSortingChange = (accessor) => {
+    const sortOrder =
+      accessor === sortField && order === "asc" ? "desc" : "asc";
+    setSortField(accessor);
+    setOrder(sortOrder);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
+  };
+
+  useEffect(() => {
+    let isApiSubcribed = true;
+    if (isApiSubcribed) {
+      setLoading(true);
+      setTimeout(() => {
+        dispatch(
+          getIntentIssueList({
+            pageNumber: controller.page,
+            pageSize: controller.rowsPerPage,
+          })
+        );
+      }, 1000);
+    }
+    return () => {
+      isApiSubcribed = false;
+      clearTimeout();
+      dispatch(getIntentIssueListResponse(""));
+    };
+  }, [controller]);
+
+  useEffect(() => {
+    if (intentIssueListResponse && intentIssueListResponse?.status === 200) {
+      setTableData(intentIssueListResponse?.data?.pageList?.content);
+      setTotalRows(intentIssueListResponse?.data?.pageList?.totalElements);
+      setLoading(false);
+    }
+  }, [intentIssueListResponse]);
 
   const handleCollapse = (clickedIndex) => {
     if (open.includes(clickedIndex)) {
@@ -121,6 +164,7 @@ const IntentIssue = () => {
       setOpen(openCopy);
     }
   };
+
   const handleClick = (event, index, row) => {
     if (selected.includes(index)) {
       const openCopy = selected.filter((element) => {
@@ -134,137 +178,229 @@ const IntentIssue = () => {
       openCopy.shift();
       openCopy.push(index);
       setSelected(openCopy);
-      setIssueRejectModal(true);
     }
   };
-  // returns boolean wether particular index is checked or not
-  const isSelected = (name) => selected.indexOf(name) !== -1;
 
-  const handleIssueRejectModal = () => {
-    setIssueRejectModal(false);
-  };
   return (
     <>
-      <div className="row">
-        <div className="col-12">
-          <TableComponent
-            columns={columns}
-            sortField={sortField}
-            page={controller.page}
-            count={totalRows}
-            order={order}
-            checkBoxRequired={true}
-            paginationRequired={true}
-            onPageChange={handlePageChange}
-            rowsPerPage={controller.rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            numSelected={selected.length}
-            rowCount={tableData?.length}
-          >
-            <TableBody>
-              {tableData &&
-                tableData?.map((row, index) => {
-                  const isItemSelected = isSelected(row.id);
-                  const labelId = `enhanced-table-checkbox-${index}`;
-                  return (
-                    <TableRow
-                      hover
-                      role="checkbox"
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={row.id}
-                      selected={isItemSelected}
-                    >
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          onClick={(event) => handleClick(event, row.id, row)}
-                          color="primary"
-                          checked={isItemSelected}
-                          inputProps={{
-                            "aria-labelledby": labelId,
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {row?.intentNo}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {row?.intentDate}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {row?.fromStore}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {row?.progName.length > 1 && (
-                          <>
-                            <div className="d-flex justify-content-end">
-                              <FontAwesomeIcon
-                                icon={
-                                  open.includes(index)
-                                    ? faChevronUp
-                                    : faChevronDown
-                                }
-                                onClick={() => handleCollapse(index)}
-                              />
-                            </div>
-                          </>
-                        )}
-
-                        {row?.progName.length > 1 && (
-                          <Collapse in={open.includes(index)}>
-                            {row?.progName &&
-                              row?.progName.map((elem, index) => {
-                                return <div className="pt-2 pb-2 ">{elem}</div>;
-                              })}
-                          </Collapse>
-                        )}
-
-                        {row?.progName.length === 1 &&
-                          row?.progName.map((elem, index) => {
-                            return <div className="">{elem}</div>;
-                          })}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {row?.drugName.length > 1 && (
-                          <Collapse in={open.includes(index)}>
-                            {row?.drugName &&
-                              row?.drugName.map((elem, index) => {
-                                return <div className="pt-2 pb-2 ">{elem}</div>;
-                              })}
-                          </Collapse>
-                        )}
-                      </TableCell>
-
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {row?.reqQty.length > 1 && (
-                          <Collapse in={open.includes(index)}>
-                            {row?.reqQty &&
-                              row?.reqQty.map((elem, index) => {
-                                return <div className="pt-2 pb-2 ">{elem}</div>;
-                              })}
-                          </Collapse>
-                        )}
-                      </TableCell>
-
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {row?.status}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {row?.remarks}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-            </TableBody>
-          </TableComponent>
-        </div>
-        <Suspense>
-          <IntentIssueRejectModal
-            showIssueRejectModal={showIssueRejectModal}
-            handleIssueRejectModal={handleIssueRejectModal}
+      <div className="row mt-2">
+        <div className="d-flex jsutify-content-start">
+          <Basicbutton
+            buttonText="Back"
+            className="warning rounded-0"
+            icon={<FontAwesomeIcon icon={faArrowLeft} />}
+            onClick={() => navigate("/openIssueDesk")}
           />
-        </Suspense>
+        </div>
       </div>
+      <div className="row mt-2">
+        <div className="d-flex justify-content-start">
+          <p className="fs-6">INTENT DETAILS</p>
+        </div>
+      </div>
+
+      <div className="row d-flex justify-content-start mb-2">
+        <div className="col-6">
+          <div className="row align-items-center">
+            <div className="col-auto">
+              <label>Filter By Status</label>
+            </div>
+            <div className="col-auto">
+              <CustomSelect
+                defaultValue={{
+                  value: "Approved",
+                  label: "Approved",
+                }}
+                options={[
+                  {
+                    value: "Approved",
+                    label: "Approved",
+                  },
+                  {
+                    value: "Rejected",
+                    label: "Rejected",
+                  },
+                  {
+                    value: "Dispatched",
+                    label: "Dispatched",
+                  },
+                  {
+                    value: "Completed",
+                    label: "Completed",
+                  },
+                  {
+                    value: "Partly Issued",
+                    label: "Parttly Issued",
+                  },
+                ]}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="row mt-2">
+        <HorizonatalLine text="Issued Details" />
+      </div>
+      <Paper elevation={2}>
+        <div className="row mb-1">
+          <div className="d-flex justify-content-end">
+            <SearchField
+              className="me-1 mt-1"
+              iconPosition="end"
+              iconName={faSearch}
+              onChange={(e) => {
+                console.log(e);
+              }}
+            />
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="col-12">
+            <TableComponent
+              columns={columns}
+              sortField={sortField}
+              page={controller.page + 1}
+              count={totalPages}
+              rowsPerPage={controller.rowsPerPage}
+              order={order}
+              paginationRequired={true}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              handleSorting={handleSortingChange}
+              checkBoxRequired={true}
+            >
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell className="text-center" colSpan={12}>
+                      <Spinner />
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  tableData &&
+                  tableData.length > 0 &&
+                  tableData.map((data, index) => (
+                    <>
+                      <StyledTableRow key={data.id}>
+                        <StyledTableCell>
+                          <IconButton
+                            aria-label="expand row"
+                            size="small"
+                            onClick={() => handleCollapse(index)}
+                          >
+                            <FontAwesomeIcon
+                              icon={
+                                open.includes(index)
+                                  ? faChevronUp
+                                  : faChevronDown
+                              }
+                            />
+                          </IconButton>
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          <Checkbox
+                            onClick={(event) => handleClick(event, index, data)}
+                            color="primary"
+                            checked={selected.includes(index)}
+                            inputProps={{
+                              "aria-labelledby": `enhanced-table-checkbox-${index}`,
+                            }}
+                          />
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data?.request_id}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data?.request_date}
+                        </StyledTableCell>
+
+                        <StyledTableCell padding="none">
+                          {data?.fromStore}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data?.remarks}
+                        </StyledTableCell>
+                      </StyledTableRow>
+
+                      <TableRow>
+                        <TableCell
+                          style={{ paddingBottom: 0, paddingTop: 0 }}
+                          colSpan={6}
+                        >
+                          <Collapse
+                            in={open.includes(index)}
+                            timeout="auto"
+                            unmountOnExit
+                          >
+                            <Box sx={{ margin: 1 }}>
+                              <Typography
+                                variant="h6"
+                                gutterBottom
+                                component="div"
+                              >
+                                Transfer Details
+                              </Typography>
+                              <Table size="small" aria-label="purchases">
+                                <TableHead>
+                                  <TableRow>
+                                    <TableCell>Program Name</TableCell>
+                                    <TableCell>Drug Name</TableCell>
+                                    <TableCell>REQ QTY</TableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {data?.transferDetail &&
+                                    data?.transferDetail.length > 0 &&
+                                    data?.transferDetail.map((ele) => {
+                                      return (
+                                        <>
+                                          <TableRow>
+                                            <TableCell
+                                              padding="none"
+                                              className={classes.tableCell}
+                                            >
+                                              {ele?.programName}
+                                            </TableCell>
+                                            <TableCell
+                                              padding="none"
+                                              className={classes.tableCell}
+                                            >
+                                              {ele?.drugName}
+                                            </TableCell>
+
+                                            <TableCell
+                                              padding="none"
+                                              className={classes.tableCell}
+                                            >
+                                              {ele?.requestQty}
+                                            </TableCell>
+                                          </TableRow>
+                                        </>
+                                      );
+                                    })}
+                                </TableBody>
+                              </Table>
+                            </Box>
+                          </Collapse>
+                        </TableCell>
+                      </TableRow>
+                    </>
+                  ))
+                )}
+              </TableBody>
+            </TableComponent>
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </div>
+        </div>
+      </Paper>
     </>
   );
 };

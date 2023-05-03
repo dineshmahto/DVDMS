@@ -3,10 +3,6 @@ import BasicButton from "../../components/button/basicbutton";
 import HorizonatalLine from "../../components/horizontalLine/horizonatalLine";
 import SelectOption from "../../components/option/option";
 import TableComponent from "../../components/tables/datatable/tableComponent";
-import {
-  getNotificationService,
-  postNotificationService,
-} from "../../services/notification/notificationservice";
 import { TableBody, TableRow, TableCell } from "@mui/material";
 import "./notification.css";
 import SearchField from "../../components/search/search";
@@ -18,7 +14,18 @@ import BasicModal from "../../components/modal/basicmodal";
 import Checkbox from "@mui/material/Checkbox";
 import { Spinner } from "react-bootstrap";
 import { makeStyles } from "@mui/styles";
-import * as CONSTANTS from "../../common/constant/constants";
+import TablePagination from "../../components/tables/datatable/tablepagination";
+import { Paper } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  cancelNotification,
+  getNotificationList,
+  getNotificationListResponse,
+} from "../../store/demand/action";
+import toastMessage from "../../common/toastmessage/toastmessage";
+import CustomSelect from "../../components/select/customSelect";
+import { showLoader } from "../../store/loader/actions";
+import AlertDialog from "../../components/dialog/dialog";
 
 const useStyles = makeStyles({
   tableCell: {
@@ -30,6 +37,15 @@ const useStyles = makeStyles({
   },
 });
 const Notification = () => {
+  const dispatch = useDispatch();
+  const notficationListResponse = useSelector(
+    (state) => state?.demand?.notficationListResponse
+  );
+  const cancelNotificationResponse = useSelector(
+    (state) => state?.demand?.cancelNotificationResponse
+  );
+  console.log("cancelNotificationResponse", cancelNotificationResponse);
+  console.log("notficationListResponse", notficationListResponse);
   let navigate = useNavigate();
   let classes = useStyles();
   const [totalPages, setTotalPages] = useState(0);
@@ -38,6 +54,7 @@ const Notification = () => {
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
+    notitificationStatus: 1,
   });
   const [totalRows, setTotalRows] = useState(0);
   const [sortField, setSortField] = useState("");
@@ -48,6 +65,10 @@ const Notification = () => {
   const [previewList, setPreviewList] = useState([]);
   const [modalTitle, setModalTitle] = useState("");
   const [selectedRow, setSelectedRow] = useState([]);
+
+  const [open, setOpen] = React.useState(false);
+
+  const [notificationId, setNotificationId] = useState("");
   const columns = useMemo(() => [
     {
       id: "notificationDate",
@@ -56,26 +77,17 @@ const Notification = () => {
     },
 
     {
-      id: "financialYear",
+      id: "financialDate",
       name: "FINANCIAL YEAR",
       sortable: true,
     },
 
     {
-      id: "demandTypeId",
-      name: "DEMAND TYPE",
-      sortable: true,
-    },
-    {
-      id: "submissionLastDate",
+      id: "lastDate",
       name: "SUBM. LAST DATE",
       sortable: true,
     },
-    {
-      id: "instituteType",
-      name: "INSTITUTE",
-      sortable: true,
-    },
+
     {
       id: "programDetail",
       name: "PROGRAM DETAIL",
@@ -86,11 +98,7 @@ const Notification = () => {
       name: "DRUG DETAIL",
       sortable: true,
     },
-    {
-      id: "status",
-      name: "STATUS",
-      sortable: true,
-    },
+
     {
       id: "dwonload",
       name: "DOWNLOAD",
@@ -98,62 +106,82 @@ const Notification = () => {
     },
   ]);
 
-  const callApi = async () => {
-    const jwt =
-      "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhZG1pbiIsImlhdCI6M…DU1fQ.38ZZz4KQm6sA5Uh8jJJU7O6CxWkce03ZO-qSwyM2ZB8";
-    await getNotificationService(
-      CONSTANTS?.GET_NOTIFICATION_LIST,
-      {
-        pageNumber: controller.page,
-        pageSize: controller.rowsPerPage,
-      },
-      jwt
-    )
-      .then((r) => {
-        setLoading(false);
-        console.log("Response", r?.data);
-        setTotalPages(r?.data?.totalPages);
-        setTotalRows(r?.data?.totalElements);
-        setTableData(r?.data?.content);
-      })
-      .catch((e) => {
-        console.log("Error", e);
-      });
-  };
   useEffect(() => {
-    let isApiSubscribed = true;
-    if (isApiSubscribed) {
-      console.log(
-        "sessionStorage",
-        sessionStorage.getItem("DVDMS_KEEP_SECRET")
-      );
-      console.log("called");
+    let isApiSubcribed = true;
+    if (isApiSubcribed) {
       setLoading(true);
-      callApi();
+      dispatch(
+        getNotificationList({
+          pageNumber: controller.page,
+          pageSize: controller.rowsPerPage,
+          status: controller.notitificationStatus,
+        })
+      );
     }
     return () => {
-      isApiSubscribed = false;
+      dispatch(getNotificationListResponse(""));
+      isApiSubcribed = false;
     };
   }, [controller]);
-  const handlePageChange = (event, newPage) => {
-    setController({
-      ...controller,
-      page: newPage,
-    });
-  };
 
-  const handlePageChange1 = (newPage) => {
+  useEffect(() => {
+    if (notficationListResponse && notficationListResponse?.status === 200) {
+      setTotalRows(notficationListResponse?.data?.totalElements);
+      setTableData(notficationListResponse?.data?.content);
+      setLoading(false);
+    } else if (
+      notficationListResponse &&
+      notficationListResponse?.status == 400
+    ) {
+      setLoading(false);
+      dispatch(getNotificationListResponse(""));
+      toastMessage("Login Error", "Please enter valid ID", "error");
+    }
+  }, [notficationListResponse]);
+
+  useEffect(() => {
+    if (
+      cancelNotificationResponse &&
+      cancelNotificationResponse?.status === 201
+    ) {
+      setSelectedRow([]);
+      setSelected([]);
+      dispatch(
+        getNotificationList({
+          page: 0,
+          rowsPerPage: 10,
+          notitificationStatus: 1,
+        })
+      );
+      setOpen(false);
+      toastMessage("Notification", cancelNotificationResponse?.data?.message);
+      dispatch(cancelNotificationResponse(""));
+    } else if (
+      cancelNotificationResponse &&
+      cancelNotificationResponse?.status == 404
+    ) {
+      setOpen(false);
+      toastMessage(
+        "Notication",
+        cancelNotificationResponse?.data?.message,
+        "error"
+      );
+      dispatch(cancelNotificationResponse(""));
+    }
+  }, [cancelNotificationResponse]);
+
+  const handlePageChange = (newPage) => {
+    console.log("newPage", newPage);
     setLoading(true);
-    console.log("NewPage", newPage);
     setController({
       ...controller,
       page: newPage - 1,
     });
   };
-  const handleChangeRowsPerPage = (current, size) => {
+  const handleChangeRowsPerPage = (e) => {
     setController({
       ...controller,
-      rowsPerPage: size,
+      rowsPerPage: e,
       page: 0,
     });
   };
@@ -203,7 +231,20 @@ const Notification = () => {
       setSelected(openCopy);
     }
   };
-
+  const handleNotificationStatusChange = (selectedOption) => {
+    setController({
+      ...controller,
+      notitificationStatus: selectedOption?.value,
+    });
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleAction = () => {
+    console.log("selelcted", selectedRow?.id);
+    console.log("clicked handle Action");
+    dispatch(cancelNotification(selectedRow?.id));
+  };
   const preview = useCallback(() => {
     return (
       <BasicModal
@@ -222,7 +263,7 @@ const Notification = () => {
               <>
                 <p>
                   {" "}
-                  <span>{index + 1}. </span> {element?.programmeName}
+                  <span>{index + 1}. </span> {element?.name}
                 </p>
               </>
             );
@@ -237,34 +278,42 @@ const Notification = () => {
           <p className="fs-6">DEMAND NOTIFICATION DESK</p>
         </div>
       </div>
-      <div className="row">
-        <div className="d-flex justify-content-start">
-          <div className="me-3">
-            <div className="row g-0">
-              <div className="col-5 text-center">
-                <label className="labellineHeight" htmlFor="storeName">
-                  Store Name
-                </label>
-              </div>
-              <div className="col-6">
-                <SelectOption id="storeName" data={[]} />
-              </div>
+
+      <div className="row d-flex justify-content-start mb-2">
+        <div className="col-6">
+          <div className="row align-items-center">
+            <div className="col-auto">
+              <label className="labellineHeight" htmlFor="storeName">
+                Store Name:
+              </label>
             </div>
-          </div>
-          <div className=" col-4">
-            <div className="row g-0">
-              <div className="col-6 text-center">
-                <label className="labellineHeight" htmlFor="notificationStatus">
-                  Notification Status
-                </label>
-              </div>
-              <div className="col-4">
-                <SelectOption id="notificationStatus" data={[]} />
-              </div>
+            <div className="col-auto">STATE WAREHOUSE</div>
+
+            <div className="col-auto">
+              <label className="labellineHeight" htmlFor="notificationStatus">
+                Notification Status
+              </label>
+            </div>
+            <div className="col-auto">
+              <CustomSelect
+                defaultValue={{
+                  value: "1",
+                  label: "ACTIVE",
+                }}
+                options={[
+                  { value: "99", label: "ALL" },
+                  { value: "1", label: " ACTIVE" },
+                  { value: "3", label: "CANCELLED" },
+                  { value: "10", label: "Compiled by HQ" },
+                  { value: "11", label: "Closed" },
+                ]}
+                onChange={handleNotificationStatusChange}
+              />
             </div>
           </div>
         </div>
       </div>
+
       <div className="row mt-2">
         <div className="d-flex justify-content-start">
           <BasicButton
@@ -272,14 +321,25 @@ const Notification = () => {
             buttonText="New Notification (HQ)"
             className="btn btn-outline-primary btn-sm rounded-0"
             onClick={(e) => {
-              navigate("/admin/openNotification", {state: e});
+              navigate("/openNotification", { state: e });
+              dispatch(showLoader());
             }}
           />
           {selected.length > 0 ? (
             <>
               <BasicButton
                 type="button"
-                buttonText="Edit PO"
+                buttonText="Cancel Notification"
+                outlineType={true}
+                className="primary btn-sm ms-1"
+                disabled={selected.length > 0 ? null : "disabled"}
+                onClick={(e) => {
+                  setOpen(true);
+                }}
+              />
+              <BasicButton
+                type="button"
+                buttonText="Compile"
                 outlineType={true}
                 className="primary btn-sm ms-1"
                 disabled={selected.length > 0 ? null : "disabled"}
@@ -287,27 +347,23 @@ const Notification = () => {
               />
               <BasicButton
                 type="button"
-                buttonText="Edit PO"
+                buttonText="Change Last Date"
                 outlineType={true}
                 className="primary btn-sm ms-1"
                 disabled={selected.length > 0 ? null : "disabled"}
-                onClick={(e) => console.log("Selected Data", selectedRow)}
-              />
-              <BasicButton
-                type="button"
-                buttonText="Edit PO"
-                outlineType={true}
-                className="primary btn-sm ms-1"
-                disabled={selected.length > 0 ? null : "disabled"}
-                onClick={(e) => console.log("Selected Data", selectedRow)}
+                onClick={(e) => {
+                  navigate("/openExtendNotificationForm", {
+                    state: selectedRow,
+                  });
+                }}
               />
               <BasicButton
                 type="button"
                 outlineType={true}
-                buttonText="Edit PO"
+                buttonText="Annual Demand"
                 className="primary btn-sm ms-1"
                 disabled={selected.length > 0 ? null : "disabled"}
-                onClick={(e) => console.log("Selected Data", selectedRow)}
+                onClick={(e) => console.log("Selected Data", [selectedRow])}
               />
             </>
           ) : (
@@ -329,135 +385,147 @@ const Notification = () => {
           />
         </div>
       </div>
-      {/* Table Rendering */}
-      <div className="row">
-        <div className="col-12">
-          <TableComponent
-            columns={columns}
-            sortField={sortField}
-            page={controller.page + 1}
-            count={totalRows}
-            rowsPerPage={controller.rowsPerPage}
-            order={order}
-            paginationRequired={true}
-            onPageChange={handlePageChange1}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            handleSorting={handleSortingChange}
-            checkBoxRequired={true}
-          >
-            <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell className="text-center" colSpan={12}>
-                    <Spinner />
-                  </TableCell>
-                </TableRow>
-              ) : (
-                tableData &&
-                tableData?.length > 0 &&
-                tableData?.map((data, index) => {
-                  return (
-                    <TableRow key={data.id}>
-                      <TableCell padding="none">
-                        <Checkbox
-                          onClick={(event) => handleClick(event, index, data)}
-                          color="primary"
-                          checked={selected.includes(index)}
-                          inputProps={{
-                            "aria-labelledby": `enhanced-table-checkbox-${index}`,
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {moment(data.notificationDate).format("DD/MM/YYYY")}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data.financialYear}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.demandTypeId?.demandName}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {moment(data?.submissionLastDate).format("DD/MM/YYYY")}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.instituteType?.typeName}
-                      </TableCell>
-
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.programmeList &&
-                        data?.programmeList.length > 0 ? (
-                          <span
-                            className="text-decoration-underline"
-                            onClick={() => {
-                              setModalTitle("Programme List");
-                              setPreviewList(data?.programmeList);
-                              setShow(true);
+      <Paper>
+        {/* Table Rendering */}
+        <div className="row">
+          <div className="col-12">
+            <TableComponent
+              columns={columns}
+              sortField={sortField}
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller.rowsPerPage}
+              order={order}
+              paginationRequired={true}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              handleSorting={handleSortingChange}
+              checkBoxRequired={true}
+            >
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell className="text-center" colSpan={12}>
+                      <Spinner />
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  tableData &&
+                  tableData?.length > 0 &&
+                  tableData?.map((data, index) => {
+                    return (
+                      <TableRow key={data.id}>
+                        <TableCell padding="none">
+                          <Checkbox
+                            onClick={(event) => handleClick(event, index, data)}
+                            color="primary"
+                            checked={selected.includes(index)}
+                            inputProps={{
+                              "aria-labelledby": `enhanced-table-checkbox-${index}`,
                             }}
-                            style={{ fontSize: "0.7rem", cursor: "pointer" }}
-                          >
-                            VIEW PROGRAMME LIST
-                          </span>
-                        ) : (
-                          "NONE"
-                        )}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.drugList && data?.drugList.length > 0 ? (
-                          <span
-                            className="text-decoration-underline"
-                            onClick={() => {
-                              setModalTitle("Drug List");
-                              setPreviewList(data?.drugList);
-                              setShow(true);
-                            }}
-                            style={{ fontSize: "0.7rem" }}
-                          >
-                            VIEW DRUGLIST
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </TableCell>
+                          />
+                        </TableCell>
+                        <TableCell padding="none" className={classes.tableCell}>
+                          {moment(data.notificationDate).format("DD/MM/YYYY")}
+                        </TableCell>
+                        <TableCell
+                          padding="none"
+                          className={[classes.tableCell, "text-center"]}
+                        >
+                          {data.financialDate}
+                        </TableCell>
+                        <TableCell
+                          padding="none"
+                          className={[classes.tableCell, "text-center"]}
+                        >
+                          {moment.utc(data.lastDate).format("DD/MM/YYYY")}
+                        </TableCell>
 
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.status === 10
-                          ? "	Compiled by HQ"
-                          : data?.status === 11
-                          ? " 	Closed"
-                          : data?.status === 1
-                          ? "Active"
-                          : data?.status === 3
-                          ? "Cancelled"
-                          : ""}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.staus === 10 || data?.status === 11 ? (
-                          <FontAwesomeIcon icon={faDownload} />
-                        ) : (
-                          ""
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })
-              )}
-              {console.log(tableData?.length)}
-              {!loading && tableData && tableData.length === 0 && (
-                <TableRow>
-                  <TableCell className="text-center" colSpan={12}>
-                    <p style={{ fontSize: "0.8rem" }}>
-                      NO DATA AVAILABE IN TABLE
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </TableComponent>
+                        <TableCell
+                          padding="none"
+                          className={[classes.tableCell, "text-center"]}
+                        >
+                          {data?.programList && data?.programList.length > 0 ? (
+                            <span
+                              className="text-decoration-underline"
+                              onClick={() => {
+                                setModalTitle("Programme List");
+                                setPreviewList(data?.programList);
+                                setShow(true);
+                              }}
+                              style={{ fontSize: "0.7rem", cursor: "pointer" }}
+                            >
+                              VIEW PROGRAMME LIST
+                            </span>
+                          ) : (
+                            "NONE"
+                          )}
+                        </TableCell>
+                        <TableCell
+                          padding="none"
+                          className={[classes.tableCell, "text-center"]}
+                        >
+                          {data?.drugList && data?.drugList.length > 0 ? (
+                            <span
+                              className="text-decoration-underline"
+                              onClick={() => {
+                                setModalTitle("Drug List");
+                                setPreviewList(data?.drugList);
+                                setShow(true);
+                              }}
+                              style={{ fontSize: "0.7rem" }}
+                            >
+                              VIEW DRUGLIST
+                            </span>
+                          ) : (
+                            ""
+                          )}
+                        </TableCell>
 
-          {preview()}
+                        <TableCell
+                          padding="none"
+                          className={[classes.tableCell, "text-center"]}
+                        >
+                          {data?.staus === 10 || data?.status === 11 ? (
+                            <FontAwesomeIcon icon={faDownload} />
+                          ) : (
+                            ""
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
+                {console.log(tableData?.length)}
+                {!loading && tableData && tableData.length === 0 && (
+                  <TableRow>
+                    <TableCell className="text-center" colSpan={12}>
+                      <p style={{ fontSize: "0.8rem" }}>
+                        NO DATA AVAILABE IN TABLE
+                      </p>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </TableComponent>
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+            {preview()}
+          </div>
         </div>
-      </div>
+        <AlertDialog
+          open={open}
+          handleClose={handleClose}
+          dialogTitle="Cancel"
+          description="Are you sure to cancel demand notification?"
+          handleAction={handleAction}
+        />
+      </Paper>
     </>
   );
 };

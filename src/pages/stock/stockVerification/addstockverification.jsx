@@ -5,7 +5,7 @@ import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine"
 import SearchField from "../../../components/search/search";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 
-import { faSearch, faAdd } from "@fortawesome/free-solid-svg-icons";
+import { faSearch, faAdd, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { TableBody, TableRow, TableCell } from "@mui/material";
 import { Paper } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
@@ -15,6 +15,8 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import TextField from "@mui/material/TextField";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { makeStyles } from "@mui/styles";
+import Basicbutton from "../../../components/button/basicbutton";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const useStyles = makeStyles({
   root: {
     "& .MuiInputBase-root": {
@@ -60,6 +62,7 @@ const AddStockVerification = () => {
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [selected, setSelected] = useState([]);
+  const [displayData, setDisplayData] = useState([]);
   const [selectedRow, setSelectedRow] = useState([]);
 
   const [verificationDate, setVerificationDate] = useState();
@@ -146,6 +149,42 @@ const AddStockVerification = () => {
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
+  };
+
+  //   Add Button event Listner to show selected List
+  const handleSelectedList = () => {
+    if (selected && selected.length > 0) {
+      const selectedList = [...tableData].filter((elem) => {
+        return selected.find((ele) => {
+          return ele === elem.id;
+        });
+      });
+      const isEmpty = selectedList?.some(function (object) {
+        return object.issuedAmnt == "" || object.requestQty == "";
+      });
+      if (!isEmpty) {
+        const newIssueList = tableData.filter((elem) => {
+          return !selected.find((ele) => {
+            return ele === elem.id;
+          });
+        });
+        setSelected([]);
+        setDisplayData(selectedList);
+        setTableData(newIssueList);
+      } else {
+        toastMessage(
+          "Stock Verification",
+          "Fill up the selected List to Transfer",
+          "error"
+        );
+      }
+    } else {
+      toastMessage(
+        "Issue List",
+        "Select the Checkbox to transfer the list",
+        "error"
+      );
+    }
   };
   return (
     <>
@@ -302,6 +341,114 @@ const AddStockVerification = () => {
               </TableBody>
             </TableComponent>
           </div>
+        </div>
+        <div className="row">
+          <div className="d-flex justify-content-center">
+            <div>
+              <Basicbutton
+                buttonText="Add"
+                className="primary mb-1 rounded-0"
+                icon={<FontAwesomeIcon icon={faPlus} className="me-1" />}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="row">
+          {selected && selected.length > 0 ? (
+            <TableComponent
+              columns={columns}
+              sortField={sortField}
+              page={controller.page}
+              count={totalRows}
+              rowsPerPage={controller.rowsPerPage}
+              order={order}
+              checkBoxRequired={true}
+              paginationRequired={true}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+              numSelected={selected.length}
+              rowCount={tableData?.length}
+              actionIcon={faAdd}
+              showTableActionBar={false}
+              handleSorting={handleSortingChange}
+            >
+              <TableBody>
+                {tableData &&
+                  tableData?.map((row, index) => {
+                    const isItemSelected = isSelected(row.id);
+                    const labelId = `enhanced-table-checkbox-${index}`;
+                    return (
+                      <TableRow
+                        hover
+                        role="checkbox"
+                        aria-checked={selected.includes(index)}
+                        tabIndex={-1}
+                        key={row.id}
+                        selected={isItemSelected}
+                      >
+                        <TableCell padding="none">
+                          <Checkbox
+                            onClick={(event) => handleClick(event, row.id, row)}
+                            color="primary"
+                            checked={isItemSelected}
+                            inputProps={{
+                              "aria-labelledby": labelId,
+                            }}
+                          />
+                        </TableCell>
+                        {columns.map((d, k) => {
+                          if (d.id === "avlQty") {
+                            return (
+                              <TableCell
+                                key={k}
+                                padding="none"
+                                style={{
+                                  padding: "4px",
+                                  fontSize: "0.7rem",
+                                }}
+                              >
+                                <BasicInput
+                                  type="text"
+                                  placeholder="Enter the Quantity"
+                                  disabled={!isItemSelected}
+                                />
+                              </TableCell>
+                            );
+                          } else if (d.id === "mfgDate" || d.id === "expDate") {
+                            return (
+                              <TableCell
+                                key={k}
+                                padding="none"
+                                style={{
+                                  padding: "4px",
+                                  fontSize: "0.7rem",
+                                }}
+                              >
+                                {moment(row[d.id]).format("DD/MM/YYYY")}
+                              </TableCell>
+                            );
+                          } else {
+                            return (
+                              <TableCell
+                                key={k}
+                                padding="none"
+                                style={{
+                                  padding: "4px",
+                                  fontSize: "0.7rem",
+                                }}
+                              >
+                                {row[d.id]}
+                              </TableCell>
+                            );
+                          }
+                        })}
+                      </TableRow>
+                    );
+                  })}
+              </TableBody>
+            </TableComponent>
+          ) : null}
         </div>
       </Paper>
     </>

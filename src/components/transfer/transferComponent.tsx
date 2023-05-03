@@ -16,6 +16,7 @@ const useStyles = makeStyles({
 });
 
 interface transferComponentProps {
+  isDisabled: boolean | false;
   apiData: any[];
   selectedItem: any[];
   activeIndicies: any[];
@@ -48,6 +49,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
   selectItemActiveIndices,
   selectedItem,
   handleRightListItemClick,
+  isDisabled,
 }) => {
   const classes = useStyles();
   return (
@@ -61,6 +63,8 @@ const TransferComponent: React.FC<transferComponentProps> = ({
               overflowX: "hidden",
               overflowY: "scroll",
               borderWidth: "0px !important",
+              pointerEvents: isDisabled ? "none" : "auto",
+              cursor: isDisabled ? "not-allowed" : "pointer",
             }}
           >
             <ul className="list-group">
@@ -90,6 +94,10 @@ const TransferComponent: React.FC<transferComponentProps> = ({
             <button
               className="btn btn-secondary btn-sm mb-1"
               onClick={handleMoveSelectedItemToRight}
+              style={{
+                cursor: isDisabled ? "not-allowed !important" : "pointer",
+              }}
+              disabled={isDisabled}
             >
               <FontAwesomeIcon
                 icon={faAngleRight}
@@ -99,18 +107,30 @@ const TransferComponent: React.FC<transferComponentProps> = ({
             <button
               className="btn btn-secondary btn-sm mb-1"
               onClick={handleMoveSelectedItemToLeft}
+              disabled={isDisabled}
+              style={{
+                cursor: isDisabled ? "not-allowed" : "pointer",
+              }}
             >
               <FontAwesomeIcon icon={faAngleLeft} />
             </button>
             <button
               className="btn btn-secondary btn-sm mb-1"
               onClick={handleShiftAllElementToRight}
+              disabled={isDisabled}
+              style={{
+                cursor: isDisabled ? "not-allowed" : "pointer",
+              }}
             >
               <FontAwesomeIcon icon={faAngleDoubleRight} />
             </button>
             <button
               className="btn btn-secondary btn-sm mb-1"
               onClick={handleShiftAllElementToLeft}
+              style={{
+                cursor: isDisabled ? "not-allowed" : "pointer",
+              }}
+              disabled={isDisabled}
             >
               <FontAwesomeIcon icon={faAngleDoubleLeft} />
             </button>
@@ -121,6 +141,8 @@ const TransferComponent: React.FC<transferComponentProps> = ({
               height: "300px",
               overflowX: "hidden",
               overflowY: "scroll",
+              pointerEvents: isDisabled ? "none" : "auto",
+              cursor: isDisabled ? "not-allowed" : "default",
             }}
           >
             <ul className="list-group list-group-flush">

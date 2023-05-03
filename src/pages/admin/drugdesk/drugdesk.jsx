@@ -15,6 +15,13 @@ import {
   faFloppyDisk,
 } from "@fortawesome/free-solid-svg-icons";
 import API from "../../../config/config";
+import TablePagination from "../../../components/tables/datatable/tablepagination";
+import { useDispatch, useSelector } from "react-redux";
+import { getDrugDeksList } from "../../../store/admin/action";
+import toastMessage from "../../../common/toastmessage/toastmessage";
+import handleSortingFunc from "../../../components/tables/datatable/sortable";
+import StyledTableRow from "../../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 const AddNewDrugModal = lazy(() => import("./addnewdrug"));
 const AddNewAssetModal = lazy(() => import("./addnewasset"));
 const EditDrugModal = lazy(() => import("./editdrugmodal"));
@@ -29,6 +36,11 @@ const useStyles = makeStyles({
   },
 });
 const DrugDesk = () => {
+  const dispatch = useDispatch();
+  const drugDeskListResponse = useSelector(
+    (state) => state?.admin?.drugDeskListResponse
+  );
+  console.log("drugDeskListResponse", drugDeskListResponse);
   const classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
@@ -46,33 +58,33 @@ const DrugDesk = () => {
   const [loading, setLoading] = useState(false);
   const columns = useMemo(() => [
     {
-      id: "drugId",
+      id: "id",
       name: "DRUG ID",
       sortable: true,
     },
 
     {
-      id: "drugName",
+      id: "name",
       name: "DRUG NAME",
       sortable: true,
     },
     {
-      id: "strengthUnit",
+      id: "unit",
       name: "STRENGTH UNIT",
       sortable: true,
     },
     {
-      id: "mName",
+      id: "manuName",
       name: "MANUFACTURER NAME",
       sortable: true,
     },
     {
-      id: "pType",
+      id: "packType",
       name: "PACKAGE TYPE",
       sortable: true,
     },
     {
-      id: "dClass",
+      id: "drugClass",
       name: "DRUG CLASS",
       sortable: true,
     },
@@ -89,49 +101,57 @@ const DrugDesk = () => {
     },
   ]);
 
-  const fetchApi = async (signal) => {
-    await API.get("", { signal })
-      .then((response) => {
-        console.log("response", response);
-      })
-      .catch((error) => {
-        if (error.name === "AbortError") {
-          console.log("Request canceled", error.message);
-        } else {
-          if (error.response) {
-            console.log("Response", error.response);
-          } else if (error.request) {
-            console.log("Error Request", error.request);
-          } else {
-            console.log("Error", error.message);
-          }
-        }
-      });
-  };
   useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-    const signal = controller.signal;
-    fetchApi(signal);
+    let isApiSubcribed = true;
+    if (isApiSubcribed) {
+      setLoading(true);
+      dispatch(
+        getDrugDeksList({
+          pageNumber: controller.page,
+          pageSize: controller.rowsPerPage,
+        })
+      );
+    }
     return () => {
-      isMounted = false;
-      isMounted && controller.abort();
+      isApiSubcribed = false;
     };
-  }, []);
+  }, [controller]);
+
+  useEffect(() => {
+    if (drugDeskListResponse && drugDeskListResponse?.status === 200) {
+      setTotalRows(drugDeskListResponse?.data?.totalElements);
+      setTableData(drugDeskListResponse?.data?.content);
+
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    } else if (drugDeskListResponse && drugDeskListResponse?.status == 400) {
+      setLoading(false);
+      toastMessage("Login Error", "Please enter valid ID", "error");
+    } else if (
+      drugDeskListResponse &&
+      drugDeskListResponse?.response?.status == 500
+    ) {
+      setLoading(false);
+      toastMessage(
+        "Drug Desk",
+        "Something went wrong please try after sometime",
+        "error"
+      );
+    }
+  }, [drugDeskListResponse]);
 
   const handlePageChange = (newPage) => {
-    console.log("newPage", newPage);
     setLoading(true);
     setController({
       ...controller,
       page: newPage - 1,
     });
   };
-  const handleChangeRowsPerPage = (current, pageSize) => {
-    console.log(current, pageSize);
+  const handleChangeRowsPerPage = (e) => {
     setController({
       ...controller,
-      rowsPerPage: pageSize,
+      rowsPerPage: e,
       page: 0,
     });
   };
@@ -140,10 +160,8 @@ const DrugDesk = () => {
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    // console.log("tableData", tableData);
-    // handleSorting(accessor, sortOrder, tableData);
-    // console.log("sortedData", sortedData);
-    // setTableData(sortedData);
+    handleSortingFunc(accessor, sortOrder, tableData);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
   const handleOpenAddDrugModal = () => {
     setShowAddDrugModal(false);
@@ -157,124 +175,91 @@ const DrugDesk = () => {
 
   return (
     <>
-      <div className="row mt-2">
+      <div className="row mt-1">
         <div className="d-flex justify-content-start">
           <p className="fs-6">DRUG / ASSETS DESK</p>
         </div>
       </div>
 
-      <div className="row mt-2">
+      <div className="row mt-1">
         <HorizonatalLine text="Drug Management Desk" />
       </div>
+      <div className="row ">
+        <div className="d-flex flex-row justify-content-between">
+          <Basicbutton
+            buttonText="Add New Drug"
+            className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
+            onClick={() => {
+              setShowAddDrugModal(true);
+            }}
+          />
+          <SearchField
+            className="me-1 "
+            iconPosition="end"
+            iconName={faSearch}
+            onChange={(e) => {
+              console.log(e);
+            }}
+          />
+        </div>
+      </div>
       <Paper>
-        <div className="row ">
-          <div className="d-flex flex-row justify-content-end">
-            <Basicbutton
-              buttonText="Add New Drug"
-              className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
-              onClick={() => {
-                setShowAddDrugModal(true);
-              }}
-            />
-          </div>
-        </div>
-        <div className="row mb-1">
-          <div className="d-flex justify-content-end">
-            <SearchField
-              className="me-1 "
-              iconPosition="end"
-              iconName={faSearch}
-              onChange={(e) => {
-                console.log(e);
-              }}
-            />
-          </div>
-        </div>
         <div className="row">
           <div className="col-12">
             <TableComponent
               columns={columns}
               sortField={sortField}
               page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
               paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
               handleSorting={handleSortingChange}
               checkBoxRequired={false}
             >
               <TableBody>
                 {loading ? (
-                  <TableRow>
+                  <StyledTableRow>
                     <TableCell className="text-center" colSpan={12}>
                       <Spinner />
                     </TableCell>
-                  </TableRow>
+                  </StyledTableRow>
                 ) : (
                   tableData &&
                   tableData.length > 0 &&
                   tableData.map((data, index) => {
                     return (
-                      <TableRow key={data.id}>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {data.drugId}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {data.drugName}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {data?.strengthUnit}
-                        </TableCell>
-
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {data?.mName}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {data?.pType}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {data?.dClass}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {data?.category}
-                        </TableCell>
-
-                        <TableCell padding="none" className={classes.tableCell}>
-                          <span
-                            className="text-decoration-underline ms-1"
-                            style={{
-                              fontSize: "0.7rem",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <FontAwesomeIcon
-                              icon={faPenToSquare}
-                              className="me-2"
-                            />
-                          </span>
-                          <span className="m-1"> |</span>
-
-                          <span
-                            className="text-decoration-underline"
-                            style={{
-                              fontSize: "0.7rem",
-                              cursor: "pointer",
-                            }}
-                          >
-                            <FontAwesomeIcon
-                              icon={faTrash}
-                              className="ms-2"
-                              color="red"
-                            />
-                          </span>
-                        </TableCell>
-                      </TableRow>
+                      <StyledTableRow>
+                        {columns.map((d, k) => {
+                          if (d.id === "Action") {
+                            return (
+                              <StyledTableCell key={k} padding="none">
+                                <span
+                                  className="text-decoration-underline"
+                                  style={{
+                                    fontSize: "0.8rem",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  <FontAwesomeIcon
+                                    icon={faTrash}
+                                    className="ms-2"
+                                    color="red"
+                                  />
+                                </span>
+                              </StyledTableCell>
+                            );
+                          } else {
+                            return (
+                              <StyledTableCell key={k} padding="none">
+                                {data[d.id]}
+                              </StyledTableCell>
+                            );
+                          }
+                        })}
+                      </StyledTableRow>
                     );
                   })
                 )}
-                {!loading && tableData && (
+                {!loading && tableData.length === 0 && (
                   <TableRow>
                     <TableCell className="text-center" colSpan={12}>
                       <p style={{ fontSize: "0.8rem" }}>
@@ -285,6 +270,14 @@ const DrugDesk = () => {
                 )}
               </TableBody>
             </TableComponent>
+
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
           </div>
           <Suspense>
             <AddNewDrugModal

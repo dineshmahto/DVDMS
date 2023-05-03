@@ -1,47 +1,40 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  lazy,
+  Suspense,
+} from "react";
 import { Paper } from "@mui/material";
 import { TableBody, TableRow, TableCell } from "@mui/material";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
-import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import Basicbutton from "../../../components/button/basicbutton";
-import BasicModal from "../../../components/modal/basicmodal";
 import SearchField from "../../../components/search/search";
-import BasicInput from "../../../components/inputbox/floatlabel/basicInput";
 import { Spinner } from "react-bootstrap";
 import {
-  faFloppyDisk,
-  faList,
   faPenToSquare,
   faSearch,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import CustomSelect from "../../../components/select/customSelect";
-import { getAdminService } from "../../../services/adminservice/adminservice";
-import { makeStyles } from "@mui/styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toastMessage from "../../../common/toastmessage/toastmessage";
-import * as CONSTANTS from "../../../common/constant/constants";
-import { Seo } from "../../../components/seo/seo";
-import CreateUserModalForm from "./createusermodalform";
-import EditUserModalForm from "./editusermodalform";
-import UserActivityListModal from "./useractivitylistmodal";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserList } from "../../../store/admin/action";
+import { getUserList, getUserListResponse } from "../../../store/admin/action";
+import TablePagination from "../../../components/tables/datatable/tablepagination";
+import StyledTableRow from "../../../components/tables/datatable/customTableRow";
+import handleSortingFunc from "../../../components/tables/datatable/sortable";
+import { Seo } from "../../../components/seo/seo";
+import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 
-const useStyles = makeStyles({
-  tableCell: {
-    padding: "10px !important",
-    fontSize: "0.8rem !important",
-  },
-  lineHeight: {
-    lineHeight: "3",
-  },
-});
+const CreateUserModalForm = lazy(() => import("./createusermodalform"));
+const EditUserModalForm = lazy(() => import("./editusermodalform"));
+const UserActivityListModal = lazy(() => import("./useractivitylistmodal"));
+
 const UserDesk = () => {
   const userListResponse = useSelector((state) => state.admin.userListResponse);
   console.log("userListResponse", userListResponse);
   const dispatch = useDispatch();
-  let classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
@@ -122,64 +115,29 @@ const UserDesk = () => {
     },
   ]);
 
-  const handlePageChange = (newPage) => {
-    setLoading(true);
+  const handlePageChange = useCallback(
+    (newPage) => {
+      setLoading(true);
+      setController({
+        ...controller,
+        page: newPage - 1,
+      });
+    },
+    [controller]
+  );
+  const handleChangeRowsPerPage = (e) => {
     setController({
       ...controller,
-      page: newPage - 1,
+      rowsPerPage: e,
+      page: 0,
     });
-  };
-  const handleChangeRowsPerPage = (current, pageSize) => {
-    console.log(current, pageSize);
   };
   const handleSortingChange = (accessor) => {
     const sortOrder =
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    handleSorting(accessor, sortOrder);
-  };
-
-  const handleSorting = useCallback(
-    (sortField, sortOrder) => {
-      if (sortField) {
-        const sorted = [...tableData].sort((a, b) => {
-          if (a[sortField] === null) return 1;
-          if (b[sortField] === null) return -1;
-          if (a[sortField] === null && b[sortField] === null) return 0;
-
-          return (
-            a[sortField]
-              ?.toString()
-              ?.localeCompare(b[sortField]?.toString(), "en", {
-                numeric: true,
-              }) * (sortOrder === "asc" ? 1 : -1)
-          );
-        });
-
-        setTableData(sorted);
-      }
-    },
-    [sortField, order, tableData]
-  );
-
-  const callApi = async () => {
-    await getAdminService(CONSTANTS.USER_LISTING, null)
-      .then((r) => {
-        console.log(r);
-        // console.log(r?.data?.content);
-        setTotalPages(r?.data?.totalPages);
-        setTotalRows(r?.data?.totalElements);
-        setTableData(r?.data?.content);
-        setRoleList(r?.data?.roleList);
-        setStoreList(r?.data?.storeList);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setLoading(false);
-        toastMessage("Role List", "Server can't respon", "error");
-        console.log("Error", e);
-      });
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
 
   useEffect(() => {
@@ -192,57 +150,31 @@ const UserDesk = () => {
           pageSize: controller.rowsPerPage,
         })
       );
-      //callApi();
     }
     return () => {
       isApiSubcribed = false;
+      dispatch(getUserListResponse(""));
     };
   }, [controller]);
 
   useEffect(() => {
     if (userListResponse && userListResponse?.status === 200) {
-      setTotalPages(userListResponse?.data?.totalPages);
-      setTotalRows(userListResponse?.data?.totalElements);
-      setTableData(userListResponse?.data?.content);
+      setTotalPages(userListResponse?.data?.pageList.totalPages);
+      setTotalRows(userListResponse?.data?.pageList.totalElements);
+      setTableData(userListResponse?.data?.pageList.content);
       setRoleList(userListResponse?.data?.roleList);
       setStoreList(userListResponse?.data?.storeList);
-
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+      dispatch(getUserListResponse(""));
     } else if (userListResponse && userListResponse?.status == 400) {
       setLoading(false);
-      toastMessage("Login Error", "Please enter valid ID", "error");
+      toastMessage("User Desk", "", "error");
+      dispatch(getUserListResponse(""));
     }
   }, [userListResponse]);
 
-  useEffect(() => {});
-
-  const showActivities = () => {
-    return (
-      <BasicModal
-        title="List of Activities"
-        show={showActivityModal}
-        close={() => setShowActivityModal(false)}
-        isStatic={false}
-        scrollable={true}
-        isCenterAlign={true}
-        fullScreen={false}
-        key="list_Activity"
-      >
-        {activityList &&
-          activityList.length > 0 &&
-          activityList.map((element, index) => {
-            return (
-              <>
-                <p key={index}>
-                  {" "}
-                  <span>{index + 1}. </span> {element?.activityName}
-                </p>
-              </>
-            );
-          })}
-      </BasicModal>
-    );
-  };
   const handleCloseCreateUserModal = useCallback(() => {
     setShowAddModal(false);
   }, [showAddModal]);
@@ -261,48 +193,37 @@ const UserDesk = () => {
         </div>
       </div>
 
-      <div className="row mt-2">
-        <HorizonatalLine text="USER List" />
+      <div className="row">
+        <div className="d-flex flex-row justify-content-between">
+          <Basicbutton
+            buttonText="Add New User"
+            outlineType={true}
+            className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
+            onClick={() => {
+              setDropDownRoleList(roleList);
+              setDropDownStoreList(storeList);
+              setShowAddModal(true);
+            }}
+          />
+          <SearchField
+            className="me-1 "
+            iconPosition="end"
+            iconName={faSearch}
+            onChange={(e) => {
+              console.log(e);
+            }}
+          />
+        </div>
       </div>
+
       <Paper>
-        <div className="row">
-          <div className="d-flex flex-row justify-content-end">
-            <Basicbutton
-              buttonText="Add New User"
-              outlineType={true}
-              className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
-              onClick={() => {
-                setDropDownRoleList(roleList);
-                setDropDownStoreList(storeList);
-                setShowAddModal(true);
-              }}
-            />
-          </div>
-        </div>
-        <div className="row mb-1">
-          <div className="d-flex justify-content-end">
-            <SearchField
-              className="me-1 "
-              iconPosition="end"
-              iconName={faSearch}
-              onChange={(e) => {
-                console.log(e);
-              }}
-            />
-          </div>
-        </div>
         <div className="row">
           <div className="col-12">
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
+              caption="User List"
               handleSorting={handleSortingChange}
               checkBoxRequired={false}
             >
@@ -318,39 +239,39 @@ const UserDesk = () => {
                   tableData.length > 0 &&
                   tableData.map((data, index) => {
                     return (
-                      <TableRow key={data.id}>
-                        <TableCell padding="none" className={classes.tableCell}>
+                      <StyledTableRow key={data.id}>
+                        <StyledTableCell padding="none">
                           {data.username}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data.role}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.store}
-                        </TableCell>
+                        </StyledTableCell>
 
-                        <TableCell padding="none" className={classes.tableCell}>
+                        <StyledTableCell padding="none">
                           {data?.firstName}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.lastName}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.emailId}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.mobileNumber}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.address}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.city}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.type}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           <span
                             className="text-decoration-underline ms-1"
                             style={{
@@ -378,37 +299,50 @@ const UserDesk = () => {
                               color="red"
                             />
                           </span>
-                        </TableCell>
-                      </TableRow>
+                        </StyledTableCell>
+                      </StyledTableRow>
                     );
                   })
                 )}
                 {!loading && tableData.length == 0 && (
                   <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
+                    <StyledTableCell colSpan={12}>
                       <p style={{ fontSize: "0.8rem" }}>
                         NO DATA AVAILABE IN TABLE
                       </p>
-                    </TableCell>
+                    </StyledTableCell>
                   </TableRow>
                 )}
               </TableBody>
             </TableComponent>
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
           </div>
         </div>
       </Paper>
-      <CreateUserModalForm
-        openCreateuserModal={showAddModal}
-        handleCloseCreateUserModal={handleCloseCreateUserModal}
-      />
-      <EditUserModalForm
-        openEdituserModal={showEditModal}
-        handleCloseEditUserModal={handleCloseEditUserModal}
-      />
-      <UserActivityListModal
-        showActivityModal={showActivityModal}
-        handleCloseActivityListModal={handleCloseActivityListModal}
-      />
+      <Suspense>
+        <CreateUserModalForm
+          openCreateuserModal={showAddModal}
+          handleCloseCreateUserModal={handleCloseCreateUserModal}
+        />
+      </Suspense>
+      <Suspense>
+        <EditUserModalForm
+          openEdituserModal={showEditModal}
+          handleCloseEditUserModal={handleCloseEditUserModal}
+        />
+      </Suspense>
+      <Suspense>
+        <UserActivityListModal
+          showActivityModal={showActivityModal}
+          handleCloseActivityListModal={handleCloseActivityListModal}
+        />
+      </Suspense>
     </>
   );
 };

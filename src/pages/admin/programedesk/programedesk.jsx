@@ -4,6 +4,8 @@ import React, {
   useEffect,
   useCallback,
   useRef,
+  lazy,
+  Suspense,
 } from "react";
 import { Paper } from "@mui/material";
 import { TableBody, TableRow, TableCell } from "@mui/material";
@@ -22,9 +24,19 @@ import { makeStyles } from "@mui/styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import { useDispatch, useSelector } from "react-redux";
-import { getProgramDeskList } from "../../../store/admin/action";
+import {
+  getProgramDeskList,
+  getProgramDeskListResponse,
+} from "../../../store/admin/action";
 import moment from "moment";
 import { Seo } from "../../../components/seo/seo";
+import TablePagination from "../../../components/tables/datatable/tablepagination";
+import StyledTableRow from "../../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../../components/tables/datatable/customTableCell";
+
+const CreateProgramDeskForm = lazy(() => import("./createprogram"));
+const EditProgramDeskForm = lazy(() => import("./editprogram"));
+const AlertDialog = lazy(() => import("../../../components/dialog/dialog"));
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -53,13 +65,11 @@ const ProgrammeDesk = () => {
     rowsPerPage: 10,
   });
   const [loading, setLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-
-  const [activityList, setActivityList] = useState([]);
-  const [dropDownList, setDropDownList] = useState([]);
-  const [showActivityModal, setShowActivityModal] = useState(false);
-
   const [data, setData] = useState([]);
+
+  const [showCreatProgrmModal, setShowCreateProgrmModal] = useState(false);
+  const [showEditProgrmModal, setShowEditProgrmModal] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const columns = useMemo(() => [
     {
       id: "id",
@@ -103,13 +113,6 @@ const ProgrammeDesk = () => {
       sortable: false,
     },
   ]);
-
-  // edit role modal state
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [totalRoleList, setTotalRoleList] = useState([]);
-  const [currentRoleList, setCurrentRoleList] = useState([]);
-  const [availableRoleList, setAvailableRoleList] = useState([]);
-
   const handlePageChange = (newPage) => {
     console.log("newPage", newPage);
     setLoading(true);
@@ -150,35 +153,39 @@ const ProgrammeDesk = () => {
     }
     return () => {
       isApiSubcribed = false;
+      dispatch(getProgramDeskListResponse(""));
     };
   }, [controller]);
 
   useEffect(() => {
-    if (programeDeskListResponse && programeDeskListResponse?.status === 201) {
-      setTotalRoleList(programeDeskListResponse?.data?.activityList);
-      setActivityList(programeDeskListResponse?.data?.activityTypeList);
+    if (programeDeskListResponse && programeDeskListResponse?.status === 200) {
+      // setTotalRoleList(programeDeskListResponse?.data?.activityList);
+      // setActivityList(programeDeskListResponse?.data?.activityTypeList);
       setData(programeDeskListResponse?.data?.activityList);
-      setTotalPages(programeDeskListResponse?.data?.totalPages);
-      setTotalRows(programeDeskListResponse?.data?.totalElements);
-      setTableData(programeDeskListResponse?.data?.content);
+      setTotalPages(programeDeskListResponse?.data?.pageList?.totalPages);
+      setTotalRows(programeDeskListResponse?.data?.pageList?.totalElements);
+      setTableData(programeDeskListResponse?.data?.pageList?.content);
       setLoading(false);
+      dispatch(getProgramDeskListResponse(""));
     } else if (
       programeDeskListResponse &&
       programeDeskListResponse?.status == 400
     ) {
       setLoading(false);
-      toastMessage("Login Error", "Please enter valid ID", "error");
+
+      toastMessage("Program Desk", "", "error");
+      dispatch(getProgramDeskListResponse(""));
     }
   }, [programeDeskListResponse]);
 
-  const handleCloseCreateRoleModal = () => {
-    setShowModal(false);
+  const handleCloseCreateProgrmModal = () => {
+    setShowCreateProgrmModal(false);
   };
-  const handleCloseEditRoleModal = () => {
-    setShowEditModal(false);
+  const handleCloseEditProgrmModal = () => {
+    setShowEditProgrmModal(false);
   };
-  const handleActivityShowModal = () => {
-    setShowActivityModal(false);
+  const handleDeleteDialog = () => {
+    setShowDeleteDialog(false);
   };
 
   const badge = (badgeValue) => {
@@ -207,7 +214,7 @@ const ProgrammeDesk = () => {
               outlineType={true}
               className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
               onClick={() => {
-                setShowModal(true);
+                setShowCreateProgrmModal(true);
               }}
             />
           </div>
@@ -241,27 +248,27 @@ const ProgrammeDesk = () => {
             >
               <TableBody>
                 {loading ? (
-                  <TableRow>
+                  <StyledTableRow>
                     <TableCell className="text-center" colSpan={12}>
                       <Spinner />
                     </TableCell>
-                  </TableRow>
+                  </StyledTableRow>
                 ) : (
                   tableData &&
                   tableData.length > 0 &&
                   tableData.map((data, index) => {
                     return (
-                      <TableRow hover>
+                      <StyledTableRow>
                         {columns.map((d, k) => {
                           if (d.id === "action") {
                             return (
-                              <TableCell>
+                              <StyledTableCell>
                                 <span
-                                  className="text-decoration-underline ms-1"
-                                  style={{
-                                    fontSize: "0.8rem",
-                                    cursor: "pointer",
-                                  }}
+                                  className={[
+                                    classes.tableCell,
+                                    "text-center text-decoration-underline ms-1",
+                                  ]}
+                                  onClick={() => setShowEditProgrmModal(true)}
                                 >
                                   <FontAwesomeIcon
                                     icon={faPenToSquare}
@@ -276,6 +283,7 @@ const ProgrammeDesk = () => {
                                     fontSize: "0.8rem",
                                     cursor: "pointer",
                                   }}
+                                  onClick={() => setShowDeleteDialog(true)}
                                 >
                                   <FontAwesomeIcon
                                     icon={faTrash}
@@ -283,61 +291,83 @@ const ProgrammeDesk = () => {
                                     color="red"
                                   />
                                 </span>
-                              </TableCell>
+                              </StyledTableCell>
                             );
                           } else if (
                             d.id === "startDate" ||
                             d.id === "endDate"
                           ) {
                             return (
-                              <TableCell
-                                key={k}
-                                padding="none"
-                                style={{ padding: "4px", fontSize: "0.7rem" }}
-                              >
+                              <StyledTableCell key={k} padding="none">
                                 {moment(data[d.id]).format("DD/MM/YYYY")}
-                              </TableCell>
+                              </StyledTableCell>
                             );
                           } else if (d.id === "status") {
                             return (
-                              <TableCell
-                                key={k}
-                                padding="none"
-                                style={{ padding: "4px", fontSize: "0.7rem" }}
-                              >
+                              <StyledTableCell key={k} padding="none">
                                 {badge(data[d.id])}
-                              </TableCell>
+                              </StyledTableCell>
                             );
                           } else {
                             return (
-                              <TableCell
-                                key={k}
-                                padding="none"
-                                style={{ padding: "4px", fontSize: "0.7rem" }}
-                              >
+                              <StyledTableCell key={k} padding="none">
                                 {data[d.id]}
-                              </TableCell>
+                              </StyledTableCell>
                             );
                           }
                         })}
-                      </TableRow>
+                      </StyledTableRow>
                     );
                   })
                 )}
                 {!loading && tableData && tableData.length === 0 && (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
+                  <StyledTableRow>
+                    <StyledTableCell className="text-center" colSpan={12}>
                       <p style={{ fontSize: "0.8rem" }}>
                         NO DATA AVAILABE IN TABLE
                       </p>
-                    </TableCell>
-                  </TableRow>
+                    </StyledTableCell>
+                  </StyledTableRow>
                 )}
               </TableBody>
             </TableComponent>
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
           </div>
         </div>
       </Paper>
+
+      <Suspense>
+        <CreateProgramDeskForm
+          openCreateProgrmModal={showCreatProgrmModal}
+          handleCloseCreateProgrmModal={handleCloseCreateProgrmModal}
+        />
+      </Suspense>
+      <Suspense>
+        <EditProgramDeskForm
+          openEditProgrmModal={showEditProgrmModal}
+          handleCloseEditProgrmModal={handleCloseEditProgrmModal}
+        />
+      </Suspense>
+      <Suspense>
+        <AlertDialog
+          open={showDeleteDialog}
+          handleClose={handleDeleteDialog}
+          description="You are about to delete one record, this procedure is irreversible.
+Do you want to proceed?"
+        >
+          <Basicbutton
+            buttonText="Disagree"
+            onClick={() => setShowDeleteDialog(false)}
+          />
+          <Basicbutton buttonText="Agree" />
+        </AlertDialog>
+      </Suspense>
     </>
   );
 };
