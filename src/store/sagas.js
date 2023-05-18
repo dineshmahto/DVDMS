@@ -5,6 +5,8 @@ import StockSaga from "./stock/saga";
 import DemandSaga from "./demand/saga";
 import OrderManagementSaga from "./ordermanagement/saga";
 import IssueReturnSaga from "./issue/saga";
+import RequisitionSaga from "./requisition/saga";
+import ReceivingSaga from "./receiving/saga";
 export default function* rootSaga() {
   yield all([
     AdminSaga(),
@@ -13,5 +15,7 @@ export default function* rootSaga() {
     DemandSaga(),
     OrderManagementSaga(),
     IssueReturnSaga(),
+    RequisitionSaga(),
+    ReceivingSaga(),
   ]);
 }

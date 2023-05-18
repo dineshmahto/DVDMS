@@ -12,7 +12,7 @@ const StoreTypeDrugMapping = () => {
   const [storeTypeDropDownList, setStoreTypeDropDownList] = useState([]);
   const dispatch = useDispatch();
   const edlMappingListResponse = useSelector(
-    (state) => state.admin?.edlMappingListResponse
+    (state) => state?.admin?.edlMappingListResponse
   );
 
   // programme state variable
@@ -30,11 +30,11 @@ const StoreTypeDrugMapping = () => {
 
   useEffect(() => {
     if (edlMappingListResponse && edlMappingListResponse?.status === 200) {
-      setStoreTypeDropDownList(edlMappingListResponse?.data?.selectList);
-      setprogrammeData(edlMappingListResponse?.data?.moveLeftRightList);
-      setCopyprogrmmeData(edlMappingListResponse?.data?.moveLeftRightList);
+      setStoreTypeDropDownList(edlMappingListResponse?.data?.storeTypeList);
+      setprogrammeData(edlMappingListResponse?.data?.drugList);
+      setCopyprogrmmeData(edlMappingListResponse?.data?.drugList);
       setProgrammeActiveIndicies(
-        edlMappingListResponse?.data?.moveLeftRightList.map((bool, j) => false)
+        edlMappingListResponse?.data?.drugList.map((bool, j) => false)
       );
     }
   }, [edlMappingListResponse]);
@@ -157,22 +157,17 @@ const StoreTypeDrugMapping = () => {
     if (rightTempArray.length > 0) {
       setFirstClick(true);
       const cloneData = [...selectedItem];
-      console.log("cloneData", cloneData);
       const rightDispalyList = cloneData.filter((elem) => {
         return !rightTempArray.find((ele) => {
           return ele.id === elem.id;
         });
       });
-      console.log("rightDisplayList", rightDispalyList);
       setSelectedItemActiveIndices(rightDispalyList?.map(() => true));
       const reverseBackElements = cloneData.filter((elem) => {
         return rightTempArray.find((ele) => {
           return ele.id === elem.id;
         });
       });
-
-      console.log("reverseBackElement", reverseBackElements);
-
       const updateTempArray = tempArray.filter((elem) => {
         return !reverseBackElements.find((ele) => {
           return ele.id === elem.id;
@@ -180,11 +175,9 @@ const StoreTypeDrugMapping = () => {
       });
       setTempArray(updateTempArray);
       const storeIntoOne = [...data];
-      console.log("copyiedData", copyiedData);
       reverseBackElements.map((elem) => {
         storeIntoOne.push(elem);
       });
-      console.log("storeintoOne", storeIntoOne);
       setData(storeIntoOne);
       setSelectedItem(rightDispalyList);
       setRightTempArray([]);
@@ -232,8 +225,6 @@ const StoreTypeDrugMapping = () => {
     activeIndicies
   ) => {
     const cloneData = [...copyiedData];
-    console.log("cloneData", cloneData);
-
     setSelectedItemActiveIndices([]);
     setData(cloneData);
     setRightTempArray([]);

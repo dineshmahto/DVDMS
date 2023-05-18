@@ -7,6 +7,9 @@ import stockReducer from "../store/stock/reducer";
 import demandReducer from "../store/demand/reducer";
 import orderManagementReducer from "../store/ordermanagement/reducer";
 import issueReturnReducer from "../store/issue/reducer";
+import requisitionReducer from "../store/requisition/reducer";
+import darkModeReducer from "./darkmode/reducer";
+import receivingReducer from "../store/receiving/reducer";
 export default combineReducers({
   loader: loaderReducer,
   activemenu: activemenuReducer,
@@ -16,4 +19,7 @@ export default combineReducers({
   demand: demandReducer,
   ordermanaagement: orderManagementReducer,
   issuereturn: issueReturnReducer,
+  requisition: requisitionReducer,
+  darkMode: darkModeReducer,
+  receiving: receivingReducer,
 });

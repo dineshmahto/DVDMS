@@ -3,9 +3,10 @@ import CustomSelect from "../../../components/select/customSelect";
 import Basicbutton from "../../../components/button/basicbutton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faEraser,
   faFloppyDisk,
   faRefresh,
-  faTrash,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import BasicModal from "../../../components/modal/basicmodal";
 import { Form, Formik, Field } from "formik";
@@ -14,24 +15,27 @@ const EditUserModalForm = ({
   openEdituserModal,
   handleCloseEditUserModal,
   editData,
+  roleList,
+  storeList,
 }) => {
+  console.log("editData", editData);
   const newUserRoleSchema = Yup.object().shape({
-    userId: Yup.string()
+    username: Yup.string()
       .min(2, "Too Short!")
       .max(50, "Too Long!")
       .required("User Id is Required"),
     firstName: Yup.string().ensure().required("First Name is Required!"),
     lastName: Yup.string().required("Last Name is required"),
-    email: Yup.string().email().required("Email is required"),
-    address: Yup.number().required("Address Field is Required"),
-    city: Yup.number().required("City Field is Required"),
-    storeName: Yup.string().ensure().required("Select the Store Name!"),
-    role: Yup.string().ensure().required("Select the Role!"),
+    emailId: Yup.string().email().required("Email is required"),
+    address: Yup.string().required("Address Field is Required"),
+    city: Yup.string().required("City Field is Required"),
+    store: Yup.string().ensure().required("Select the Store Name!"),
+    roles: Yup.string().ensure().required("Select the Role!"),
   });
   return (
     <>
       <BasicModal
-        title="Create Role"
+        title="Edit User"
         show={openEdituserModal}
         close={() => {
           handleCloseEditUserModal();
@@ -47,14 +51,14 @@ const EditUserModalForm = ({
           enableReinitialize={true}
           validateOnMount
           initialValues={{
-            userId: "",
-            firstName: "",
-            lastName: "",
-            email: "",
-            address: "",
-            city: "",
-            storeName: "",
-            role: "",
+            username: editData?.username,
+            firstName: editData?.firstName,
+            lastName: editData?.lastName,
+            emailId: editData?.emailId,
+            address: editData?.address,
+            city: editData?.city,
+            store: editData?.storeId,
+            roles: editData?.roleId,
           }}
           validationSchema={newUserRoleSchema}
           onSubmit={async (values) => {
@@ -70,6 +74,7 @@ const EditUserModalForm = ({
             handleChange,
             handleBlur,
             setFieldTouched,
+            setFieldValue,
             isValid,
           }) => (
             <Form>
@@ -77,26 +82,26 @@ const EditUserModalForm = ({
                 <div className="col-10 offset-1">
                   <div className="row mb-2 align-items-center">
                     <div className="col-2">
-                      <label htmlFor="userId" class="col-form-label">
+                      <label htmlFor="username" class="col-form-label">
                         User ID:
                       </label>
                     </div>
                     <div className="col-6">
                       <Field
                         className="form-control shadow-none"
-                        value={values?.userId}
+                        value={values?.username}
                         type="text"
-                        placeholder="Role Name"
-                        id="userId"
-                        name="userId"
+                        placeholder="Username "
+                        id="username"
+                        name="username"
                         onChange={handleChange}
                         onBlur={handleBlur}
                       />
                     </div>
                     <div className="col-4">
-                      {errors.userId && touched.userId ? (
+                      {errors.username && touched.username ? (
                         <div className="text-danger float-end">
-                          {errors.userId}
+                          {errors.username}
                         </div>
                       ) : null}
                       <span class="form-text">Between 2 to 50 characters.</span>
@@ -165,26 +170,26 @@ const EditUserModalForm = ({
 
                   <div className="row mb-2 align-items-center">
                     <div class="col-2">
-                      <label htmlFor="email" class="col-form-label">
+                      <label htmlFor="emailId" class="col-form-label">
                         Email
                       </label>
                     </div>
                     <div class="col-6">
                       <Field
                         className="form-control shadow-none"
-                        value={values?.email}
+                        value={values?.emailId}
                         type="email"
                         placeholder="Email"
-                        id="email"
-                        name="email"
+                        id="emailId"
+                        name="emailId"
                         onChange={handleChange}
                         onBlur={handleBlur}
                       />
                     </div>
                     <div className="col-4">
-                      {errors.email && touched.email ? (
+                      {errors.emailId && touched.emailId ? (
                         <div className="text-danger float-end">
-                          {errors.email}
+                          {errors.emailId}
                         </div>
                       ) : null}
                     </div>
@@ -273,20 +278,27 @@ const EditUserModalForm = ({
                     <div className="col-6">
                       <CustomSelect
                         className="form-control shadow-none"
-                        name="storeName"
-                        id="storeName"
-                        value={values?.storeName}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
+                        name="store"
+                        id="store"
+                        defaultValue={storeList?.find(
+                          (c) => c.value === values?.store
+                        )}
+                        value={storeList?.find(
+                          (c) => c.value === values?.store
+                        )}
+                        onChange={(val) => {
+                          setFieldValue("store", val.value);
                         }}
+                        options={
+                          storeList && storeList?.length > 0 ? storeList : []
+                        }
+                        onBlur={setFieldTouched}
                       />
                     </div>
                     <div className="col-4">
-                      {errors.storeName && touched.storeName ? (
+                      {errors.store && touched.store ? (
                         <div className="text-danger float-end">
-                          {errors.storeName}
+                          {errors.store}
                         </div>
                       ) : null}
                     </div>
@@ -301,20 +313,29 @@ const EditUserModalForm = ({
                     <div className="col-6">
                       <CustomSelect
                         className="form-control shadow-none"
-                        name="role"
-                        id="role"
-                        value={values?.role}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
+                        name="roles"
+                        id="roles"
+                        defaultValue={
+                          roleList &&
+                          roleList?.find((c) => c.value === values?.roles)
+                        }
+                        options={
+                          roleList && roleList?.length > 0 ? roleList : roleList
+                        }
+                        value={
+                          roleList &&
+                          roleList?.find((c) => c.value === values?.roles)
+                        }
+                        onChange={(val) => {
+                          setFieldValue("roles", val.value);
                         }}
+                        onBlur={setFieldTouched}
                       />
                     </div>
                     <div className="col-4">
-                      {errors.role && touched.role ? (
+                      {errors.roles && touched.roles ? (
                         <div className="text-danger float-end">
-                          {errors.role}
+                          {errors.roles}
                         </div>
                       ) : null}
                       <span class="form-text">
@@ -327,14 +348,11 @@ const EditUserModalForm = ({
                       <div className="d-flex justify-content-center">
                         <Basicbutton
                           icon={
-                            <FontAwesomeIcon
-                              icon={faRefresh}
-                              className="me-1"
-                            />
+                            <FontAwesomeIcon icon={faEraser} className="me-1" />
                           }
                           type="button"
                           buttonText="Reset"
-                          className="secondary rounded-0 me-1"
+                          className="warning rounded-0 me-1"
                           outlineType={true}
                         />
                         <Basicbutton
@@ -351,6 +369,9 @@ const EditUserModalForm = ({
                           disabled={!isValid}
                         />
                         <Basicbutton
+                          icon={
+                            <FontAwesomeIcon icon={faXmark} className="me-1" />
+                          }
                           type="button"
                           buttonText="Close"
                           className="danger rounded-0"

@@ -126,8 +126,8 @@ const Notification = () => {
 
   useEffect(() => {
     if (notficationListResponse && notficationListResponse?.status === 200) {
-      setTotalRows(notficationListResponse?.data?.totalElements);
-      setTableData(notficationListResponse?.data?.content);
+      setTotalRows(notficationListResponse?.data?.pageList?.totalElements);
+      setTableData(notficationListResponse?.data?.pageList?.content);
       setLoading(false);
     } else if (
       notficationListResponse &&
@@ -392,13 +392,7 @@ const Notification = () => {
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
               handleSorting={handleSortingChange}
               checkBoxRequired={true}
             >

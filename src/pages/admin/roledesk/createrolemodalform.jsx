@@ -2,20 +2,29 @@ import React, { useState, useEffect } from "react";
 import CustomSelect from "../../../components/select/customSelect";
 import Basicbutton from "../../../components/button/basicbutton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFloppyDisk,
-  faRefresh,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 import BasicModal from "../../../components/modal/basicmodal";
 import TransferComponent from "../../../components/transfer/transferComponent";
 import { Form, Formik, Field } from "formik";
 import * as Yup from "yup";
+import { useDispatch, useSelector } from "react-redux";
+import toastMessage from "../../../common/toastmessage/toastmessage";
+import {
+  createRole,
+  createRoleResponse,
+  getRoleList,
+} from "../../../store/admin/action";
 const CreateRoleModalForm = ({
   openCreateRoleModal,
   handleCloseCreateRoleModal,
   data,
+  activityList,
 }) => {
+  const dispatch = useDispatch();
+  const createRoleResp = useSelector((state) => state?.admin?.createRoleResp);
+  console.log("Data", data);
+  console.log("activityList", activityList);
+
   const [tempArray, setTempArray] = useState([]);
   const [rightTempArray, setRightTempArray] = useState([]);
   const [selectedItem, setSelectedItem] = useState([]);
@@ -242,13 +251,49 @@ const CreateRoleModalForm = ({
     setSelectedItem([]);
     setActiveIndicies(activeIndicies.map((bool) => false));
   };
+
+  const addRoleField = [
+    {
+      type: "text",
+      name: "roleName",
+      placeholder: "Enter Role Name",
+      value: "",
+      label: "Role Name",
+    },
+    {
+      type: "text",
+      name: "roleDescription",
+      placeholder: "Enter Role Description",
+      value: "",
+
+      label: "Role Description",
+    },
+
+    {
+      type: "select",
+      name: "activityType",
+
+      option: activityList,
+      value: "",
+      label: "Activity Type",
+    },
+  ];
+
+  useEffect(() => {
+    if (createRoleResp && createRoleResp?.status === 201) {
+      dispatch(getRoleList());
+      dispatch(createRoleResponse(""));
+    } else if (createRoleResp && createRoleResp?.status === 500) {
+      dispatch(createRoleResponse(""));
+      toastMessage("CREATE ROLE", "Something went wrong");
+    }
+  }, [createRoleResp]);
   return (
     <>
       <BasicModal
         title="Create Role"
         show={openCreateRoleModal}
         close={() => {
-          setTransferableRoleList([]);
           setSelectedItem([]);
           setRightTempArray([]);
           setFirstClick(false);
@@ -272,8 +317,20 @@ const CreateRoleModalForm = ({
           }}
           validationSchema={newUserRoleSchema}
           onSubmit={async (values) => {
-            await new Promise((r) => setTimeout(r, 500));
-            alert(JSON.stringify(values, null, 2));
+            console.log("Values", values);
+            if (selectedItem && selectedItem?.length === 0) {
+              toastMessage("CREATE ROLE", "please map the role list");
+            } else {
+              const cloneData = [...selectedItem];
+              const final =
+                cloneData &&
+                cloneData.map((ele) => {
+                  delete ele["name"];
+                  return ele;
+                });
+              console.log("final", final);
+              dispatch(createRole({ ...values, list: final }));
+            }
           }}
         >
           {({
@@ -284,74 +341,95 @@ const CreateRoleModalForm = ({
             handleChange,
             handleBlur,
             setFieldTouched,
+            setFieldValue,
             isValid,
           }) => (
             <Form>
               <div className="row">
                 <div className="col-12">
-                  <div className="row mb-2">
-                    <div className="col-3">
-                      <label htmlFor="roleName" className="col-form-label">
-                        Role Name :
-                      </label>
-                    </div>
-                    <div className="col-9">
-                      <Field
-                        className="form-control shadow-none"
-                        type="text"
-                        placeholder="Role Name is between 6 to 50 character"
-                        id="roleName"
-                        name="roleName"
-                        value={values?.roleName}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                    </div>
-                  </div>
+                  {addRoleField.map(
+                    ({ name, type, value, label, ...props }) => {
+                      switch (type) {
+                        case "select":
+                          return (
+                            <>
+                              <div className="row mb-2">
+                                <div className="col-3">
+                                  <label htmlFor={name} class="col-form-label">
+                                    {label}
+                                  </label>
+                                </div>
+                                <div className="col-6">
+                                  <CustomSelect
+                                    id={name}
+                                    key={name}
+                                    name={name}
+                                    value={
+                                      props?.option &&
+                                      props?.option?.find(
+                                        (c) => c.value === values[`${name}`]
+                                      )
+                                    }
+                                    onChange={(val) => {
+                                      setFieldValue(name, val.value);
+                                    }}
+                                    options={
+                                      props?.option && props?.option?.length > 0
+                                        ? props?.option
+                                        : []
+                                    }
+                                    onBlur={setFieldTouched}
+                                  />
+                                </div>
+                                <div className="col-3">
+                                  {errors.name && touched.name ? (
+                                    <div className="text-danger float-end">
+                                      {errors.name}
+                                    </div>
+                                  ) : null}
+                                </div>
+                              </div>
+                            </>
+                          );
 
-                  <div className="row mb-2">
-                    <div className="col-3">
-                      <label
-                        htmlFor="roleDescription"
-                        className="col-form-label"
-                      >
-                        Role Description :
-                      </label>
-                    </div>
-                    <div className="col-9">
-                      <Field
-                        className="form-control shadow-none"
-                        type="text"
-                        placeholder="Enter Role Description"
-                        id="roleDescription"
-                        name="roleDescription"
-                        value={values?.roleDescription}
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                    </div>
-                  </div>
+                        default:
+                          return (
+                            <>
+                              <div className="row mb-2">
+                                <div className="col-3">
+                                  <label
+                                    htmlFor={name}
+                                    className="col-form-label"
+                                  >
+                                    {label}
+                                  </label>
+                                </div>
+                                <div className="col-6">
+                                  <Field
+                                    className="form-control shadow-none"
+                                    value={values[`${name}`]}
+                                    type={type}
+                                    id={name}
+                                    name={name}
+                                    onChange={handleChange}
+                                    onBlur={handleBlur}
+                                    placeholder={props?.placeholder}
+                                  />
+                                </div>
+                                <div className="col-3">
+                                  {errors?.name && touched?.name ? (
+                                    <div className="text-danger float-end">
+                                      {errors?.name}
+                                    </div>
+                                  ) : null}
+                                </div>
+                              </div>
+                            </>
+                          );
+                      }
+                    }
+                  )}
 
-                  <div className="row mb-2">
-                    <div className="col-3">
-                      <label htmlFor="activityType" className="col-form-label">
-                        Activity Type :
-                      </label>
-                    </div>
-                    <div className="col-9">
-                      <CustomSelect
-                        className="form-control shadow-none"
-                        id="activityType"
-                        name="activityType"
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
-                          //callActivityListApiByCode(choice?.value);
-                        }}
-                      />
-                    </div>
-                  </div>
                   <div className="row m-1">
                     <TransferComponent
                       apiData={transferableRoleList}
@@ -426,7 +504,7 @@ const CreateRoleModalForm = ({
                               className="me-1"
                             />
                           }
-                          type="button"
+                          type="submit"
                           buttonText="Save"
                           className="primary"
                           outlineType={true}

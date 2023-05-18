@@ -25,8 +25,38 @@ API.interceptors.response.use(
   function (response) {
     return response;
   },
-  function (error) {
-    return Promise.reject(error);
+  async (err) => {
+    const originalConfig = err.config;
+
+    if (err.response) {
+      if (err.response.status === 401 && !originalConfig._retry) {
+        originalConfig._retry = true;
+
+        try {
+          const rs = await API.post("/auth/refresh-token", {
+            refreshToken: window.localStorage.getItem("refresh_token"),
+          });
+          console.log("refershTOkenResp", rs);
+          const { accessToken } = rs.data;
+          window.sessionStorage.setItem("DVDMS_KEEP_SECRET", accessToken);
+          API.defaults.headers["Authorization"] = `Bearer ${accessToken}`;
+
+          return API(originalConfig);
+        } catch (_error) {
+          if (_error.response && _error.response.data) {
+            return Promise.reject(_error.response.data);
+          }
+
+          return Promise.reject(_error);
+        }
+      }
+
+      if (err.response.status === 403 && err.response.data) {
+        return Promise.reject(err.response.data);
+      }
+    }
+
+    return Promise.reject(err);
   }
 );
 export default API;

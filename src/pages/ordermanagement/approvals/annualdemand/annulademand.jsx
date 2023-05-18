@@ -20,12 +20,20 @@ import Basicbutton from "../../../../components/button/basicbutton";
 import SearchField from "../../../../components/search/search";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getApprovalDeskList } from "../../../../store/ordermanagement/action";
+import {
+  getApprovalDeskList,
+  getApprovalDeskListResponse,
+} from "../../../../store/ordermanagement/action";
 import toastMessage from "../../../../common/toastmessage/toastmessage";
 import Checkbox from "@mui/material/Checkbox";
 import { Paper } from "@mui/material";
 import TablePagination from "../../../../components/tables/datatable/tablepagination";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
+import TableRowLaoder from "../../../../components/tables/datatable/tableRowLaoder";
+import StyledTableRow from "../../../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../../../components/tables/datatable/customTableCell";
+import EmptyRow from "../../../../components/tables/datatable/emptyRow";
+import handleSortingFunc from "../../../../components/tables/datatable/sortable";
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -114,29 +122,40 @@ const AnnualDemand = () => {
     let isApiSubcribed = true;
     if (isApiSubcribed) {
       setLoading(true);
-      dispatch(
-        getApprovalDeskList({
-          pageNumber: controller.page,
-          pageSize: controller.rowsPerPage,
-        })
-      );
+      setTimeout(() => {
+        dispatch(
+          getApprovalDeskList({
+            pageNumber: controller.page,
+            pageSize: controller.rowsPerPage,
+          })
+        );
+      }, 500);
     }
     return () => {
+      dispatch(getApprovalDeskListResponse(""));
+      clearTimeout();
       isApiSubcribed = false;
     };
   }, [controller]);
 
   useEffect(() => {
     if (approvalDeskListResponse && approvalDeskListResponse?.status === 200) {
-      setTotalRows(approvalDeskListResponse?.data?.totalElements);
-      setTableData(approvalDeskListResponse?.data?.content);
+      if (
+        approvalDeskListResponse?.data?.pageList &&
+        approvalDeskListResponse?.data?.pageList?.content
+      ) {
+        setTotalRows(approvalDeskListResponse?.data?.pageList?.totalElements);
+        setTableData(approvalDeskListResponse?.data?.pageList?.content);
+      }
+      dispatch(getApprovalDeskListResponse(""));
       setLoading(false);
     } else if (
       approvalDeskListResponse &&
       approvalDeskListResponse?.status == 400
     ) {
+      dispatch(getApprovalDeskListResponse(""));
       setLoading(false);
-      toastMessage("Login Error", "Please enter valid ID", "error");
+      toastMessage("Annual Demand", "", "error");
     }
   }, [approvalDeskListResponse]);
 
@@ -160,31 +179,8 @@ const AnnualDemand = () => {
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    handleSorting(accessor, sortOrder);
+    handleSortingFunc(accessor, sortOrder, tableData);
   };
-  const handleSorting = useCallback(
-    (sortField, sortOrder) => {
-      if (sortField) {
-        const sorted = [...tableData].sort((a, b) => {
-          if (a[sortField] === null) return 1;
-          if (b[sortField] === null) return -1;
-          if (a[sortField] === null && b[sortField] === null) return 0;
-
-          return (
-            a[sortField]
-              .toString()
-              .localeCompare(b[sortField].toString(), "en", {
-                numeric: true,
-              }) * (sortOrder === "asc" ? 1 : -1)
-          );
-        });
-        setSelected([]);
-
-        setTableData(sorted);
-      }
-    },
-    [sortField, order, tableData]
-  );
 
   const handleClick = (event, index, row) => {
     if (selected.includes(index)) {
@@ -269,31 +265,22 @@ const AnnualDemand = () => {
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
               handleSorting={handleSortingChange}
               checkBoxRequired={true}
             >
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </TableRow>
+                  <TableRowLaoder />
                 ) : (
                   tableData &&
                   tableData?.length > 0 &&
                   tableData?.map((data, index) => {
                     return (
-                      <TableRow key={data.id}>
-                        <TableCell padding="none">
+                      <StyledTableRow key={data.id}>
+                        <StyledTableCell padding="none">
                           <Checkbox
+                            size="small"
                             onClick={(event) => handleClick(event, index, data)}
                             color="primary"
                             checked={selected.includes(index)}
@@ -301,61 +288,34 @@ const AnnualDemand = () => {
                               "aria-labelledby": `enhanced-table-checkbox-${index}`,
                             }}
                           />
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {data.fromStore}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
-                          {data.toStore}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data?.fromStore}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data?.toStore}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.id}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {moment(data?.requestDate).format("DD/MM/YYYY")}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.instituteType?.reqType}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.instituteType?.instiute}
-                        </TableCell>
+                        </StyledTableCell>
 
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        <StyledTableCell padding="none">
                           {data?.status}
-                        </TableCell>
-                      </TableRow>
+                        </StyledTableCell>
+                      </StyledTableRow>
                     );
                   })
                 )}
-                {console.log(tableData?.length)}
-                {!loading && tableData && tableData.length === 0 && (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <p style={{ fontSize: "0.8rem" }}>
-                        NO DATA AVAILABE IN TABLE
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
             <TablePagination

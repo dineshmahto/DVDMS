@@ -1,8 +1,4 @@
-import {
-  faArrowsRotate,
-  faRightToBracket,
-} from "@fortawesome/free-solid-svg-icons";
-import { Paper } from "@mui/material";
+import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, useEffect } from "react";
 import BasicButton from "../../button/basicbutton";
@@ -14,12 +10,12 @@ import Canvas from "../../canvas/Canvas";
 import { Spinner } from "react-bootstrap";
 import { useDispatch } from "react-redux";
 import { closeLoginModal, login } from "../../../store/login/actions";
-import * as CONSTANTS from "../../../common/constant/constants";
 import { useSelector } from "react-redux";
 import tokenhandle from "../../../common/tokenhandle/tokenhandle";
 const LoginForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const loginResponse = useSelector((state) => state.login.loginResponse);
   console.log("loginReposne", loginResponse);
   const [userData, setUSerData] = useState({
@@ -79,11 +75,13 @@ const LoginForm = () => {
 
   useEffect(() => {
     if (loginResponse && loginResponse?.status === 200) {
+      console.log("loginResponse", loginResponse);
+      tokenhandle.storeRefreshToken(loginResponse?.data?.refresh_token);
       tokenhandle.storetoken(loginResponse?.data.access_token);
       tokenhandle.storeProfileDetails(loginResponse?.data?.displayName);
       setLoading(false);
       dispatch(closeLoginModal());
-      navigate("/dashboard");
+      navigate("/stockListing");
     } else if (loginResponse && loginResponse?.status == 400) {
       setLoading(false);
       toastMessage("Login Error", "Please enter valid ID", "error");
@@ -194,7 +192,7 @@ const LoginForm = () => {
           <div className="d-flex justify-content-between">
             <BasicButton
               disabled={isLoading ? isLoading : !isValid}
-              className="btn-bg-login rounded-0"
+              className="primary rounded-0"
               buttonText="Login"
               type="submit"
               onClick={(e) => loginAction(e)}
@@ -202,7 +200,7 @@ const LoginForm = () => {
               loadingText={<Spinner />}
             />
             <BasicButton
-              className="btn-bg-login rounded-0"
+              className="info rounded-0"
               buttonText="Forgot Password"
               type="submit"
               isloading={isLoading}

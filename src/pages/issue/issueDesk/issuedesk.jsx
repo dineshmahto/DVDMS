@@ -32,6 +32,8 @@ import StyledTableRow from "../../../components/tables/datatable/customTableRow"
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
 import { Spinner } from "react-bootstrap";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
 
 const useStyles = makeStyles({
   tableCell: {
@@ -133,7 +135,7 @@ const IssueDesk = () => {
             pageSize: controller.rowsPerPage,
           })
         );
-      }, 1000);
+      }, 500);
     }
     return () => {
       isApiSubcribed = false;
@@ -144,8 +146,16 @@ const IssueDesk = () => {
 
   useEffect(() => {
     if (issueDeskResponse && issueDeskResponse?.status === 200) {
-      setTableData(issueDeskResponse?.data?.content);
-      setTotalRows(issueDeskResponse?.data?.totalElements);
+      if (
+        issueDeskResponse?.data?.pageList &&
+        issueDeskResponse?.data?.pageList?.content
+      ) {
+        setTableData(issueDeskResponse?.data?.pageList?.content);
+        setTotalRows(issueDeskResponse?.data?.pageList?.totalElements);
+      }
+      dispatch(getIssueDeskListResponse(""));
+      setLoading(false);
+    } else if (issueDeskResponse && issueDeskResponse?.status === 401) {
       setLoading(false);
     }
   }, [issueDeskResponse]);
@@ -251,7 +261,6 @@ const IssueDesk = () => {
             <SearchField
               className="me-1 mt-1"
               iconPosition="end"
-              iconName={faSearch}
               onChange={(e) => {
                 console.log(e);
               }}
@@ -276,11 +285,7 @@ const IssueDesk = () => {
             >
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </TableRow>
+                  <TableRowLaoder />
                 ) : (
                   tableData &&
                   tableData.length > 0 &&
@@ -351,12 +356,18 @@ const IssueDesk = () => {
                               <Table size="small" aria-label="purchases">
                                 <TableHead>
                                   <TableRow>
-                                    <TableCell>Program Name</TableCell>
-                                    <TableCell>Drug Name</TableCell>
-                                    <TableCell>Batch No</TableCell>
-                                    <TableCell>Expiry Date</TableCell>
-                                    <TableCell>REQ QTY</TableCell>
-                                    <TableCell>ISSUE/TRF QTY</TableCell>
+                                    <StyledTableCell>
+                                      Program Name
+                                    </StyledTableCell>
+                                    <StyledTableCell>Drug Name</StyledTableCell>
+                                    <StyledTableCell>Batch No</StyledTableCell>
+                                    <StyledTableCell>
+                                      Expiry Date
+                                    </StyledTableCell>
+                                    <StyledTableCell>REQ QTY</StyledTableCell>
+                                    <StyledTableCell>
+                                      ISSUE/TRF QTY
+                                    </StyledTableCell>
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -365,44 +376,26 @@ const IssueDesk = () => {
                                     data?.transferDetail.map((ele) => {
                                       return (
                                         <>
-                                          <TableRow>
-                                            <TableCell
-                                              padding="none"
-                                              className={classes.tableCell}
-                                            >
+                                          <StyledTableRow>
+                                            <StyledTableCell padding="none">
                                               {ele?.programName}
-                                            </TableCell>
-                                            <TableCell
-                                              padding="none"
-                                              className={classes.tableCell}
-                                            >
+                                            </StyledTableCell>
+                                            <StyledTableCell padding="none">
                                               {ele?.drugName}
-                                            </TableCell>
-                                            <TableCell
-                                              padding="none"
-                                              className={classes.tableCell}
-                                            >
+                                            </StyledTableCell>
+                                            <StyledTableCell padding="none">
                                               {ele?.batchNo}
-                                            </TableCell>
-                                            <TableCell
-                                              padding="none"
-                                              className={classes.tableCell}
-                                            >
+                                            </StyledTableCell>
+                                            <StyledTableCell padding="none">
                                               {ele?.expiryDate}
-                                            </TableCell>
-                                            <TableCell
-                                              padding="none"
-                                              className={classes.tableCell}
-                                            >
+                                            </StyledTableCell>
+                                            <StyledTableCell padding="none">
                                               {ele?.requestQty}
-                                            </TableCell>
-                                            <TableCell
-                                              padding="none"
-                                              className={classes.tableCell}
-                                            >
+                                            </StyledTableCell>
+                                            <StyledTableCell padding="none">
                                               {ele?.transferQty}
-                                            </TableCell>
-                                          </TableRow>
+                                            </StyledTableCell>
+                                          </StyledTableRow>
                                         </>
                                       );
                                     })}
@@ -415,6 +408,7 @@ const IssueDesk = () => {
                     </>
                   ))
                 )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
             <TablePagination

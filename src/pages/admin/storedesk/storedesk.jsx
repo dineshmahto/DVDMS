@@ -1,11 +1,17 @@
-import React, { useState, useMemo, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  Suspense,
+  lazy,
+} from "react";
 import { Paper } from "@mui/material";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { TableBody } from "@mui/material";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import Basicbutton from "../../../components/button/basicbutton";
 import SearchField from "../../../components/search/search";
-import { Spinner } from "react-bootstrap";
 import {
   faPenToSquare,
   faSearch,
@@ -20,7 +26,10 @@ import TablePagination from "../../../components/tables/datatable/tablepaginatio
 import StyledTableRow from "../../../components/tables/datatable/customTableRow";
 import { getStockDeskListResponse } from "../../../store/stock/action";
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
-
+import handleSortingFunc from "../../../components/tables/datatable/sortable";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
+const CreateStoreModal = lazy(() => import("./createstoremodal"));
 const StoreDesk = () => {
   const dispatch = useDispatch();
   const storeDeskListResponse = useSelector(
@@ -41,10 +50,13 @@ const StoreDesk = () => {
   const [showEditModal, setShowEditModal] = useState(false);
 
   const [activityList, setActivityList] = useState([]);
-  const [activityType, setActivityType] = useState([]);
-  const [showActivityModal, setShowActivityModal] = useState(false);
-  const [roleList, setRoleList] = useState([]);
+  const [ownerList, setOwnerList] = useState([]);
+  const [pageList, setPageList] = useState([]);
+  const [storeTypeList, setStoreTypeList] = useState([]);
   const [storeList, setStoreList] = useState([]);
+  const [blockList, setBlockList] = useState([]);
+  const [districtList, setDistrictList] = useState([]);
+
   const [dropDwonRoleList, setDropDownRoleList] = useState([]);
   const [dropDownStoreList, setDropDownStoreList] = useState([]);
   const columns = useMemo(() => [
@@ -140,31 +152,8 @@ const StoreDesk = () => {
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    handleSorting(accessor, sortOrder);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
-
-  const handleSorting = useCallback(
-    (sortField, sortOrder) => {
-      if (sortField) {
-        const sorted = [...tableData].sort((a, b) => {
-          if (a[sortField] === null) return 1;
-          if (b[sortField] === null) return -1;
-          if (a[sortField] === null && b[sortField] === null) return 0;
-
-          return (
-            a[sortField]
-              ?.toString()
-              ?.localeCompare(b[sortField]?.toString(), "en", {
-                numeric: true,
-              }) * (sortOrder === "asc" ? 1 : -1)
-          );
-        });
-
-        setTableData(sorted);
-      }
-    },
-    [sortField, order, tableData]
-  );
 
   useEffect(() => {
     let isApiSubcribed = true;
@@ -188,15 +177,41 @@ const StoreDesk = () => {
       setActivityList(storeDeskListResponse?.data?.activityTypeList);
       setTotalRows(storeDeskListResponse?.data?.pageList?.totalElements);
       setTableData(storeDeskListResponse?.data?.pageList?.content);
+      setDistrictList(storeDeskListResponse?.data?.districtList);
+      setBlockList(storeDeskListResponse?.data?.blockList);
+      setOwnerList(storeDeskListResponse?.data?.ownerList);
+      setStoreList(storeDeskListResponse?.data?.storeList);
+      setStoreTypeList(storeDeskListResponse?.data?.storeTypeList);
       setLoading(false);
       dispatch(getStockDeskListResponse(""));
     } else if (storeDeskListResponse && storeDeskListResponse?.status == 400) {
       setLoading(false);
 
-      toastMessage("Login Error", "Please enter valid ID", "error");
+      toastMessage("Store Desk", "", "error");
       dispatch(getStockDeskListResponse(""));
+    } else if (
+      storeDeskListResponse &&
+      storeDeskListResponse?.code === "ERR_NETWORK"
+    ) {
+      setLoading(false);
+      toastMessage("Store Desk", "Internet Connection Problem");
+      dispatch(getStockDeskListResponse(""));
+    } else if (
+      storeDeskListResponse &&
+      storeDeskListResponse?.response?.status == 500
+    ) {
+      setLoading(false);
+      dispatch(getStockDeskListResponse(""));
+      toastMessage(
+        "Store Desk",
+        "Something went wrong please try after sometime",
+        "error"
+      );
     }
   }, [storeDeskListResponse]);
+  const handleCloseCreateStoreModal = () => {
+    setShowAddModal(false);
+  };
   return (
     <>
       <Seo title="DVDMS | Store Desk" description="Store Desk" />
@@ -206,9 +221,8 @@ const StoreDesk = () => {
         </div>
       </div>
 
-      <div className="row mt-2">
-        <HorizonatalLine text="Store Management Desk" />
-      </div>
+      <HorizonatalLine text="Store Management Desk" />
+
       <div className="row">
         <div className="d-flex flex-row justify-content-between">
           <Basicbutton
@@ -222,7 +236,6 @@ const StoreDesk = () => {
           <SearchField
             className="me-1 mt-1"
             iconPosition="end"
-            iconName={faSearch}
             onChange={(e) => {
               console.log(e);
             }}
@@ -235,23 +248,12 @@ const StoreDesk = () => {
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
               handleSorting={handleSortingChange}
-              checkBoxRequired={false}
             >
               <TableBody>
                 {loading ? (
-                  <StyledTableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </StyledTableRow>
+                  <TableRowLaoder />
                 ) : (
                   tableData &&
                   tableData.length > 0 &&
@@ -313,15 +315,7 @@ const StoreDesk = () => {
                     );
                   })
                 )}
-                {!loading && tableData.length === 0 && (
-                  <TableRow>
-                    <StyledTableCell colSpan={12}>
-                      <p style={{ fontSize: "0.8rem" }}>
-                        NO DATA AVAILABE IN TABLE
-                      </p>
-                    </StyledTableCell>
-                  </TableRow>
-                )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
             <TablePagination
@@ -333,6 +327,17 @@ const StoreDesk = () => {
             />
           </div>
         </div>
+        <Suspense>
+          <CreateStoreModal
+            openCreateStoreModal={showAddModal}
+            handleCloseCreateStoreModal={handleCloseCreateStoreModal}
+            storeList={storeList}
+            storeTypeList={storeTypeList}
+            districtList={districtList}
+            ownerList={ownerList}
+            blockList={blockList}
+          />
+        </Suspense>
       </Paper>
     </>
   );

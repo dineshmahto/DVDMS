@@ -2,14 +2,12 @@ import React, { useState, useEffect } from "react";
 import CustomSelect from "../../../components/select/customSelect";
 import Basicbutton from "../../../components/button/basicbutton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFloppyDisk,
-  faRefresh,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faFloppyDisk, faRefresh } from "@fortawesome/free-solid-svg-icons";
 import BasicModal from "../../../components/modal/basicmodal";
 import { Form, Formik, Field } from "formik";
 import * as Yup from "yup";
+import CustDatepicker from "../../../components/datepicker/custDatepicker";
+
 const CreateProgramDeskForm = ({
   openCreateProgrmModal,
   handleCloseCreateProgrmModal,
@@ -19,12 +17,61 @@ const CreateProgramDeskForm = ({
       .min(2, "Too Short!")
       .max(50, "Too Long!")
       .required("Program Name is Required"),
-    prgCode: Yup.string().required("Program Code is required"),
-    startDate: Yup.string().ensure().required("Start Date is Required!"),
+    programCode: Yup.string().required("Program Code is required"),
+    startDate: Yup.string().required("Start Date is Required!"),
     endDate: Yup.string().required("End Date is required"),
-    remarks: Yup.string().email().required("Remarks is required"),
+    remarks: Yup.string().required("Remarks is required"),
     status: Yup.number().required("Status Field is Required"),
   });
+
+  const addProgramField = [
+    {
+      type: "text",
+      name: "programName",
+      placeholder: "Enter Programe Name",
+      value: "",
+      label: "Programe Name",
+    },
+    {
+      type: "text",
+      name: "programCode",
+      placeholder: "Full Name",
+      value: "",
+      label: "Programe Code",
+    },
+    {
+      type: "date",
+      name: "startDate",
+
+      value: "",
+
+      label: "Start Date",
+    },
+    {
+      type: "date",
+      name: "endDate",
+
+      value: null,
+
+      label: "End Date",
+    },
+    {
+      type: "text",
+      name: "remarks",
+      value: "",
+      label: "Remarks",
+    },
+    {
+      type: "select",
+      name: "status",
+      option: [
+        { label: "Active", value: "1" },
+        { label: "InActive", value: "0" },
+      ],
+      label: "Status",
+      value: "",
+    },
+  ];
   return (
     <>
       <BasicModal
@@ -38,15 +85,15 @@ const CreateProgramDeskForm = ({
         isCenterAlign={false}
         fullScreen={false}
         size="lg"
-        key="create_user"
+        key="create_program"
       >
         <Formik
           validateOnMount
           initialValues={{
-            programName: "",
-            prgCode: "",
-            startDate: "",
-            endDate: "",
+            programName: "Test",
+            programCode: "",
+            startDate: null,
+            endDate: null,
             remarks: "",
             status: "",
           }}
@@ -65,171 +112,127 @@ const CreateProgramDeskForm = ({
             handleBlur,
             setFieldTouched,
             isValid,
+            setFieldValue,
           }) => (
             <Form>
               <div className="row">
                 <div className="col-10 offset-1">
-                  <div className="row mb-2 align-items-center">
-                    <div className="col-2">
-                      <label htmlFor="programName" class="col-form-label">
-                        Program Name:
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <Field
-                        className="form-control shadow-none"
-                        value={values?.programName}
-                        type="text"
-                        id="programName"
-                        name="programName"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                    </div>
-                    <div className="col-4">
-                      {errors.programName && touched.programName ? (
-                        <div className="text-danger float-end">
-                          {errors.programName}
-                        </div>
-                      ) : null}
-                      <span class="form-text">Between 2 to 50 characters.</span>
-                    </div>
-                  </div>
+                  {addProgramField &&
+                    addProgramField?.length > 0 &&
+                    addProgramField.map(
+                      ({ name, type, value, label, ...props }) => {
+                        switch (type) {
+                          case "select":
+                            return (
+                              <>
+                                <div className="row mb-2">
+                                  <div className="col-3">
+                                    <label
+                                      htmlFor={name}
+                                      class="col-form-label"
+                                    >
+                                      {label} :
+                                    </label>
+                                  </div>
+                                  <div className="col-6">
+                                    <CustomSelect
+                                      className="form-control shadow-none"
+                                      name={name}
+                                      id={name}
+                                      value={
+                                        props?.option &&
+                                        props?.option?.find(
+                                          (c) => c.value === values[`${name}`]
+                                        )
+                                      }
+                                      onChange={(val) => {
+                                        setFieldValue(name, val.value);
+                                      }}
+                                      options={
+                                        props?.option &&
+                                        props?.option?.length > 0
+                                          ? props?.option
+                                          : []
+                                      }
+                                      onBlur={setFieldTouched}
+                                    />
+                                    <div className="col-3">
+                                      {errors.name && touched.name ? (
+                                        <div className="text-danger float-end">
+                                          {errors.name}
+                                        </div>
+                                      ) : null}
+                                    </div>
+                                  </div>
+                                </div>
+                              </>
+                            );
+                          case "date":
+                            return (
+                              <>
+                                <div className="row mb-2">
+                                  <div className="col-3">
+                                    <label
+                                      htmlFor={name}
+                                      class="col-form-label"
+                                    >
+                                      {label} :
+                                    </label>
+                                  </div>
+                                  <div className="col-6">
+                                    <CustDatepicker
+                                      value={values[`${name}`]}
+                                      name={name}
+                                      inputFormat="DD/MM/YYYY"
+                                      disablePast={
+                                        name === "endDate" ? true : false
+                                      }
+                                      onChange={(newValue) => {
+                                        setFieldValue(name, newValue);
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              </>
+                            );
 
-                  <div className="row mb-2 align-items-center">
-                    <div className="col-2">
-                      <label htmlFor="prgCode" class="col-form-label">
-                        Program Code:
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <Field
-                        className="form-control shadow-none"
-                        value={values?.prgCode}
-                        type="prgCode"
-                        id="prgCode"
-                        name="prgCode"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                    </div>
-                    <div className="col-4">
-                      {errors.prgCode && touched.prgCode ? (
-                        <div className="text-danger float-end">
-                          {errors.prgCode}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                  <div className="row mb-2 align-items-center">
-                    <div class="col-2">
-                      <label htmlFor="startDate" class="col-form-label">
-                        Start Date
-                      </label>
-                    </div>
-                    <div class="col-6">
-                      <Field
-                        className="form-control shadow-none"
-                        value={values?.startDate}
-                        type="text"
-                        id="startDate"
-                        name="startDate"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                    </div>
-                    <div class="col-4">
-                      {errors.startDate && touched.startDate ? (
-                        <div className="text-danger float-end">
-                          {errors.startDate}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="row mb-2 align-items-center">
-                    <div class="col-2">
-                      <label htmlFor="endDate" class="col-form-label">
-                        End Date
-                      </label>
-                    </div>
-                    <div class="col-6">
-                      <Field
-                        className="form-control shadow-none"
-                        value={values?.endDate}
-                        type="text"
-                        id="endDate"
-                        name="endDate"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                    </div>
-                    <div class="col-4">
-                      {errors.endDate && touched.endDate ? (
-                        <div className="text-danger float-end">
-                          {errors.endDate}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="row mb-2 align-items-center">
-                    <div class="col-2">
-                      <label htmlFor="remarks" class="col-form-label">
-                        Remarks
-                      </label>
-                    </div>
-                    <div class="col-6">
-                      <Field
-                        className="form-control shadow-none"
-                        value={values?.remarks}
-                        type="remarks"
-                        id="remarks"
-                        name="remarks"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                    </div>
-                    <div className="col-4">
-                      {errors.remarks && touched.remarks ? (
-                        <div className="text-danger float-end">
-                          {errors.remarks}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                  <div className="row mb-2 align-items-center">
-                    <div class="col-2">
-                      <label
-                        htmlFor="status"
-                        className=""
-                        class="col-form-label"
-                      >
-                        Status
-                      </label>
-                    </div>
-                    <div class="col-6">
-                      <CustomSelect
-                        className="form-control shadow-none"
-                        name="status"
-                        id="status"
-                        value={values?.status}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
-                        }}
-                      />
-                    </div>
-                    <div className="col-4">
-                      {errors.status && touched.status ? (
-                        <div className="text-danger float-end">
-                          {errors.status}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-
+                          default:
+                            return (
+                              <>
+                                <div className="row mb-2">
+                                  <div className="col-3">
+                                    <label
+                                      htmlFor={name}
+                                      className="col-form-label"
+                                    >
+                                      {label}
+                                    </label>
+                                  </div>
+                                  <div className="col-6">
+                                    <Field
+                                      className="form-control shadow-none"
+                                      value={values[`${name}`]}
+                                      type={type}
+                                      id={name}
+                                      name={name}
+                                      onChange={handleChange}
+                                      onBlur={handleBlur}
+                                      placeholder={props?.placeholder}
+                                    />
+                                  </div>
+                                  <div className="col-3">
+                                    {errors?.name && touched?.name ? (
+                                      <div className="text-danger float-end">
+                                        {errors?.name}
+                                      </div>
+                                    ) : null}
+                                  </div>
+                                </div>
+                              </>
+                            );
+                        }
+                      }
+                    )}
                   <div className="row  mb-2">
                     <div className="col-12">
                       <div className="d-flex justify-content-center">

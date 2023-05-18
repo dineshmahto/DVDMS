@@ -26,7 +26,14 @@ import Checkbox from "@mui/material/Checkbox";
 import { Paper } from "@mui/material";
 import TablePagination from "../../../../components/tables/datatable/tablepagination";
 import { faDownload } from "@fortawesome/free-solid-svg-icons";
-import { getPurchaseOrderList } from "../../../../store/admin/action";
+import {
+  getPurchaseOrderList,
+  getPurchaseOrderListResponse,
+} from "../../../../store/admin/action";
+import TableRowLaoder from "../../../../components/tables/datatable/tableRowLaoder";
+import StyledTableRow from "../../../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../../../components/tables/datatable/customTableCell";
+import EmptyRow from "../../../../components/tables/datatable/emptyRow";
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -133,14 +140,18 @@ const PurchaseOrder = () => {
     let isApiSubcribed = true;
     if (isApiSubcribed) {
       setLoading(true);
-      dispatch(
-        getPurchaseOrderList({
-          pageNumber: controller.page,
-          pageSize: controller.rowsPerPage,
-        })
-      );
+      setTimeout(() => {
+        dispatch(
+          getPurchaseOrderList({
+            pageNumber: controller.page,
+            pageSize: controller.rowsPerPage,
+          })
+        );
+      }, 500);
     }
     return () => {
+      clearTimeout();
+      dispatch(getPurchaseOrderListResponse(""));
       isApiSubcribed = false;
     };
   }, [controller]);
@@ -150,15 +161,26 @@ const PurchaseOrder = () => {
       purchaseOrderListApprovalResponse &&
       purchaseOrderListApprovalResponse?.status === 200
     ) {
-      setTotalRows(purchaseOrderListApprovalResponse?.data?.totalElements);
-      setTableData(purchaseOrderListApprovalResponse?.data?.content);
+      if (
+        purchaseOrderListApprovalResponse?.data?.pageList?.content &&
+        purchaseOrderListApprovalResponse?.data?.pageList?.content?.length > 0
+      ) {
+        setTotalRows(
+          purchaseOrderListApprovalResponse?.data?.pageList?.totalElements
+        );
+        setTableData(
+          purchaseOrderListApprovalResponse?.data?.pageList?.content
+        );
+      }
+      dispatch(getPurchaseOrderListResponse(""));
       setLoading(false);
     } else if (
       purchaseOrderListApprovalResponse &&
       purchaseOrderListApprovalResponse?.status == 400
     ) {
       setLoading(false);
-      toastMessage("Login Error", "Please enter valid ID", "error");
+      dispatch(getPurchaseOrderListResponse(""));
+      toastMessage("Purchase Order", "Try again", "error");
     }
   }, [purchaseOrderListApprovalResponse]);
 
@@ -248,6 +270,24 @@ const PurchaseOrder = () => {
                 ]}
               />
             </div>
+
+            <div className="col-auto">
+              <label>PO Status</label>
+            </div>
+            <div className="col-auto">
+              <CustomSelect
+                defaultValue={{
+                  value: "1",
+                  label: "Approval Pending",
+                }}
+                options={[
+                  {
+                    value: "1",
+                    label: "Approval Pending",
+                  },
+                ]}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -257,13 +297,11 @@ const PurchaseOrder = () => {
           <div className="row align-items-center">
             <div className="col-auto">
               <div>
-                <Link to={"/openIssueToThirdparty"}>
-                  <Basicbutton
-                    type="button"
-                    buttonText="Approve / Reject PO"
-                    className="primary rounded-0"
-                  />
-                </Link>
+                <Basicbutton
+                  type="button"
+                  buttonText="Approve / Reject PO"
+                  className="primary rounded-0"
+                />
               </div>
             </div>
           </div>
@@ -277,7 +315,6 @@ const PurchaseOrder = () => {
           <SearchField
             className="me-1 mt-1"
             iconPosition="end"
-            iconName={faSearch}
             onChange={(e) => {
               console.log(e);
             }}
@@ -291,31 +328,22 @@ const PurchaseOrder = () => {
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
               handleSorting={handleSortingChange}
               checkBoxRequired={true}
             >
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </TableRow>
+                  <TableRowLaoder />
                 ) : (
                   tableData &&
                   tableData?.length > 0 &&
                   tableData?.map((data, index) => {
                     return (
-                      <TableRow key={data.id}>
-                        <TableCell padding="none">
+                      <StyledTableRow key={data.id}>
+                        <StyledTableCell padding="none">
                           <Checkbox
+                            size="small"
                             onClick={(event) => handleClick(event, index, data)}
                             color="primary"
                             checked={selected.includes(index)}
@@ -323,80 +351,42 @@ const PurchaseOrder = () => {
                               "aria-labelledby": `enhanced-table-checkbox-${index}`,
                             }}
                           />
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {index + 1}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data.poRef}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {moment(data.poDate).format("DD/MM/YYYY")}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.supplierName}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.consignee}
-                        </TableCell>
+                        </StyledTableCell>
 
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        <StyledTableCell padding="none">
                           {data?.programName}
-                        </TableCell>
+                        </StyledTableCell>
 
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        <StyledTableCell padding="none">
                           {data?.drugName}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.instiute}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.tax}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
-                          {data?.poStatus}
-                        </TableCell>
-                      </TableRow>
+                        </StyledTableCell>
+                        <TableCell padding="none">{data?.poStatus}</TableCell>
+                      </StyledTableRow>
                     );
                   })
                 )}
-                {console.log(tableData?.length)}
-                {!loading && tableData && tableData.length === 0 && (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <p style={{ fontSize: "0.8rem" }}>
-                        NO DATA AVAILABE IN TABLE
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
             <TablePagination

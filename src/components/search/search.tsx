@@ -2,6 +2,7 @@ import React from "react";
 import { TextField } from "@mui/material";
 import { InputAdornment } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { makeStyles } from "@mui/styles";
 export type position = "start" | "end";
 
@@ -29,10 +30,8 @@ const SearchField: React.FC<searchProps> = ({
   placeholder,
   fullWidth,
   onChange,
-  iconName,
   iconPosition,
   className,
-  input,
 }) => {
   const classes = useStyles();
   return (
@@ -43,7 +42,7 @@ const SearchField: React.FC<searchProps> = ({
       InputProps={{
         endAdornment: (
           <InputAdornment position={iconPosition}>
-            <FontAwesomeIcon icon={iconName} />
+            <FontAwesomeIcon icon={faSearch} />
           </InputAdornment>
         ),
       }}

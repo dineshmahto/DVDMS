@@ -1,6 +1,16 @@
+import { GET_ADD_STOCK_VERIFICATION_LIST } from "../../common/constant/constants";
 import {
+  ADD_DRUG_CONDEMNATION,
+  ADD_DRUG_CONDEMNATION_RESPONSE,
   ADD_STOCK_ENTRY,
   ADD_STOCK_ENTRY_RESPONSE,
+  ADD_STOCK_VERIFICATION,
+  ADD_STOCK_VERIFICATION_RESPONSE,
+  GET_ADD_DRUG_CONDEMNATION_LIST,
+  GET_ADD_DRUG_CONDEMNATION_LIST_RESPONSE,
+  GET_ADD_STOCK_VERIFICATION_LIST_RESPONSE,
+  GET_DRUG_CONDEMNATION_LSIT,
+  GET_DRUG_CONDEMNATION_LSIT_RESPONSE,
   GET_STOCK_DESK_LIST,
   GET_STOCK_DESK_LIST_RESPONSE,
   GET_STOCK_ENTRY_DESK,
@@ -17,7 +27,6 @@ const initialState = {
 };
 
 const stock = (state = initialState, action) => {
-  console.log("aciton", action.type);
   switch (action.type) {
     case GET_STOCK_DESK_LIST:
       state = {
@@ -73,6 +82,62 @@ const stock = (state = initialState, action) => {
       state = {
         ...state,
         stockVerificationListResponse: action?.payload,
+      };
+      break;
+
+    case GET_ADD_STOCK_VERIFICATION_LIST:
+      state = {
+        ...state,
+      };
+      break;
+    case GET_ADD_STOCK_VERIFICATION_LIST_RESPONSE:
+      state = {
+        ...state,
+        addStockVerificationListResponse: action?.payload,
+      };
+      break;
+    case ADD_STOCK_VERIFICATION:
+      state = {
+        ...state,
+      };
+      break;
+    case ADD_STOCK_VERIFICATION_RESPONSE:
+      state = {
+        ...state,
+        addStockVerificationResponse: action?.payload,
+      };
+      break;
+    case GET_DRUG_CONDEMNATION_LSIT:
+      state = {
+        ...state,
+      };
+      break;
+    case GET_DRUG_CONDEMNATION_LSIT_RESPONSE:
+      state = {
+        ...state,
+        drugCondemnationListResponse: action?.payload,
+      };
+      break;
+    case GET_ADD_DRUG_CONDEMNATION_LIST:
+      state = {
+        ...state,
+      };
+      break;
+    case GET_ADD_DRUG_CONDEMNATION_LIST_RESPONSE:
+      state = {
+        ...state,
+        addDrugCondemnationListResponse: action?.payload,
+      };
+      break;
+    case ADD_DRUG_CONDEMNATION:
+      state = {
+        ...state,
+      };
+      break;
+    case ADD_DRUG_CONDEMNATION_RESPONSE:
+      state = {
+        ...state,
+        addDrugCondemnationResponse: action?.payload,
       };
       break;
 

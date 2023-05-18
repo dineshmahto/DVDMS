@@ -44,12 +44,37 @@ const Sidenav = () => {
 
     //This part is to handle the open submenu collapse if the user refresh the page
     if (localActiveMenuItem) {
-      //if submenu2 or submenu3 is true i.e menu1 is also active
-      //submenu2 and submenu3 value is taking from the current state
-      if (activeMenuItem.isSubMenu2Active || activeMenuItem.isSubMenu3Active) {
+      if (activeMenuItem.isSubMenu3Active) {
+        //find the topmost active menu by class name "active-me" i.e menu1
+        let activeSubMenu2Elements =
+          document.getElementsByClassName("active-me")[1];
+
+        //removing "collapsed" class from topmost active menu i.e menu1
+        activeSubMenu2Elements.classList.remove("collapsed");
+
+        //get value of data attribute from topmost active menu i.e menu1
+        //this data attribute value is the id name of the collapse submenu items container element
+        let showSubmenuElementID =
+          activeSubMenu2Elements.getAttribute("data-bs-target");
+
+        //Now find the element of id which hold submenu items
+        //and substring(1) is use for removing '#' from the id name string
+        let subMenuContainerElement = document.getElementById(
+          showSubmenuElementID.substring(1)
+        );
+
+        //lastly add 'show' class to show submenu
+        subMenuContainerElement.classList.add("show");
+      } else {
+        $(".sb-sidenav-menu").find(".show").removeClass("show");
+        $(".sb-sidenav-menu-nested").find(".nav-link").addClass("collapsed");
+      }
+      if (activeMenuItem.isSubMenu2Active) {
         //find the topmost active menu by class name "active-me" i.e menu1
         let activeMenu1Elements =
           document.getElementsByClassName("active-me")[0];
+        let activeSubMenu2Elements =
+          document.getElementsByClassName("active-me")[1];
 
         //removing "collapsed" class from topmost active menu i.e menu1
         activeMenu1Elements.classList.remove("collapsed");
@@ -166,29 +191,208 @@ const Sidenav = () => {
                   >
                     Notification
                   </Link>
-                  <Link
-                    className={`nav-link ${
-                      activeMenuItem.subMenu2 === "annualdemand"
-                        ? "active-me1"
-                        : ""
-                    }`}
-                    to={{ pathname: "/annualdemand" }}
-                    onClick={() => {
-                      handleMenuItemClick(
-                        "demand",
-                        true,
-                        "annualdemand",
-                        true,
-                        "",
-                        false
-                      );
-                    }}
-                  >
-                    Annual Demand
-                  </Link>
                 </nav>
               </div>
               {/* End of Demand SubListing */}
+
+              {/* Order Management started */}
+              <Link
+                className={`nav-link collapsed ${
+                  activeMenuItem.menu1 === "ordermgmt" ? "active-me" : ""
+                }`}
+                to={{}}
+                data-bs-toggle="collapse"
+                data-bs-target="#ordermgmt"
+                aria-expanded="false"
+                aria-controls="ordermgmt"
+              >
+                <div className="sb-nav-link-icon">
+                  <i className="fas fa-list-radio"></i>
+                </div>
+                Order Mgmt
+                <div className="sb-sidenav-collapse-arrow">
+                  <i className="fas fa-angle-down"></i>
+                </div>
+              </Link>
+              <div
+                className="collapse"
+                id="ordermgmt"
+                aria-labelledby="headingOne"
+                data-bs-parent="#sidenavAccordion"
+              >
+                <nav className="sb-sidenav-menu-nested nav">
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "openPurchaseOrderList"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/openPurchaseOrderList" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "ordermgmt",
+                        true,
+                        "openPurchaseOrderList",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Purchase Order List.
+                  </Link>
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "openRateContractListing"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/openRateContractListing" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "ordermgmt",
+                        true,
+                        "openRateContractListing",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Rate Contract
+                  </Link>
+                  <Link
+                    // className="nav-link collapsed"
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "approvals" ? "active-me" : ""
+                    }`}
+                    to={"/"}
+                    data-bs-toggle="collapse"
+                    data-bs-target="#approvals"
+                    aria-expanded="false"
+                    aria-controls="approvals"
+                  >
+                    Approvals
+                    <div className="sb-sidenav-collapse-arrow">
+                      <i className="fas fa-angle-down"></i>
+                    </div>
+                  </Link>
+                  <div
+                    className="collapse"
+                    id="approvals"
+                    aria-labelledby="headingOne"
+                    data-bs-parent="#sidenavAccordionPages"
+                  >
+                    <nav className="sb-sidenav-menu-nested nav">
+                      <Link
+                        // className="nav-link"
+                        className={`nav-link ${
+                          activeMenuItem.subMenu3 === "openDemandApproval"
+                            ? "active-me2"
+                            : ""
+                        }`}
+                        to={"/openDemandApproval"}
+                        onClick={() =>
+                          handleMenuItemClick(
+                            "ordermgmt",
+                            true,
+                            "approvals",
+                            true,
+                            "openDemandApproval",
+                            true
+                          )
+                        }
+                      >
+                        Annual Demand
+                      </Link>
+                      <Link
+                        className={`nav-link ${
+                          activeMenuItem.subMenu3 ===
+                          "openPurchaseOrderForApprovalList"
+                            ? "active-me2"
+                            : ""
+                        }`}
+                        to={"/openPurchaseOrderForApprovalList"}
+                        onClick={() =>
+                          handleMenuItemClick(
+                            "ordermgmt",
+                            true,
+                            "approvals",
+                            true,
+                            "openPurchaseOrderForApprovalList",
+                            true
+                          )
+                        }
+                      >
+                        Purchase Order
+                      </Link>
+                      <Link
+                        className={`nav-link ${
+                          activeMenuItem.subMenu3 === "openApprovalDesk"
+                            ? "active-me2"
+                            : ""
+                        }`}
+                        to={"/openApprovalDesk"}
+                        onClick={() =>
+                          handleMenuItemClick(
+                            "ordermgmt",
+                            true,
+                            "approvals",
+                            true,
+                            "openApprovalDesk",
+                            true
+                          )
+                        }
+                      >
+                        Intent Approval
+                      </Link>
+
+                      <Link
+                        className={`nav-link ${
+                          activeMenuItem.subMenu2 === "openTransferApprovalDesk"
+                            ? "active-me1"
+                            : ""
+                        }`}
+                        to={{ pathname: "/openTransferApprovalDesk" }}
+                        onClick={() =>
+                          handleMenuItemClick(
+                            "ordermgmt",
+                            true,
+                            "approvals",
+                            true,
+                            "openTransferApprovalDesk",
+                            true
+                          )
+                        }
+                      >
+                        Transfer Approval
+                      </Link>
+                      <Link
+                        className={`nav-link ${
+                          activeMenuItem.subMenu2 === "openTransferManagerforHQ"
+                            ? "active-me1"
+                            : ""
+                        }`}
+                        to={{ pathname: "/openTransferManagerforHQ" }}
+                        onClick={() =>
+                          handleMenuItemClick(
+                            "ordermgmt",
+                            true,
+                            "approvals",
+                            true,
+                            "openTransferManagerforHQ",
+                            true
+                          )
+                        }
+                      >
+                        Transfer Approval(HQ)
+                      </Link>
+                    </nav>
+                  </div>
+                </nav>
+              </div>
+              {/* Order management ended */}
+
               {/* Stock */}
               <Link
                 className={`nav-link collapsed ${
@@ -257,7 +461,27 @@ const Sidenav = () => {
                   </Link>
                   <Link
                     className={`nav-link ${
-                      activeMenuItem.subMenu2 === "condemnation-register"
+                      activeMenuItem.subMenu2 === "updateStockRackDesk"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/updateStockRackDesk" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "stock",
+                        true,
+                        "updateStockRackDesk",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Update Stock Rack
+                  </Link>
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "openCondeminationRegister"
                         ? "active-me1"
                         : ""
                     }`}
@@ -266,7 +490,7 @@ const Sidenav = () => {
                       handleMenuItemClick(
                         "stock",
                         true,
-                        "condemnation-register",
+                        "openCondeminationRegister",
                         true,
                         "",
                         false
@@ -275,9 +499,174 @@ const Sidenav = () => {
                   >
                     Condemnation Register
                   </Link>
+
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "openStockVerificationDeck"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/openStockVerificationDeck" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "stock",
+                        true,
+                        "openStockVerificationDeck",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Stock Verification
+                  </Link>
                 </nav>
               </div>
               {/* End of Stock */}
+
+              {/* Requisition */}
+
+              <Link
+                className={`nav-link collapsed ${
+                  activeMenuItem.menu1 === "requisition" ? "active-me" : ""
+                }`}
+                to={{}}
+                data-bs-toggle="collapse"
+                data-bs-target="#requisition"
+                aria-expanded="false"
+                aria-controls="requisition"
+              >
+                <div className="sb-nav-link-icon">
+                  <i className="fas fa-box-open"></i>
+                </div>
+                Requisition
+                <div className="sb-sidenav-collapse-arrow">
+                  <i className="fas fa-angle-down"></i>
+                </div>
+              </Link>
+              <div
+                className="collapse"
+                id="requisition"
+                aria-labelledby="headingOne"
+                data-bs-parent="#sidenavAccordion"
+              >
+                <nav className="sb-sidenav-menu-nested nav">
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "openIndentDesk"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/openIndentDesk" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "requisition",
+                        true,
+                        "openIndentDesk",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Intent Drugs
+                  </Link>
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "openReturnDesk"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/transferList" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "requisition",
+                        true,
+                        "transferList",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Transfer List
+                  </Link>
+                </nav>
+              </div>
+
+              {/* End of Requsition */}
+
+              {/* Receiving */}
+
+              <Link
+                className={`nav-link collapsed ${
+                  activeMenuItem.menu1 === "receiving" ? "active-me" : ""
+                }`}
+                to={{}}
+                data-bs-toggle="collapse"
+                data-bs-target="#receiving"
+                aria-expanded="false"
+                aria-controls="receiving"
+              >
+                <div className="sb-nav-link-icon">
+                  <i className="fas fa-inbox-in"></i>
+                </div>
+                Receiving
+                <div className="sb-sidenav-collapse-arrow">
+                  <i className="fas fa-angle-down"></i>
+                </div>
+              </Link>
+              <div
+                className="collapse"
+                id="receiving"
+                aria-labelledby="headingOne"
+                data-bs-parent="#sidenavAccordion"
+              >
+                <nav className="sb-sidenav-menu-nested nav">
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "openChallanDesk"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/openChallanDesk" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "receiving",
+                        true,
+                        "openChallanDesk",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Challan List
+                  </Link>
+                  <Link
+                    className={`nav-link ${
+                      activeMenuItem.subMenu2 === "openIndentReceiveDesk"
+                        ? "active-me1"
+                        : ""
+                    }`}
+                    to={{ pathname: "/openIndentReceiveDesk" }}
+                    onClick={() =>
+                      handleMenuItemClick(
+                        "receiving",
+                        true,
+                        "openIndentReceiveDesk",
+                        true,
+                        "",
+                        false
+                      )
+                    }
+                  >
+                    Receive of Drugs
+                  </Link>
+                </nav>
+              </div>
+
+              {/* End of Receiving */}
 
               {/* Issue */}
 
@@ -292,7 +681,7 @@ const Sidenav = () => {
                 aria-controls="issue"
               >
                 <div className="sb-nav-link-icon">
-                  <i className="fas fa-warehouse"></i>
+                  <i className="fas fa-box-open"></i>
                 </div>
                 Issue
                 <div className="sb-sidenav-collapse-arrow">

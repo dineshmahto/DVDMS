@@ -1,4 +1,20 @@
 import {
+  CREATE_NEW_BUDGET,
+  CREATE_NEW_BUDGET_RESPONSE,
+  CREATE_NEW_DRUG,
+  CREATE_NEW_DRUG_RESPONSE,
+  CREATE_NEW_FUNDING,
+  CREATE_NEW_FUNDING_RESPONSE,
+  CREATE_PORGRAM_RESPONSE,
+  CREATE_PROGRAM,
+  CREATE_ROLE,
+  CREATE_ROLE_RESPONSE,
+  CREATE_STORE,
+  CREATE_STORE_RESPONSE,
+  CREATE_USER,
+  CREATE_USER_RESPONSE,
+  DELETE_PROGRAM,
+  DELETE_PROGRAM_RESPONSE,
   DELETE_ROLE,
   GET_BUDGET_INTERFACE_LIST,
   GET_BUDGET_INTERFACE_LIST_RESPONSE,
@@ -24,7 +40,13 @@ import {
   GET_SUPPLIER_LIST_RESPONSE,
   GET_USER_LIST,
   GET_USER_LIST_RESPONSE,
+  POST_EDL_MAPPING,
+  POST_EDL_MAPPING_RESPONSE,
+  POST_PROGRAM_FUND_MAPPING,
+  POST_PROGRAM_FUND_MAPPING_RESPONSE,
   ROLE_DELETED_SUCCESSFULL,
+  UPDATE_PROGRAM,
+  UPDATE_PROGRAM_RESPONSE,
 } from "./actionTypes";
 import {} from "./actionTypes";
 
@@ -198,5 +220,156 @@ export const getProgrameFundingSourceListResponse = (
   return {
     type: GET_PROGRAM_FUNDING_SOURCE_RESPONSE,
     payload: programFundingSourceListResponse,
+  };
+};
+
+// POST
+
+export const createUser = (userDetails) => {
+  return {
+    type: CREATE_USER,
+    payload: userDetails,
+  };
+};
+
+export const createUserResponse = (createUsrResp) => {
+  return {
+    type: CREATE_USER_RESPONSE,
+    payload: createUsrResp,
+  };
+};
+
+export const createNewDrug = (drugDetails) => {
+  return {
+    type: CREATE_NEW_DRUG,
+    payload: drugDetails,
+  };
+};
+
+export const createNewDrugResponse = (createDrugResp) => {
+  return {
+    type: CREATE_NEW_DRUG_RESPONSE,
+    payload: createDrugResp,
+  };
+};
+
+export const createStore = (storeDetails) => {
+  return {
+    type: CREATE_STORE,
+    payload: storeDetails,
+  };
+};
+
+export const createStoreResponse = (createStoreResp) => {
+  return {
+    type: CREATE_STORE_RESPONSE,
+    payload: createStoreResp,
+  };
+};
+
+export const createProgram = (programDetails) => {
+  return {
+    type: CREATE_PROGRAM,
+    payload: programDetails,
+  };
+};
+
+export const updateProgram = (updateProgramDetails) => {
+  return {
+    type: UPDATE_PROGRAM,
+    payload: updateProgramDetails,
+  };
+};
+
+export const updateProgramResponse = (updateProgramResponse) => {
+  return {
+    type: UPDATE_PROGRAM_RESPONSE,
+    payload: updateProgramResponse,
+  };
+};
+
+export const deleteProgrm = (deleteId) => {
+  return {
+    type: DELETE_PROGRAM,
+    payload: deleteId,
+  };
+};
+
+export const deleteProgramResponse = (deleteProgrmResponse) => {
+  return {
+    type: DELETE_PROGRAM_RESPONSE,
+    payload: deleteProgrmResponse,
+  };
+};
+export const createProgramResponse = (createPrgmResp) => {
+  return {
+    type: CREATE_PORGRAM_RESPONSE,
+    payload: createPrgmResp,
+  };
+};
+
+export const createRole = (roleDetails) => {
+  return {
+    type: CREATE_ROLE,
+    payload: roleDetails,
+  };
+};
+
+export const createRoleResponse = (createRoleRsp) => {
+  return {
+    type: CREATE_ROLE_RESPONSE,
+    payload: createRoleRsp,
+  };
+};
+export const postProgrmFunding = (prgmFundingDetails) => {
+  return {
+    type: POST_PROGRAM_FUND_MAPPING,
+    payload: prgmFundingDetails,
+  };
+};
+
+export const postProgrmFundingResponse = (postPrgmFundingResp) => {
+  return {
+    type: POST_PROGRAM_FUND_MAPPING_RESPONSE,
+    payload: postPrgmFundingResp,
+  };
+};
+
+export const postEDLMapping = (edlMappingDetails) => {
+  return {
+    type: POST_EDL_MAPPING,
+    payload: edlMappingDetails,
+  };
+};
+
+export const postEDLMappingResponse = (postEDLMappingResp) => {
+  return {
+    type: POST_EDL_MAPPING_RESPONSE,
+    payload: postEDLMappingResp,
+  };
+};
+export const createNewBudgetInterface = (budgetDetails) => {
+  return {
+    type: CREATE_NEW_BUDGET,
+    payload: budgetDetails,
+  };
+};
+export const createNewBudgetInterfaceResponse = (createBudgetResp) => {
+  return {
+    type: CREATE_NEW_BUDGET_RESPONSE,
+    payload: createBudgetResp,
+  };
+};
+
+export const createFundingSource = (fundingSrcDetails) => {
+  return {
+    type: CREATE_NEW_FUNDING,
+    payload: fundingSrcDetails,
+  };
+};
+export const createFundingSourceResponse = (createFundingSrcResp) => {
+  return {
+    type: CREATE_NEW_FUNDING_RESPONSE,
+    payload: createFundingSrcResp,
   };
 };

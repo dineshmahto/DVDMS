@@ -3,10 +3,8 @@ import TableComponent from "../../../components/tables/datatable/tableComponent"
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import SearchField from "../../../components/search/search";
 import BasicInput from "../../../components/inputbox/floatlabel/basicInput";
-import { TableBody } from "@mui/material";
+import { Paper, TableBody } from "@mui/material";
 import moment from "moment";
-import { Spinner } from "react-bootstrap";
-import { makeStyles } from "@mui/styles";
 import Basicbutton from "../../../components/button/basicbutton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -22,51 +20,18 @@ import {
 import StyledTableRow from "../../../components/tables/datatable/customTableRow";
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 import { useDispatch, useSelector } from "react-redux";
-const useStyles = makeStyles({
-  root: {
-    "& .MuiInputBase-root": {
-      "& .MuiButtonBase-root": {},
-      "& .MuiInputBase-input": {
-        padding: 8,
-      },
-    },
-  },
-});
-const tempData = [
-  {
-    id: 1,
-    storeName: "SWH HQ MEGHALAYA(NHM)",
-    dName: "VITAMIN A SOLUTION: 100000 IU PER 1ML IN 50ML",
-    pName: "CHILD HEALTH CH",
-    batchNo: "RA-005",
-    expDate: "MAR-2024",
-    mfgDate: "OCT-2022",
-    noOfExpDays: "354",
-    avlQty: "694",
-    unitPrice: "56.68",
-    institute: "NHM",
-  },
-  {
-    id: 2,
-    storeName: "SWH HQ MEGHALAYA(NHM)",
-    dName: "VITAMIN A SOLUTION: 100000 IU PER 1ML IN 50ML",
-    pName: "CHILD HEALTH",
-    batchNo: "RA-005",
-    expDate: "MAR-2024",
-    mfgDate: "OCT-2022",
-    noOfExpDays: "354",
-    avlQty: "694",
-    unitPrice: "56.68",
-    institute: "NHM",
-  },
-];
+import TablePagination from "../../../components/tables/datatable/tablepagination";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
+
 const UpdateStockRack = () => {
   const dispatch = useDispatch();
   const updateStockRackResponse = useSelector(
     (state) => state?.stock?.updateStockRackListResponse
   );
   console.log("updateStockRackResponse", updateStockRackResponse);
-  const [tableData, setTableData] = useState(tempData);
+
+  const [tableData, setTableData] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState([]);
@@ -87,12 +52,12 @@ const UpdateStockRack = () => {
     },
 
     {
-      id: "dName",
+      id: "drugName",
       name: "DRUG NAME",
       sortable: true,
     },
     {
-      id: "pName",
+      id: "programName",
       name: "PROGRAMME NAME",
       sortable: false,
       type: "select",
@@ -113,12 +78,12 @@ const UpdateStockRack = () => {
       sortable: true,
     },
     {
-      id: "noOfExpDays",
+      id: "dayToExpire",
       name: "NO OF DAYS TO EXP",
       sortable: true,
     },
     {
-      id: "avlQty",
+      id: "stockQty",
       name: "AVAIL. QTY",
       sortable: true,
     },
@@ -188,6 +153,10 @@ const UpdateStockRack = () => {
 
   useEffect(() => {
     if (updateStockRackResponse && updateStockRackResponse?.status === 200) {
+      setTotalRows(updateStockRackResponse?.data?.pageList?.totalElements);
+      setTableData(updateStockRackResponse?.data?.pageList?.content);
+      dispatch(getStockUpdateRackListResponse(""));
+      setLoading(false);
     }
   }, [updateStockRackResponse]);
   return (
@@ -221,75 +190,85 @@ const UpdateStockRack = () => {
           />
         </div>
       </div>
-      <div className="row">
-        <div className="col-12">
-          <TableComponent
-            columns={columns}
-            sortField={sortField}
-            order={order}
-            handleSorting={handleSortingChange}
-            checkBoxRequired={false}
-          >
-            <TableBody>
-              {loading ? (
-                <StyledTableRow>
-                  <StyledTableCell colSpan={12}>
-                    <Spinner />
-                  </StyledTableCell>
-                </StyledTableRow>
-              ) : (
-                tableData.length > 0 &&
-                tableData.map((data, index) => (
-                  <StyledTableRow key={data.id}>
-                    {columns.map((d, k) => {
-                      if (d.id === "rack") {
-                        return (
-                          <StyledTableCell key={k} padding="none">
-                            <BasicInput
-                              type="text"
-                              placeholder="Enter the Quantity"
-                            />
-                          </StyledTableCell>
-                        );
-                      } else if (d.id === "mfgDate" || d.id === "expDate") {
-                        return (
-                          <StyledTableCell key={k} padding="none">
-                            {moment(data[d.id]).format("DD/MM/YYYY")}
-                          </StyledTableCell>
-                        );
-                      } else {
-                        return (
-                          <StyledTableCell key={k} padding="none">
-                            {data[d.id]}
-                          </StyledTableCell>
-                        );
-                      }
-                    })}
-                  </StyledTableRow>
-                ))
-              )}
-            </TableBody>
-          </TableComponent>
-        </div>
-      </div>
-      <div className="row  mt-2">
-        <div className="col-12">
-          <div className="d-flex justify-content-center">
-            <Basicbutton
-              icon={<FontAwesomeIcon icon={faFloppyDisk} className="me-1" />}
-              type="submit"
-              buttonText="Update"
-              className="warning rounded-0 me-1"
-            />
-            <Basicbutton
-              icon={<FontAwesomeIcon icon={faXmark} className="me-1" />}
-              type="button"
-              buttonText="Cancel"
-              className="danger rounded-0"
+      <Paper>
+        <div className="row">
+          <div className="col-12">
+            <TableComponent
+              columns={columns}
+              sortField={sortField}
+              order={order}
+              handleSorting={handleSortingChange}
+              checkBoxRequired={false}
+            >
+              <TableBody>
+                {loading ? (
+                  <TableRowLaoder />
+                ) : (
+                  tableData.length > 0 &&
+                  tableData.map((data, index) => (
+                    <StyledTableRow key={data.id}>
+                      {columns.map((d, k) => {
+                        if (d.id === "rack") {
+                          return (
+                            <StyledTableCell key={k} padding="none">
+                              <BasicInput
+                                type="text"
+                                placeholder="Enter the Quantity"
+                              />
+                            </StyledTableCell>
+                          );
+                        } else if (d.id === "mfgDate" || d.id === "expDate") {
+                          return (
+                            <StyledTableCell key={k} padding="none">
+                              {moment(data[d.id]).format("DD/MM/YYYY")}
+                            </StyledTableCell>
+                          );
+                        } else {
+                          return (
+                            <StyledTableCell key={k} padding="none">
+                              {data[d.id]}
+                            </StyledTableCell>
+                          );
+                        }
+                      })}
+                    </StyledTableRow>
+                  ))
+                )}
+                <EmptyRow loading={loading} tableData={tableData} />
+              </TableBody>
+            </TableComponent>
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
             />
           </div>
         </div>
-      </div>
+        {tableData && tableData?.length > 0 ? (
+          <div className="row  mt-2">
+            <div className="col-12">
+              <div className="d-flex justify-content-center mb-1">
+                <Basicbutton
+                  icon={
+                    <FontAwesomeIcon icon={faFloppyDisk} className="me-1" />
+                  }
+                  type="submit"
+                  buttonText="Update"
+                  className="warning rounded-0 me-1"
+                />
+                <Basicbutton
+                  icon={<FontAwesomeIcon icon={faXmark} className="me-1" />}
+                  type="button"
+                  buttonText="Cancel"
+                  className="danger rounded-0"
+                />
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </Paper>
     </>
   );
 };

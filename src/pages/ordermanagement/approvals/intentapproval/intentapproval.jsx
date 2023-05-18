@@ -1,70 +1,43 @@
-import React, {
-  useState,
-  useMemo,
-  useEffect,
-  lazy,
-  Suspense,
-  useCallback,
-} from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import HorizonatalLine from "../../../../components/horizontalLine/horizonatalLine";
 import TableComponent from "../../../../components/tables/datatable/tableComponent";
-import { TableBody, TableRow, TableCell } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { TableBody } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import moment from "moment";
-import { Spinner } from "react-bootstrap";
-import { faFilePdf, faSearch } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CustomSelect from "../../../../components/select/customSelect";
 import Basicbutton from "../../../../components/button/basicbutton";
 import SearchField from "../../../../components/search/search";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getIntentforApprovalList } from "../../../../store/ordermanagement/action";
+import {
+  getIntentforApprovalList,
+  getIntentforApprovalListResponse,
+} from "../../../../store/ordermanagement/action";
 import toastMessage from "../../../../common/toastmessage/toastmessage";
 import Checkbox from "@mui/material/Checkbox";
 import { Paper } from "@mui/material";
 import TablePagination from "../../../../components/tables/datatable/tablepagination";
-import { faDownload } from "@fortawesome/free-solid-svg-icons";
-const useStyles = makeStyles({
-  tableCell: {
-    padding: "10px !important",
-    fontSize: "0.8rem !important",
-  },
-  lineHeight: {
-    lineHeight: "3",
-  },
-});
-const tempData = [
-  {
-    id: 1,
-    storeName: "STATE WAREHOUSE",
-    drugName: "PARACETAMOL TAB. 500MG",
-    progName: "COVID19",
-    batchNo: "	21443792",
-    expDate: "NOV-2024",
-    mfgDate: "DEC-2021",
-    dToExp: "597",
-    avalQty: "579",
-    rack: "0 ",
-    instiute: "BOTH(NHM & DHS)",
-    source: "ECRP",
-  },
-];
+import handleSortingFunc from "../../../../components/tables/datatable/sortable";
+import TableRowLaoder from "../../../../components/tables/datatable/tableRowLaoder";
+import StyledTableRow from "../../../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../../../components/tables/datatable/customTableCell";
+import EmptyRow from "../../../../components/tables/datatable/emptyRow";
+
 const IntentApproval = () => {
   const dispatch = useDispatch();
   const intentApprovalListResponse = useSelector(
     (state) => state.ordermanaagement?.intentApprovalListResponse
   );
   console.log("intentApprovalListResponse", intentApprovalListResponse);
-  let classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
-  const [tableData, setTableData] = useState(tempData);
+  const [tableData, setTableData] = useState([]);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
+    type: 99,
+    status: 99,
   });
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState([]);
@@ -113,14 +86,19 @@ const IntentApproval = () => {
     let isApiSubcribed = true;
     if (isApiSubcribed) {
       setLoading(true);
-      dispatch(
-        getIntentforApprovalList({
-          pageNumber: controller.page,
-          pageSize: controller.rowsPerPage,
-        })
-      );
+      setTimeout(() => {
+        dispatch(
+          getIntentforApprovalList({
+            ...controller,
+            pageNumber: controller.page,
+            pageSize: controller.rowsPerPage,
+          })
+        );
+      }, 500);
     }
     return () => {
+      clearTimeout();
+      dispatch(getIntentforApprovalListResponse(""));
       isApiSubcribed = false;
     };
   }, [controller]);
@@ -130,15 +108,22 @@ const IntentApproval = () => {
       intentApprovalListResponse &&
       intentApprovalListResponse?.status === 200
     ) {
-      setTotalRows(intentApprovalListResponse?.data?.totalElements);
-      setTableData(intentApprovalListResponse?.data?.content);
+      if (
+        intentApprovalListResponse?.data?.pageList?.content &&
+        intentApprovalListResponse?.data?.pageList?.content.length
+      ) {
+        setTotalRows(intentApprovalListResponse?.data?.pageList?.totalElements);
+        setTableData(intentApprovalListResponse?.data?.pageList?.content);
+      }
+      dispatch(getIntentforApprovalListResponse(""));
       setLoading(false);
     } else if (
       intentApprovalListResponse &&
       intentApprovalListResponse?.status == 400
     ) {
+      dispatch(getIntentforApprovalListResponse(""));
       setLoading(false);
-      toastMessage("Login Error", "Please enter valid ID", "error");
+      toastMessage("Intent Approval", "Please try again", "error");
     }
   }, [intentApprovalListResponse]);
 
@@ -162,31 +147,8 @@ const IntentApproval = () => {
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    handleSorting(accessor, sortOrder);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
-  const handleSorting = useCallback(
-    (sortField, sortOrder) => {
-      if (sortField) {
-        const sorted = [...tableData].sort((a, b) => {
-          if (a[sortField] === null) return 1;
-          if (b[sortField] === null) return -1;
-          if (a[sortField] === null && b[sortField] === null) return 0;
-
-          return (
-            a[sortField]
-              .toString()
-              .localeCompare(b[sortField].toString(), "en", {
-                numeric: true,
-              }) * (sortOrder === "asc" ? 1 : -1)
-          );
-        });
-        setSelected([]);
-
-        setTableData(sorted);
-      }
-    },
-    [sortField, order, tableData]
-  );
 
   const handleClick = (event, index, row) => {
     if (selected.includes(index)) {
@@ -208,7 +170,7 @@ const IntentApproval = () => {
     <>
       <div className="row mt-2">
         <div className="d-flex justify-content-start">
-          <p className="fs-6">APPROVAL DESK</p>
+          <p className="fs-6">INTENT APPROVAL</p>
         </div>
       </div>
       <div className="row d-flex justify-content-start mb-2">
@@ -244,6 +206,12 @@ const IntentApproval = () => {
                     label: "Intent for Issue",
                   },
                 ]}
+                onChange={(selectedOption) => {
+                  setController({
+                    ...controller,
+                    type: selectedOption?.value,
+                  });
+                }}
               />
             </div>
 
@@ -253,15 +221,33 @@ const IntentApproval = () => {
             <div className="col-auto">
               <CustomSelect
                 defaultValue={{
-                  value: "all",
+                  value: "99",
                   label: "All",
                 }}
                 options={[
                   {
-                    value: "all",
+                    value: "99",
                     label: "All",
                   },
+                  {
+                    value: "1",
+                    label: "Approval Pending",
+                  },
+                  {
+                    value: "4",
+                    label: "Approved By Ins. Head",
+                  },
+                  {
+                    value: "5",
+                    label: "Rejected By Ins. Head",
+                  },
                 ]}
+                onChange={(selectedOption) => {
+                  setController({
+                    ...controller,
+                    status: selectedOption?.value,
+                  });
+                }}
               />
             </div>
           </div>
@@ -305,7 +291,6 @@ const IntentApproval = () => {
           <SearchField
             className="me-1 mt-1"
             iconPosition="end"
-            iconName={faSearch}
             onChange={(e) => {
               console.log(e);
             }}
@@ -314,103 +299,67 @@ const IntentApproval = () => {
       </div>
       <Paper>
         {/* Table Rendering */}
-        <div className="row">
-          <div className="col-12">
-            <TableComponent
-              columns={columns}
-              sortField={sortField}
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
-              order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              handleSorting={handleSortingChange}
-              checkBoxRequired={true}
-            >
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  tableData &&
-                  tableData?.length > 0 &&
-                  tableData?.map((data, index) => {
-                    return (
-                      <TableRow key={data.id}>
-                        <TableCell padding="none">
-                          <Checkbox
-                            onClick={(event) => handleClick(event, index, data)}
-                            color="primary"
-                            checked={selected.includes(index)}
-                            inputProps={{
-                              "aria-labelledby": `enhanced-table-checkbox-${index}`,
-                            }}
-                          />
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {data?.fromStore}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
-                          {data?.toStore}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
-                          {data?.requestNo}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
-                          {moment(data?.requesstDate).format("DD/MM/YYYY")}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
-                          {data?.type}
-                        </TableCell>
 
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
-                          {data?.status}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
-                )}
-                {console.log(tableData?.length)}
-                {!loading && tableData && tableData.length === 0 && (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <p style={{ fontSize: "0.8rem" }}>
-                        NO DATA AVAILABE IN TABLE
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </TableComponent>
-            <TablePagination
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller?.rowsPerPage}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </div>
-        </div>
+        <TableComponent
+          columns={columns}
+          sortField={sortField}
+          order={order}
+          handleSorting={handleSortingChange}
+          checkBoxRequired={true}
+        >
+          <TableBody>
+            {loading ? (
+              <TableRowLaoder />
+            ) : (
+              tableData &&
+              tableData?.length > 0 &&
+              tableData?.map((data, index) => {
+                return (
+                  <StyledTableRow key={data.id}>
+                    <StyledTableCell padding="none">
+                      <Checkbox
+                        size="small"
+                        onClick={(event) => handleClick(event, index, data)}
+                        color="primary"
+                        checked={selected.includes(index)}
+                        inputProps={{
+                          "aria-labelledby": `enhanced-table-checkbox-${index}`,
+                        }}
+                      />
+                    </StyledTableCell>
+                    <StyledTableCell padding="none">
+                      {data?.fromStore}
+                    </StyledTableCell>
+                    <StyledTableCell padding="none">
+                      {data?.toStore}
+                    </StyledTableCell>
+                    <StyledTableCell padding="none">
+                      {data?.requestNo}
+                    </StyledTableCell>
+                    <StyledTableCell padding="none">
+                      {moment(data?.requesstDate).format("DD/MM/YYYY")}
+                    </StyledTableCell>
+                    <StyledTableCell padding="none">
+                      {data?.type}
+                    </StyledTableCell>
+
+                    <StyledTableCell padding="none">
+                      {data?.status}
+                    </StyledTableCell>
+                  </StyledTableRow>
+                );
+              })
+            )}
+            <EmptyRow loading={loading} tableData={tableData} />
+          </TableBody>
+        </TableComponent>
+        <TablePagination
+          page={controller.page + 1}
+          count={totalRows}
+          rowsPerPage={controller?.rowsPerPage}
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </Paper>
     </>
   );

@@ -41,6 +41,7 @@ const TablePagination: React.FC<paginationProps> = ({
             { value: "50", label: "50 / page" },
             { value: "100", label: "100 / page" },
           ]}
+          disabled={count === 0 ? true : false}
         />
       </div>
     </div>

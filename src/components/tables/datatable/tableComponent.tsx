@@ -126,10 +126,10 @@ const TableComponent: React.FC<tableProps> = ({
                       padding="none"
                       style={{
                         backgroundColor: colouredHeader
-                          ? "#454545"
+                          ? "black"
                           : "transparent",
                         color: colouredHeader ? "white" : "black",
-                        padding: "8px",
+                        padding: "10px",
                         fontSize: "0.7rem",
                         textAlign: "center",
                       }}

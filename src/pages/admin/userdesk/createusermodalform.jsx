@@ -1,33 +1,65 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import CustomSelect from "../../../components/select/customSelect";
 import Basicbutton from "../../../components/button/basicbutton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFloppyDisk,
-  faRefresh,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faFloppyDisk, faRefresh } from "@fortawesome/free-solid-svg-icons";
 import BasicModal from "../../../components/modal/basicmodal";
 import { Form, Formik, Field } from "formik";
 import * as Yup from "yup";
+import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import toastMessage from "../../../common/toastmessage/toastmessage";
+import {
+  createUser,
+  createUserResponse,
+  getUserList,
+} from "../../../store/admin/action";
+
 const CreateUserModalForm = ({
   openCreateuserModal,
   handleCloseCreateUserModal,
+  roleList,
+  storeList,
 }) => {
+  const formRef = useRef();
+  const dispatch = useDispatch();
+
+  const addUserResponse = useSelector(
+    (state) => state?.admin?.createUserResponse
+  );
+  console.log("createUserResponse", addUserResponse);
+  console.log("roleList", roleList);
   const newUserRoleSchema = Yup.object().shape({
-    userId: Yup.string()
+    username: Yup.string()
       .min(2, "Too Short!")
       .max(50, "Too Long!")
       .required("User Id is Required"),
     password: Yup.string().required("Passowrd is required"),
     firstName: Yup.string().ensure().required("First Name is Required!"),
     lastName: Yup.string().required("Last Name is required"),
-    email: Yup.string().email().required("Email is required"),
-    address: Yup.number().required("Address Field is Required"),
-    city: Yup.number().required("City Field is Required"),
-    storeName: Yup.string().ensure().required("Select the Store Name!"),
-    role: Yup.string().ensure().required("Select the Role!"),
+    emailId: Yup.string().email().required("Email is required"),
+    mobileNumber: Yup.number().required("Contact No is Required"),
+    address: Yup.string().required("Address Field is Required"),
+    city: Yup.string().required("City Field is Required"),
+    store: Yup.string().ensure().required("Select the Store Name!"),
+    roles: Yup.string().ensure().required("Select the Role!"),
   });
+
+  useEffect(() => {
+    if (addUserResponse && addUserResponse?.status === 200) {
+      dispatch(getUserList());
+      dispatch(createUserResponse(""));
+      formRef?.current?.resetForm({ values: "" });
+      toastMessage("User Desk", "User Created Successfully");
+      handleCloseCreateUserModal();
+    } else if (addUserResponse && addUserResponse?.status === 500) {
+      dispatch(createUserResponse(""));
+      toastMessage("User Desk", "Something went wrong try again", "error");
+    } else {
+      dispatch(createUserResponse(""));
+    }
+  }, [addUserResponse]);
   return (
     <>
       <BasicModal
@@ -44,22 +76,26 @@ const CreateUserModalForm = ({
         key="create_user"
       >
         <Formik
+          innerRef={formRef}
           validateOnMount
           initialValues={{
-            userId: "",
+            username: "",
             password: "",
             firstName: "",
             lastName: "",
-            email: "",
+            emailId: "",
+            mobileNumber: "",
             address: "",
             city: "",
-            storeName: "",
-            role: "",
+            store: "",
+            roles: "",
           }}
           validationSchema={newUserRoleSchema}
-          onSubmit={async (values) => {
+          onSubmit={async (values, { resetForm }) => {
             await new Promise((r) => setTimeout(r, 500));
             alert(JSON.stringify(values, null, 2));
+            console.log("values", values);
+            dispatch(createUser(values));
           }}
         >
           {({
@@ -70,6 +106,7 @@ const CreateUserModalForm = ({
             handleChange,
             handleBlur,
             setFieldTouched,
+            setFieldValue,
             isValid,
           }) => (
             <Form>
@@ -77,25 +114,25 @@ const CreateUserModalForm = ({
                 <div className="col-10 offset-1">
                   <div className="row mb-2 align-items-center">
                     <div className="col-2">
-                      <label htmlFor="userId" class="col-form-label">
+                      <label htmlFor="username" class="col-form-label">
                         User ID:
                       </label>
                     </div>
                     <div className="col-6">
                       <Field
                         className="form-control shadow-none"
-                        value={values?.userId}
+                        value={values?.username}
                         type="text"
-                        id="userId"
-                        name="userId"
+                        id="username"
+                        name="username"
                         onChange={handleChange}
                         onBlur={handleBlur}
                       />
                     </div>
                     <div className="col-4">
-                      {errors.userId && touched.userId ? (
+                      {errors.username && touched.username ? (
                         <div className="text-danger float-end">
-                          {errors.userId}
+                          {errors.username}
                         </div>
                       ) : null}
                       <span class="form-text">Between 2 to 50 characters.</span>
@@ -117,6 +154,7 @@ const CreateUserModalForm = ({
                         name="password"
                         onChange={handleChange}
                         onBlur={handleBlur}
+                        autoComplete="new-password"
                       />
                     </div>
                     <div className="col-4">
@@ -191,25 +229,51 @@ const CreateUserModalForm = ({
 
                   <div className="row mb-2 align-items-center">
                     <div class="col-2">
-                      <label htmlFor="email" class="col-form-label">
+                      <label htmlFor="emailId" class="col-form-label">
                         Email
                       </label>
                     </div>
                     <div class="col-6">
                       <Field
                         className="form-control shadow-none"
-                        value={values?.email}
+                        value={values?.emailId}
                         type="email"
-                        id="email"
-                        name="email"
+                        id="emailId"
+                        name="emailId"
                         onChange={handleChange}
                         onBlur={handleBlur}
                       />
                     </div>
                     <div className="col-4">
-                      {errors.email && touched.email ? (
+                      {errors.emailId && touched.emailId ? (
                         <div className="text-danger float-end">
-                          {errors.email}
+                          {errors.emailId}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+
+                  <div className="row mb-2 align-items-center">
+                    <div class="col-2">
+                      <label htmlFor="mobileNumber" class="col-form-label">
+                        Contact No
+                      </label>
+                    </div>
+                    <div class="col-6">
+                      <Field
+                        className="form-control shadow-none"
+                        value={values?.mobileNumber}
+                        type="number"
+                        id="mobileNumber"
+                        name="mobileNumber"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                      />
+                    </div>
+                    <div className="col-4">
+                      {errors.mobileNumber && touched.mobileNumber ? (
+                        <div className="text-danger float-end">
+                          {errors.mobileNumber}
                         </div>
                       ) : null}
                     </div>
@@ -298,14 +362,19 @@ const CreateUserModalForm = ({
                     <div className="col-6">
                       <CustomSelect
                         className="form-control shadow-none"
-                        name="storeName"
-                        id="storeName"
-                        value={values?.storeName}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
+                        name="store"
+                        id="store"
+                        value={
+                          storeList &&
+                          storeList?.find((c) => c.value === values?.store)
+                        }
+                        onChange={(val) => {
+                          setFieldValue("store", val.value);
                         }}
+                        options={
+                          storeList && storeList?.length > 0 ? storeList : []
+                        }
+                        onBlur={setFieldTouched}
                       />
                     </div>
                     <div className="col-4">
@@ -328,22 +397,28 @@ const CreateUserModalForm = ({
                         className="form-control shadow-none"
                         name="role"
                         id="role"
-                        value={values?.role}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
+                        value={
+                          roleList &&
+                          roleList?.find((c) => c.value === values?.roles)
+                        }
+                        onChange={(val) => {
+                          setFieldValue("roles", val.value);
                         }}
+                        options={
+                          roleList && roleList?.length > 0 ? roleList : []
+                        }
+                        onBlur={setFieldTouched}
                       />
                     </div>
                     <div className="col-4">
-                      {errors.role && touched.role ? (
+                      {errors.roles && touched.roles ? (
                         <div className="text-danger float-end">
-                          {errors.role}
+                          {errors.roles}
                         </div>
                       ) : null}
                       <span class="form-text">
-                        If Role is not here. Create the Role
+                        If Role is not here.
+                        <Link to={"/listRole"}>Create the Role</Link>
                       </span>
                     </div>
                   </div>

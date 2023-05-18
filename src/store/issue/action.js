@@ -1,4 +1,6 @@
 import {
+  GET_ADD_MISCELLANOUS_LIST,
+  GET_ADD_MISCELLANOUS_LIST_RSPONSE,
   GET_INTENT_ISSUE_LIST,
   GET_INTENT_ISSUE_LIST_RESPONSE,
   GET_ISSUE_CAMP_LIST,
@@ -7,10 +9,16 @@ import {
   GET_ISSUE_DESK_LIST_RESPONSE,
   GET_ISSUE_TO_THIRD_PARTY_LIST,
   GET_ISSUE_TO_THIRD_PARTY_LIST_RESPONSE,
+  GET_MISCELLANOUS_STCK_CONSMP_LIST,
+  GET_MISCELLANOUS_STCK_CONSMP_LIST_RESPONSE,
   GET_OFFLINE_ISSUE_LIST,
   GET_OFFLINE_ISSUE_LIST_RESPONSE,
   GET_RETURN_DESK_LIST,
   GET_RETURN_DESK_LIST_RESPONSE,
+  GET_SUB_STORE_RETURN_LIST,
+  GET_SUB_STORE_RETURN_LIST_RESPONSE,
+  GET_THIRD_PARTY_RETURN,
+  GET_THIRD_PARTY_RETURN_RESPONSE,
 } from "./actionTypes";
 
 export const getIssueDeskList = (pageDetails) => {
@@ -85,5 +93,58 @@ export const getOfflineIssueListResponse = (offlineIssueListResponse) => {
   return {
     type: GET_OFFLINE_ISSUE_LIST_RESPONSE,
     payload: offlineIssueListResponse,
+  };
+};
+
+export const getSubStoreReturnList = (pageDetails) => {
+  return {
+    type: GET_SUB_STORE_RETURN_LIST,
+    payload: pageDetails,
+  };
+};
+export const getSubStoreReturnListResponse = (subStoreReturnListResp) => {
+  return {
+    type: GET_SUB_STORE_RETURN_LIST_RESPONSE,
+    payload: subStoreReturnListResp,
+  };
+};
+
+export const getThirdPartyReturnList = (pageDetails) => {
+  return {
+    type: GET_THIRD_PARTY_RETURN,
+    payload: pageDetails,
+  };
+};
+export const getThirdPartyReturnListResponse = (thirdPartyReturnListResp) => {
+  return {
+    type: GET_THIRD_PARTY_RETURN_RESPONSE,
+    payload: thirdPartyReturnListResp,
+  };
+};
+
+export const getMiscellanousStckConsmpList = (pageDetails) => {
+  console.log("pageDetails", pageDetails);
+  return {
+    type: GET_MISCELLANOUS_STCK_CONSMP_LIST,
+    payload: pageDetails,
+  };
+};
+export const getMiscellanousStckConsmpListResp = (misStockConsmpListResp) => {
+  return {
+    type: GET_MISCELLANOUS_STCK_CONSMP_LIST_RESPONSE,
+    payload: misStockConsmpListResp,
+  };
+};
+
+export const getAddMiscellanousList = (pageDetails) => {
+  return {
+    type: GET_ADD_MISCELLANOUS_LIST,
+    payload: pageDetails,
+  };
+};
+export const getAddMiscellanousListResponse = (addMisListResp) => {
+  return {
+    type: GET_ADD_MISCELLANOUS_LIST_RSPONSE,
+    payload: addMisListResp,
   };
 };

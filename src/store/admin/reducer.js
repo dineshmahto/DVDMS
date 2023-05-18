@@ -1,4 +1,20 @@
 import {
+  CREATE_NEW_BUDGET,
+  CREATE_NEW_BUDGET_RESPONSE,
+  CREATE_NEW_DRUG,
+  CREATE_NEW_DRUG_RESPONSE,
+  CREATE_NEW_FUNDING,
+  CREATE_NEW_FUNDING_RESPONSE,
+  CREATE_PORGRAM_RESPONSE,
+  CREATE_PROGRAM,
+  CREATE_ROLE,
+  CREATE_ROLE_RESPONSE,
+  CREATE_STORE,
+  CREATE_STORE_RESPONSE,
+  CREATE_USER,
+  CREATE_USER_RESPONSE,
+  DELETE_PROGRAM,
+  DELETE_PROGRAM_RESPONSE,
   DELETE_ROLE,
   GET_BUDGET_INTERFACE_LIST,
   GET_BUDGET_INTERFACE_LIST_RESPONSE,
@@ -24,7 +40,13 @@ import {
   GET_SUPPLIER_LIST_RESPONSE,
   GET_USER_LIST,
   GET_USER_LIST_RESPONSE,
+  POST_EDL_MAPPING,
+  POST_EDL_MAPPING_RESPONSE,
+  POST_PROGRAM_FUND_MAPPING,
+  POST_PROGRAM_FUND_MAPPING_RESPONSE,
   ROLE_DELETED_SUCCESSFULL,
+  UPDATE_PROGRAM,
+  UPDATE_PROGRAM_RESPONSE,
 } from "./actionTypes";
 
 const initialState = {
@@ -175,6 +197,128 @@ const admin = (state = initialState, action) => {
       state = {
         ...state,
         programFundingSourceResponse: action.payload,
+      };
+      break;
+    case CREATE_USER:
+      state = {
+        ...state,
+      };
+      break;
+    case CREATE_USER_RESPONSE:
+      state = {
+        ...state,
+        createUserResponse: action?.payload,
+      };
+      break;
+    case CREATE_NEW_DRUG:
+      state = {
+        ...state,
+      };
+      break;
+    case CREATE_NEW_DRUG_RESPONSE:
+      state = {
+        ...state,
+        createDrugResp: action?.payload,
+      };
+      break;
+    case CREATE_STORE:
+      state = {
+        ...state,
+      };
+      break;
+    case CREATE_STORE_RESPONSE:
+      state = {
+        ...state,
+        createStoreResp: action?.payload,
+      };
+      break;
+    case CREATE_PROGRAM:
+      state = {
+        ...state,
+      };
+      break;
+    case CREATE_PORGRAM_RESPONSE:
+      state = {
+        ...state,
+        createProgramResp: action?.payload,
+      };
+      break;
+
+    case UPDATE_PROGRAM:
+      state = {
+        ...state,
+      };
+      break;
+    case UPDATE_PROGRAM_RESPONSE:
+      state = {
+        ...state,
+        updateProgramResp: action?.payload,
+      };
+      break;
+    case DELETE_PROGRAM:
+      state = {
+        ...state,
+      };
+      break;
+    case DELETE_PROGRAM_RESPONSE:
+      state = {
+        ...state,
+        deletePrgrmResp: action?.payload,
+      };
+      break;
+    case CREATE_ROLE:
+      state = {
+        ...state,
+      };
+      break;
+    case CREATE_ROLE_RESPONSE:
+      state = {
+        ...state,
+        createRoleResp: action?.payload,
+      };
+      break;
+    case POST_PROGRAM_FUND_MAPPING:
+      state = {
+        ...state,
+      };
+      break;
+    case POST_PROGRAM_FUND_MAPPING_RESPONSE:
+      state = {
+        ...state,
+        postPrgmFundingResp: action?.payload,
+      };
+      break;
+    case POST_EDL_MAPPING:
+      state = {
+        ...state,
+      };
+      break;
+    case POST_EDL_MAPPING_RESPONSE:
+      state = {
+        ...state,
+        postEDLMappingResp: action?.payload,
+      };
+      break;
+    case CREATE_NEW_BUDGET:
+      state = {
+        ...state,
+      };
+      break;
+    case CREATE_NEW_BUDGET_RESPONSE:
+      state = {
+        ...state,
+        createBudgetResp: action?.payload,
+      };
+      break;
+    case CREATE_NEW_FUNDING:
+      state = {
+        ...state,
+      };
+      break;
+    case CREATE_NEW_FUNDING_RESPONSE:
+      state = {
+        ...state,
+        createFundingSrcResp: action?.payload,
       };
       break;
     default:

@@ -1,107 +1,74 @@
 import React, { useState, useMemo, useEffect } from "react";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import {
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  Paper,
+} from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { Spinner } from "react-bootstrap";
-import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faSearch,
+  faChevronUp,
+  faChevronDown,
+} from "@fortawesome/free-solid-svg-icons";
 import CustomSelect from "../../../components/select/customSelect";
 import Basicbutton from "../../../components/button/basicbutton";
 import SearchField from "../../../components/search/search";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getReturnDeskList } from "../../../store/issue/action";
+import Box from "@mui/material/Box";
+import Collapse from "@mui/material/Collapse";
+import IconButton from "@mui/material/IconButton";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import TablePagination from "../../../components/tables/datatable/tablepagination";
 import StyledTableRow from "../../../components/tables/datatable/customTableRow";
-const useStyles = makeStyles({
-  tableCell: {
-    padding: "10px !important",
-    fontSize: "0.8rem !important",
-  },
-  lineHeight: {
-    lineHeight: "3",
-  },
-});
-const tempData = [
-  {
-    id: 1,
-    storeName: "STATE WAREHOUSE",
-    drugName: "PARACETAMOL TAB. 500MG",
-    progName: "COVID19",
-    batchNo: "	21443792",
-    expDate: "NOV-2024",
-    mfgDate: "DEC-2021",
-    dToExp: "597",
-    avalQty: "579",
-    rack: "0 ",
-    instiute: "BOTH(NHM & DHS)",
-    source: "ECRP",
-  },
-];
+import StyledTableCell from "../../../components/tables/datatable/customTableCell";
+import Typography from "@mui/material/Typography";
+import handleSortingFunc from "../../../components/tables/datatable/sortable";
+import { getReturnDeskListResponse } from "../../../store/issue/action";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
+import { toast } from "react-toastify";
+import toastMessage from "../../../common/toastmessage/toastmessage";
+
 const ReturnDesk = () => {
   const dispatch = useDispatch();
   const returnDeskListResp = useSelector(
     (state) => state?.issuereturn?.returnDeskListResponse
   );
-  let classes = useStyles();
+
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalRows, setTotalRows] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [tableData, setTableData] = useState(tempData);
-  const [sortedData, handleSorting] = useSortableTable(tableData);
+  const [tableData, setTableData] = useState([]);
+  const [open, setOpen] = useState([]);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
   });
   const [loading, setLoading] = useState(false);
-  const [showStockEditListModal, setShowStockEditListModal] = useState(false);
-  const [modalData, setModalData] = useState("");
   const columns = useMemo(() => [
     {
-      id: "returnNumber",
+      id: "id",
       name: "RETURN NUMBER",
       sortable: true,
     },
 
     {
-      id: "returnDate",
+      id: "date",
       name: "RETURN DATE",
       sortable: true,
     },
 
     {
-      id: "drugName",
-      name: "DRUG NAME",
-      sortable: true,
-    },
-    {
-      id: "progName",
-      name: "PROGRAM NAME.",
-      sortable: true,
-    },
-    {
-      id: "batchNo",
-      name: "BATCH NO",
-      sortable: true,
-    },
-    {
-      id: "expiryDate",
-      name: "EXPIRY DATE",
-      sortable: true,
-    },
-    {
-      id: "noOfDaysToExpire",
-      name: "NO OF DAYS TO EXPIRE",
-      sortable: true,
-    },
-    {
-      id: "returnQty",
-      name: "RETURN. QTY.",
-      sortable: true,
-    },
-    {
-      id: "returnType",
+      id: "type",
       name: "RETURN TYPE",
       sortable: true,
     },
@@ -113,23 +80,26 @@ const ReturnDesk = () => {
     },
   ]);
 
-  const handlePageChange = (event, newPage) => {
+  const handlePageChange = (newPage) => {
     setLoading(true);
     setController({
       ...controller,
       page: newPage - 1,
     });
   };
-  const handleChangeRowsPerPage = (current, pageSize) => {
-    console.log(current, pageSize);
+  const handleChangeRowsPerPage = (e) => {
+    setController({
+      ...controller,
+      rowsPerPage: e,
+      page: 0,
+    });
   };
   const handleSortingChange = (accessor) => {
     const sortOrder =
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    handleSorting(accessor, sortOrder);
-    setTableData(sortedData);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
 
   useEffect(() => {
@@ -145,18 +115,48 @@ const ReturnDesk = () => {
     }
     return () => {
       isApiSubcribed = false;
+      dispatch(getReturnDeskListResponse(""));
     };
   }, [controller]);
 
   useEffect(() => {
     if (returnDeskListResp && returnDeskListResp?.status === 200) {
-      setTotalRows(returnDeskListResp?.data?.totalElements);
-      setTableData(returnDeskListResp?.data?.content);
+      if (
+        returnDeskListResp?.data?.pageList &&
+        returnDeskListResp?.data?.pageList?.content
+      ) {
+        setTotalRows(returnDeskListResp?.data?.pageList?.totalElements);
+        setTableData(returnDeskListResp?.data?.pageList?.content);
+      }
+      dispatch(getReturnDeskListResponse(""));
       setLoading(false);
-    } else if (returnDeskListResp && returnDeskListResp?.status == 400) {
+    } else if (
+      returnDeskListResp &&
+      returnDeskListResp?.code == "ERR_BAD_REQUEST"
+    ) {
+      toastMessage("Return Desk", "BAD REQUEST");
+      dispatch(getReturnDeskListResponse(""));
+      setLoading(false);
+    } else if (returnDeskListResp && returnDeskListResp?.status === 500) {
+      toastMessage("Return Desk", "Something went wrong");
+      dispatch(getReturnDeskListResponse(""));
       setLoading(false);
     }
   }, [returnDeskListResp]);
+
+  const handleCollapse = (clickedIndex) => {
+    if (open.includes(clickedIndex)) {
+      const openCopy = open.filter((element) => {
+        return element !== clickedIndex;
+      });
+      setOpen(openCopy);
+    } else {
+      const openCopy = [...open];
+      openCopy.shift();
+      openCopy.push(clickedIndex);
+      setOpen(openCopy);
+    }
+  };
 
   return (
     <>
@@ -228,141 +228,178 @@ const ReturnDesk = () => {
       <div className="row mt-2">
         <HorizonatalLine text="Return Details" />
       </div>
-      <div className="row mb-1">
-        <div className="d-flex justify-content-end">
-          <SearchField
-            className="me-1 mt-1"
-            iconPosition="end"
-            iconName={faSearch}
-            onChange={(e) => {
-              console.log(e);
-            }}
-          />
+      <Paper elevation={2}>
+        <div className="row mb-1">
+          <div className="d-flex justify-content-end">
+            <SearchField
+              className="me-1 mt-1"
+              iconPosition="end"
+              iconName={faSearch}
+              onChange={(e) => {
+                console.log(e);
+              }}
+            />
+          </div>
         </div>
-      </div>
-      <div className="row">
-        <div className="col-12">
-          <TableComponent
-            columns={columns}
-            sortField={sortField}
-            page={controller.page + 1}
-            count={totalPages}
-            rowsPerPage={controller.rowsPerPage}
-            order={order}
-            paginationRequired={true}
-            onPageChange={handlePageChange}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-            handleSorting={handleSortingChange}
-            checkBoxRequired={false}
-          >
-            <TableBody>
-              {loading ? (
-                <StyledTableRow>
-                  <TableCell className="text-center" colSpan={12}>
-                    <Spinner />
-                  </TableCell>
-                </StyledTableRow>
-              ) : (
-                tableData &&
-                tableData?.length > 0 &&
-                tableData?.map((data, index) => {
-                  return (
-                    <StyledTableRow key={data.id}>
-                      <TableCell padding="none">
-                        <Checkbox
-                          onClick={(event) => handleClick(event, index, data)}
-                          color="primary"
-                          checked={selected.includes(index)}
-                          inputProps={{
-                            "aria-labelledby": `enhanced-table-checkbox-${index}`,
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {moment(data.notificationDate).format("DD/MM/YYYY")}
-                      </TableCell>
-                      <TableCell
-                        padding="none"
-                        className={[classes.tableCell, "text-center"]}
-                      >
-                        {data.financialDate}
-                      </TableCell>
-                      <TableCell
-                        padding="none"
-                        className={[classes.tableCell, "text-center"]}
-                      >
-                        {moment.utc(data.lastDate).format("DD/MM/YYYY")}
-                      </TableCell>
+        <div className="row">
+          <div className="col-12">
+            <TableComponent
+              columns={columns}
+              sortField={sortField}
+              order={order}
+              handleSorting={handleSortingChange}
+              checkBoxRequired={true}
+            >
+              <TableBody>
+                {loading ? (
+                  <TableRowLaoder />
+                ) : (
+                  tableData &&
+                  tableData.length > 0 &&
+                  tableData.map((data, index) => (
+                    <>
+                      <StyledTableRow key={data.id}>
+                        <StyledTableCell>
+                          {data?.transferDrugList &&
+                          data?.transferDrugList.length > 0 ? (
+                            <IconButton
+                              aria-label="expand row"
+                              size="small"
+                              onClick={() => handleCollapse(index)}
+                            >
+                              <FontAwesomeIcon
+                                icon={
+                                  open.includes(index)
+                                    ? faChevronUp
+                                    : faChevronDown
+                                }
+                              />
+                            </IconButton>
+                          ) : null}
+                        </StyledTableCell>
 
-                      <TableCell
-                        padding="none"
-                        className={[classes.tableCell, "text-center"]}
-                      >
-                        {data?.programList && data?.programList.length > 0 ? (
-                          <span
-                            className="text-decoration-underline"
-                            onClick={() => {
-                              setModalTitle("Programme List");
-                              setPreviewList(data?.programList);
-                              setShow(true);
-                            }}
-                            style={{ fontSize: "0.7rem", cursor: "pointer" }}
-                          >
-                            VIEW PROGRAMME LIST
-                          </span>
-                        ) : (
-                          "NONE"
-                        )}
-                      </TableCell>
-                      <TableCell
-                        padding="none"
-                        className={[classes.tableCell, "text-center"]}
-                      >
-                        {data?.drugList && data?.drugList.length > 0 ? (
-                          <span
-                            className="text-decoration-underline"
-                            onClick={() => {
-                              setModalTitle("Drug List");
-                              setPreviewList(data?.drugList);
-                              setShow(true);
-                            }}
-                            style={{ fontSize: "0.7rem" }}
-                          >
-                            VIEW DRUGLIST
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </TableCell>
+                        <StyledTableCell padding="none">
+                          {data?.id}
+                        </StyledTableCell>
 
-                      <TableCell
-                        padding="none"
-                        className={[classes.tableCell, "text-center"]}
-                      >
-                        {data?.staus === 10 || data?.status === 11 ? (
-                          <FontAwesomeIcon icon={faDownload} />
-                        ) : (
-                          ""
-                        )}
-                      </TableCell>
-                    </StyledTableRow>
-                  );
-                })
-              )}
-              {console.log(tableData?.length)}
-              {!loading && tableData && tableData.length === 0 && (
-                <TableRow>
-                  <TableCell className="text-center" colSpan={12}>
-                    <p style={{ fontSize: "0.8rem" }}>
-                      NO DATA AVAILABE IN TABLE
-                    </p>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </TableComponent>
+                        <StyledTableCell padding="none">
+                          {data?.date}
+                        </StyledTableCell>
+
+                        <StyledTableCell padding="none">
+                          {data?.type}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data?.remarks}
+                        </StyledTableCell>
+                      </StyledTableRow>
+                      {data?.transferDrugList &&
+                      data?.transferDrugList.length > 0 ? (
+                        <TableRow>
+                          <TableCell
+                            style={{ paddingBottom: 0, paddingTop: 0 }}
+                            colSpan={6}
+                          >
+                            <Collapse
+                              in={open.includes(index)}
+                              timeout="auto"
+                              unmountOnExit
+                            >
+                              <Box sx={{ margin: 1 }}>
+                                <Typography
+                                  variant="h6"
+                                  gutterBottom
+                                  component="div"
+                                >
+                                  Return Details
+                                </Typography>
+                                <Table size="small" aria-label="purchases">
+                                  <TableHead>
+                                    <TableRow>
+                                      <StyledTableCell className="text-center">
+                                        Program Name
+                                      </StyledTableCell>
+                                      <StyledTableCell className="text-center">
+                                        Drug Name
+                                      </StyledTableCell>
+                                      <StyledTableCell className="text-center">
+                                        Batch
+                                      </StyledTableCell>
+                                      <StyledTableCell className="text-center">
+                                        Expiry Date
+                                      </StyledTableCell>
+                                      <StyledTableCell className="text-center">
+                                        No of Days To Exp{" "}
+                                      </StyledTableCell>
+                                      <StyledTableCell className="text-center">
+                                        Return QTY
+                                      </StyledTableCell>
+                                    </TableRow>
+                                  </TableHead>
+                                  <TableBody>
+                                    {data?.transferDrugList &&
+                                      data?.transferDrugList.length > 0 &&
+                                      data?.transferDrugList.map((ele) => {
+                                        return (
+                                          <>
+                                            <StyledTableRow key={ele?.id}>
+                                              <StyledTableCell padding="none">
+                                                {ele?.programName}
+                                              </StyledTableCell>
+                                              <StyledTableCell padding="none">
+                                                {ele?.drugName}
+                                              </StyledTableCell>
+                                              <StyledTableCell padding="none">
+                                                {ele?.batch}
+                                              </StyledTableCell>
+                                              <StyledTableCell padding="none">
+                                                {ele?.expiryDate}
+                                              </StyledTableCell>
+                                              <StyledTableCell padding="none">
+                                                {ele?.dayToExpire < 0 ? (
+                                                  <span class="badge rounded-pill bg-danger">
+                                                    Expired
+                                                  </span>
+                                                ) : ele?.dayToExpire < 100 ? (
+                                                  <span class="badge rounded-pill bg-warning">
+                                                    Soon to Expire
+                                                  </span>
+                                                ) : (
+                                                  <span class="badge rounded-pill bg-success">
+                                                    Active
+                                                  </span>
+                                                )}
+                                              </StyledTableCell>
+                                              <StyledTableCell padding="none">
+                                                {ele?.requestQty}
+                                              </StyledTableCell>
+                                            </StyledTableRow>
+                                          </>
+                                        );
+                                      })}
+                                  </TableBody>
+                                </Table>
+                              </Box>
+                            </Collapse>
+                          </TableCell>
+                        </TableRow>
+                      ) : null}
+                    </>
+                  ))
+                )}
+                <EmptyRow loading={loading} tableData={tableData} />
+              </TableBody>
+            </TableComponent>
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </div>
         </div>
-      </div>
+      </Paper>
     </>
   );
 };

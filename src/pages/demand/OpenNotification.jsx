@@ -114,20 +114,24 @@ const OpenNotification = () => {
       openNotificationListResponse &&
       openNotificationListResponse?.status === 200
     ) {
-      setTotalProgramList(openNotificationListResponse?.data?.programDrugLists);
+      setTotalProgramList(
+        openNotificationListResponse?.data?.programMappingList
+      );
       setProgrammeActiveIndicies(
         openNotificationListResponse?.data?.programDrugLists?.map(() => false)
       );
-      setCopyprogrmmeData(openNotificationListResponse?.data?.programDrugLists);
-      setprogrammeData(openNotificationListResponse?.data?.programDrugLists);
+      setCopyprogrmmeData(
+        openNotificationListResponse?.data?.programMappingList
+      );
+      setprogrammeData(openNotificationListResponse?.data?.programMappingList);
 
       setDrugActiveIndicies(
         openNotificationListResponse?.data?.drugLists?.map(() => false)
       );
-      setCopyDrugData(openNotificationListResponse?.data?.drugLists);
-      setDrugData(openNotificationListResponse?.data?.drugLists);
+      setCopyDrugData(openNotificationListResponse?.data?.drugList);
+      setDrugData(openNotificationListResponse?.data?.drugList);
 
-      setTotalDrugList(openNotificationListResponse?.data?.drugLists);
+      setTotalDrugList(openNotificationListResponse?.data?.drugList);
 
       setPeriodicDropDownList(openNotificationListResponse?.data?.periodic);
       setFinancialDropDownList(
@@ -195,12 +199,6 @@ const OpenNotification = () => {
       saveDemandNotificationResponse?.status === 201
     ) {
       navigate("/openNotificationDesk");
-    } else {
-      toastMessage(
-        "Create  Notification",
-        "Failed to Create Notification",
-        "error"
-      );
     }
   }, [saveDemandNotificationResponse]);
 

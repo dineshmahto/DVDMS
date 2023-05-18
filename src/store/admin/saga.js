@@ -1,5 +1,12 @@
 import { call, put, takeEvery } from "redux-saga/effects";
 import {
+  createNewBudgetInterfaceResponse,
+  createNewDrugResponse,
+  createProgramResponse,
+  createRoleResponse,
+  createStoreResponse,
+  createUserResponse,
+  deleteProgramResponse,
   getBudgetIterfaceListResponse,
   getDrugDeksListResponse,
   getEdlMappingListResponse,
@@ -12,11 +19,22 @@ import {
   getStoreDeskListResponse,
   getSupplierListResponse,
   getUserListResponse,
+  postEDLMappingResponse,
+  postProgrmFundingResponse,
   roleDeleteResponse,
+  updateProgramResponse,
 } from "./action";
 import { Service } from "../../config/commonFetch";
 
 import {
+  CREATE_NEW_BUDGET,
+  CREATE_NEW_DRUG,
+  CREATE_NEW_FUNDING,
+  CREATE_PROGRAM,
+  CREATE_ROLE,
+  CREATE_STORE,
+  CREATE_USER,
+  DELETE_PROGRAM,
   DELETE_ROLE,
   GET_BUDGET_INTERFACE_LIST,
   GET_DRUG_DESK_LIST,
@@ -30,7 +48,10 @@ import {
   GET_STORE_DESK_LIST,
   GET_SUPPLIER_LIST,
   GET_USER_LIST,
+  POST_EDL_MAPPING,
+  POST_PROGRAM_FUND_MAPPING,
   ROLE_DELETED_SUCCESSFULL,
+  UPDATE_PROGRAM,
 } from "./actionTypes";
 import * as CONSTANTS from "../../common/constant/constants";
 
@@ -256,6 +277,183 @@ function* getProgrameFundingSourceList({ payload: pageDetails }) {
   }
 }
 
+// POST
+function* createUser({ payload: userDetails }) {
+  console.log("userDetails", userDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.CREATE_USER,
+      userDetails
+    );
+    console.log("Response", response);
+    yield put(createUserResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(createUserResponse(error));
+  }
+}
+
+// POST
+function* createDrug({ payload: drugDetails }) {
+  console.log("drugDetails", drugDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.CREATE_DRUG,
+      drugDetails
+    );
+    console.log("Response", response);
+    yield put(createNewDrugResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(createNewDrugResponse(error));
+  }
+}
+
+function* createStore({ payload: storeDetails }) {
+  console.log("storeDetails", storeDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.CREATE_NEW_STORE,
+      storeDetails
+    );
+    console.log("Response", response);
+    yield put(createStoreResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(createStoreResponse(error));
+  }
+}
+
+function* createProgram({ payload: programDetails }) {
+  console.log("programDetails", programDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.CREATE_NEW_PROGRAM,
+      programDetails
+    );
+    console.log("Response", response);
+    yield put(createProgramResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(createProgramResponse(error));
+  }
+}
+
+function* updateProgram({ payload: updateProgramDetails }) {
+  console.log("updateProgramDetails", updateProgramDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.UPDATE_PROGRAM,
+      updateProgramDetails
+    );
+    console.log("Response", response);
+    yield put(updateProgramResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(updateProgramResponse(error));
+  }
+}
+
+function* deleteProgram({ payload: deleteId }) {
+  console.log("deleteId", deleteId);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.DELETE_PROGRAM,
+      deleteId
+    );
+    console.log("Response", response);
+    yield put(deleteProgramResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(deleteProgramResponse(error));
+  }
+}
+
+function* createRole({ payload: roleDetails }) {
+  console.log("roleDetails", roleDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.CREATE_NEW_ROLE,
+      roleDetails
+    );
+    console.log("Response", response);
+    yield put(createRoleResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(createRoleResponse(error));
+  }
+}
+
+function* postProgramFunding({ payload: prgmFundingDetails }) {
+  console.log("prgmFundingDetails", prgmFundingDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.POST_PROGRAM_FUNDING,
+      prgmFundingDetails
+    );
+    console.log("Response", response);
+    yield put(postProgrmFundingResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(postProgrmFundingResponse(error));
+  }
+}
+
+function* postEDLMapping({ payload: edlMappingDetails }) {
+  console.log("edlMappingDetails", edlMappingDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.POST_EDL_MAPPING,
+      edlMappingDetails
+    );
+    console.log("Response", response);
+    yield put(postEDLMappingResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(postEDLMappingResponse(error));
+  }
+}
+
+function* createNewBudgetInterface({ payload: budgetDetails }) {
+  console.log("budgetDetails", budgetDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.CREATE_NEW_BUDGET,
+      budgetDetails
+    );
+    console.log("Response", response);
+    yield put(createNewBudgetInterfaceResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(createNewBudgetInterfaceResponse(error));
+  }
+}
+
+function* createNewFundingSource({ payload: fundingSrcDetails }) {
+  console.log("budgetDetails", fundingSrcDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.CREATE_NEW_FUNDING,
+      fundingSrcDetails
+    );
+    console.log("Response", response);
+    yield put(createNewBudgetInterfaceResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(createNewBudgetInterfaceResponse(error));
+  }
+}
 function* AdminSaga() {
   yield takeEvery(DELETE_ROLE, deleteRoleById);
   yield takeEvery(GET_USER_LIST, getUserList);
@@ -270,5 +468,18 @@ function* AdminSaga() {
   yield takeEvery(GET_DRUG_DESK_LIST, getDrugDeskList);
   yield takeEvery(GET_EDL_MAPPING, getEdlMappingList);
   yield takeEvery(GET_PROGRAM_FUNDING_SOURCE, getProgrameFundingSourceList);
+  // POST
+
+  yield takeEvery(CREATE_USER, createUser);
+  yield takeEvery(CREATE_NEW_DRUG, createDrug);
+  yield takeEvery(CREATE_STORE, createStore);
+  yield takeEvery(CREATE_PROGRAM, createProgram);
+  yield takeEvery(CREATE_ROLE, createRole);
+  yield takeEvery(POST_PROGRAM_FUND_MAPPING, postProgramFunding);
+  yield takeEvery(POST_EDL_MAPPING, postEDLMapping);
+  yield takeEvery(CREATE_NEW_BUDGET, createNewBudgetInterface);
+  yield takeEvery(CREATE_NEW_FUNDING, createNewFundingSource);
+  yield takeEvery(UPDATE_PROGRAM, updateProgram);
+  yield takeEvery(DELETE_PROGRAM, deleteProgram);
 }
 export default AdminSaga;

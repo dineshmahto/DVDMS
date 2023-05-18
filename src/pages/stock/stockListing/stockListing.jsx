@@ -20,43 +20,18 @@ import toastMessage from "../../../common/toastmessage/toastmessage";
 import StyledTableRow from "../../../components/tables/datatable/customTableRow";
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 import Checkbox from "../../../components/checkbox/checkbox";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
 const EditStockListModal = lazy(() => import("./editstocklistmodal"));
 
-const useStyles = makeStyles({
-  tableCell: {
-    padding: "10px !important",
-    fontSize: "0.8rem !important",
-  },
-  lineHeight: {
-    lineHeight: "3",
-  },
-});
-const tempData = [
-  {
-    id: 1,
-    storeName: "STATE WAREHOUSE",
-    drugName: "PARACETAMOL TAB. 500MG",
-    progName: "COVID19",
-    batchNo: "	21443792",
-    expDate: "NOV-2024",
-    mfgDate: "DEC-2021",
-    dToExp: "597",
-    avalQty: "579",
-    rack: "0 ",
-    instiute: "BOTH(NHM & DHS)",
-    source: "ECRP",
-  },
-];
 const StockListing = () => {
   const dispatch = useDispatch();
   const stockDeskListingResponse = useSelector(
     (state) => state?.stock?.stockDeskListResponse
   );
-  let classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
-  const [tableData, setTableData] = useState(tempData);
+  const [tableData, setTableData] = useState([]);
   const [sortedData, handleSorting] = useSortableTable(tableData);
   const [controller, setController] = useState({
     page: 0,
@@ -240,13 +215,7 @@ const StockListing = () => {
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page + 1}
-              count={totalPages}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
               handleSorting={handleSortingChange}
               checkBoxRequired={false}
             >
@@ -341,6 +310,7 @@ const StockListing = () => {
                     );
                   })
                 )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
             <TablePagination

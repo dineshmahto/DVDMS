@@ -1,33 +1,36 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import CustomSelect from "../../../components/select/customSelect";
-import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
 import Basicbutton from "../../../components/button/basicbutton";
 import SearchField from "../../../components/search/search";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { Paper } from "@mui/material";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { TableBody } from "@mui/material";
 import moment from "moment";
-import { Spinner } from "react-bootstrap";
-import { makeStyles } from "@mui/styles";
-const useStyles = makeStyles({
-  root: {
-    "& .MuiInputBase-root": {
-      "& .MuiButtonBase-root": {},
-      "& .MuiInputBase-input": {
-        padding: 8,
-      },
-    },
-  },
-});
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getDrugCondemnation,
+  getDrugCondemnationListResponse,
+} from "../../../store/stock/action";
+import StyledTableRow from "../../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../../components/tables/datatable/customTableCell";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import TablePagination from "../../../components/tables/datatable/tablepagination";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
+import handleSortingFunc from "../../../components/tables/datatable/sortable";
+
 const DrugCondemnationRegister = () => {
-  const classes = useStyles();
+  const dispatch = useDispatch();
+  const drugCondemnationListResp = useSelector(
+    (state) => state?.stock?.drugCondemnationListResponse
+  );
+  console.log("drugCondemnationListResp", drugCondemnationListResp);
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
+  const [totalRows, setTotalRows] = useState(0);
   const [tableData, setTableData] = useState([]);
-  const [sortedData, handleSorting] = useSortableTable(tableData);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
@@ -41,7 +44,7 @@ const DrugCondemnationRegister = () => {
     },
 
     {
-      id: "pName",
+      id: "programName",
       name: "PROGRAM NAME",
       sortable: true,
     },
@@ -83,9 +86,43 @@ const DrugCondemnationRegister = () => {
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    handleSorting(accessor, sortOrder);
-    setTableData(sortedData);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
+  useEffect(() => {
+    let isApiSubcribed = true;
+    if (isApiSubcribed) {
+      setLoading(true);
+      setTimeout(() => {
+        dispatch(
+          getDrugCondemnation({
+            ...controller,
+            pageNumber: controller.page,
+            pageSize: controller.rowsPerPage,
+          })
+        );
+      }, 1000);
+    }
+    return () => {
+      dispatch(getDrugCondemnationListResponse(""));
+      clearTimeout();
+      isApiSubcribed = false;
+    };
+  }, [controller]);
+
+  useEffect(() => {
+    if (drugCondemnationListResp && drugCondemnationListResp?.status === 200) {
+      setTotalRows(drugCondemnationListResp?.data?.pageList?.totalElements);
+      setTableData(drugCondemnationListResp?.data?.pageList?.content);
+      setLoading(false);
+      dispatch(getDrugCondemnationListResponse(""));
+    } else if (
+      drugCondemnationListResp &&
+      drugCondemnationListResp?.status === 400
+    ) {
+      setLoading(false);
+      dispatch(getDrugCondemnationListResponse(""));
+    }
+  }, [drugCondemnationListResp]);
   return (
     <>
       <div className="row mt-2">
@@ -162,39 +199,43 @@ const DrugCondemnationRegister = () => {
             >
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </TableRow>
+                  <TableRowLaoder />
                 ) : (
                   tableData.length > 0 &&
                   tableData.map((data, index) => (
-                    <TableRow key={data.id}>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.dName}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.progName}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
+                    <StyledTableRow key={data.id}>
+                      <StyledTableCell padding="none">
+                        {data?.drugName}
+                      </StyledTableCell>
+                      <StyledTableCell padding="none">
+                        {data?.programName}
+                      </StyledTableCell>
+                      <StyledTableCell padding="none">
                         {data?.batchNo}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.condemQty}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
+                      </StyledTableCell>
+                      <StyledTableCell padding="none">
+                        {data?.condemnQty}
+                      </StyledTableCell>
+                      <StyledTableCell padding="none">
                         {data?.condemType}
-                      </TableCell>
+                      </StyledTableCell>
 
-                      <TableCell padding="none" className={classes.tableCell}>
+                      <StyledTableCell padding="none">
                         {moment(data?.reqDate).format("DD/MM/YYYY")}
-                      </TableCell>
-                    </TableRow>
+                      </StyledTableCell>
+                    </StyledTableRow>
                   ))
                 )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
           </div>
         </div>
       </Paper>

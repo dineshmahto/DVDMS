@@ -1,16 +1,23 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Paper } from "@mui/material";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { TableBody } from "@mui/material";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import Basicbutton from "../../../components/button/basicbutton";
 import SearchField from "../../../components/search/search";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { makeStyles } from "@mui/styles";
-import { Spinner } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { getBudgetIterfaceList } from "../../../store/admin/action";
+import {
+  getBudgetIterfaceList,
+  getBudgetIterfaceListResponse,
+} from "../../../store/admin/action";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
+import handleSortingFunc from "../../../components/tables/datatable/sortable";
+import StyledTableRow from "../../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../../components/tables/datatable/customTableCell";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -91,10 +98,7 @@ const BudgetListDesk = () => {
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    // console.log("tableData", tableData);
-    // handleSorting(accessor, sortOrder, tableData);
-    // console.log("sortedData", sortedData);
-    // setTableData(sortedData);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
 
   useEffect(() => {
@@ -110,6 +114,7 @@ const BudgetListDesk = () => {
     }
     return () => {
       isApiSubcribed = false;
+      dispatch(getBudgetIterfaceListResponse(""));
     };
   }, [controller]);
 
@@ -118,25 +123,31 @@ const BudgetListDesk = () => {
       budgetInterfaceListResponse &&
       budgetInterfaceListResponse?.status === 200
     ) {
-      setTotalRows(budgetInterfaceListResponse?.data?.totalElements);
-      setTableData(budgetInterfaceListResponse?.data?.content);
+      if (
+        budgetInterfaceListResponse &&
+        budgetInterfaceListResponse?.data?.pageList?.content?.length > 0
+      ) {
+        setTotalRows(
+          budgetInterfaceListResponse?.data?.pageList?.totalElements
+        );
+        setTableData(budgetInterfaceListResponse?.data?.pageList?.content);
+      }
+
       setLoading(false);
-      // setTimeout(() => {
-      //   setTotalRows(budgetInterfaceListResponse?.data?.totalElements);
-      //   setTableData(budgetInterfaceListResponse?.data?.content);
-      //   setLoading(false);
-      // }, 10000);
+      dispatch(getBudgetIterfaceListResponse(""));
     } else if (
       budgetInterfaceListResponse &&
       budgetInterfaceListResponse?.status == 400
     ) {
       setLoading(false);
+      dispatch(getBudgetIterfaceListResponse(""));
       toastMessage("Login Error", "Please enter valid ID", "error");
     } else if (
       budgetInterfaceListResponse &&
       budgetInterfaceListResponse?.status == 500
     ) {
       setLoading(false);
+      dispatch(getBudgetIterfaceListResponse(""));
       toastMessage(
         "Budget Interface Error",
         "Something went wrong please try after sometime",
@@ -177,59 +188,33 @@ const BudgetListDesk = () => {
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
               handleSorting={handleSortingChange}
               checkBoxRequired={false}
               customWidth="100%"
             >
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell
-                      padding="none"
-                      className={[classes.tableCell, "text-center"]}
-                      colSpan={12}
-                    >
-                      <Spinner />
-                    </TableCell>
-                  </TableRow>
+                  <TableRowLaoder />
                 ) : (
                   tableData &&
                   tableData.length > 0 &&
                   tableData.map((data, index) => {
                     return (
-                      <TableRow hover>
+                      <StyledTableRow>
                         {columns.map((d, k) => {
                           return (
-                            <TableCell
-                              key={k}
-                              padding="none"
-                              className={classes.tableCell}
-                            >
+                            <StyledTableCell key={k} padding="none">
                               {data[d.id]}
-                            </TableCell>
+                            </StyledTableCell>
                           );
                         })}
-                      </TableRow>
+                      </StyledTableRow>
                     );
                   })
                 )}
 
-                {!loading && tableData && tableData.length === 0 && (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <p style={{ fontSize: "0.8rem" }}>
-                        NO DATA AVAILABE IN TABLE
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
             <TablePagination

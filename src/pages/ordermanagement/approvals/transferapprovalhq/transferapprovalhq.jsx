@@ -1,19 +1,10 @@
-import React, {
-  useState,
-  useMemo,
-  useEffect,
-  lazy,
-  Suspense,
-  useCallback,
-} from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import HorizonatalLine from "../../../../components/horizontalLine/horizonatalLine";
 import TableComponent from "../../../../components/tables/datatable/tableComponent";
 import { TableBody, TableRow, TableCell } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { makeStyles } from "@mui/styles";
 import moment from "moment";
-import { Spinner } from "react-bootstrap";
-import { faFilePdf, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CustomSelect from "../../../../components/select/customSelect";
 import Basicbutton from "../../../../components/button/basicbutton";
@@ -23,49 +14,38 @@ import { useDispatch, useSelector } from "react-redux";
 import toastMessage from "../../../../common/toastmessage/toastmessage";
 import { Paper } from "@mui/material";
 import TablePagination from "../../../../components/tables/datatable/tablepagination";
-import { faDownload } from "@fortawesome/free-solid-svg-icons";
-import { getTransferListForApprovalHq } from "../../../../store/ordermanagement/action";
-import { Checkbox, Collapse } from "@mui/material";
+import {
+  getTransferListForApprovalHq,
+  getTransferListForApprovalHqResponse,
+} from "../../../../store/ordermanagement/action";
+import { Checkbox } from "@mui/material";
 import { faChevronUp, faChevronDown } from "@fortawesome/free-solid-svg-icons";
-const useStyles = makeStyles({
-  tableCell: {
-    padding: "10px !important",
-    fontSize: "0.8rem !important",
-  },
-  lineHeight: {
-    lineHeight: "3",
-  },
-});
-const tempData = [
-  {
-    id: 1,
-    storeName: "STATE WAREHOUSE",
-    drugName: "PARACETAMOL TAB. 500MG",
-    progName: "COVID19",
-    batchNo: "	21443792",
-    expDate: "NOV-2024",
-    mfgDate: "DEC-2021",
-    dToExp: "597",
-    avalQty: "579",
-    rack: "0 ",
-    instiute: "BOTH(NHM & DHS)",
-    source: "ECRP",
-  },
-];
+import handleSortingFunc from "../../../../components/tables/datatable/sortable";
+import StyledTableRow from "../../../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../../../components/tables/datatable/customTableCell";
+import IconButton from "@mui/material/IconButton";
+import Box from "@mui/material/Box";
+import Collapse from "@mui/material/Collapse";
+import Table from "@mui/material/Table";
+import TableHead from "@mui/material/TableHead";
+import Typography from "@mui/material/Typography";
+import NormalTableRow from "../../../../components/tables/datatable/normalTableRow";
+import EmptyRow from "../../../../components/tables/datatable/emptyRow";
+
 const TransferApprovalHq = () => {
   const dispatch = useDispatch();
   const transferApprovalListHqResponse = useSelector(
     (state) => state.ordermanaagement?.transferApprovalListHqResponse
   );
   console.log("transferApprovalListHqResponse", transferApprovalListHqResponse);
-  let classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
-  const [tableData, setTableData] = useState(tempData);
+  const [tableData, setTableData] = useState([]);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
+    type: 99,
   });
   const [loading, setLoading] = useState(false);
   const [selected, setSelected] = useState([]);
@@ -90,38 +70,9 @@ const TransferApprovalHq = () => {
       name: "REQ. DATE",
       sortable: true,
     },
+
     {
-      id: "drugNameList",
-      name: "DRUG NAME",
-      sortable: true,
-    },
-    {
-      id: "programList",
-      name: "PROG. NAME",
-      sortable: true,
-    },
-    {
-      id: "batchNo",
-      name: "BATCH NO.",
-      sortable: true,
-    },
-    {
-      id: "expiryDate",
-      name: "EXP DATE",
-      sortable: true,
-    },
-    {
-      id: "dayToExp",
-      name: "DAYS TO EXP",
-      sortable: true,
-    },
-    {
-      id: "requestQty",
-      name: "REQ QTY.",
-      sortable: true,
-    },
-    {
-      id: "reqType",
+      id: "requestType",
       name: "REQ TYPE.",
       sortable: true,
     },
@@ -136,14 +87,18 @@ const TransferApprovalHq = () => {
     let isApiSubcribed = true;
     if (isApiSubcribed) {
       setLoading(true);
-      dispatch(
-        getTransferListForApprovalHq({
-          pageNumber: controller.page,
-          pageSize: controller.rowsPerPage,
-        })
-      );
+      setTimeout(() => {
+        dispatch(
+          getTransferListForApprovalHq({
+            pageNumber: controller.page,
+            pageSize: controller.rowsPerPage,
+          })
+        );
+      }, 500);
     }
     return () => {
+      clearTimeout();
+      dispatch(getTransferListForApprovalHqResponse(""));
       isApiSubcribed = false;
     };
   }, [controller]);
@@ -153,13 +108,20 @@ const TransferApprovalHq = () => {
       transferApprovalListHqResponse &&
       transferApprovalListHqResponse?.status === 200
     ) {
-      setTotalRows(transferApprovalListHqResponse?.data?.totalElements);
-      setTableData(transferApprovalListHqResponse?.data?.content);
+      if (transferApprovalListHqResponse?.data?.pageList) {
+        setTotalRows(
+          transferApprovalListHqResponse?.data?.pageList?.totalElements
+        );
+        setTableData(transferApprovalListHqResponse?.data?.pageList?.content);
+      }
+
+      dispatch(getTransferListForApprovalHqResponse(""));
       setLoading(false);
     } else if (
       transferApprovalListHqResponse &&
       transferApprovalListHqResponse?.status == 400
     ) {
+      dispatch(getTransferListForApprovalHqResponse(""));
       setLoading(false);
       toastMessage("Login Error", "Please enter valid ID", "error");
     }
@@ -185,31 +147,9 @@ const TransferApprovalHq = () => {
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    handleSorting(accessor, sortOrder);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
-  const handleSorting = useCallback(
-    (sortField, sortOrder) => {
-      if (sortField) {
-        const sorted = [...tableData].sort((a, b) => {
-          if (a[sortField] === null) return 1;
-          if (b[sortField] === null) return -1;
-          if (a[sortField] === null && b[sortField] === null) return 0;
 
-          return (
-            a[sortField]
-              .toString()
-              .localeCompare(b[sortField].toString(), "en", {
-                numeric: true,
-              }) * (sortOrder === "asc" ? 1 : -1)
-          );
-        });
-        setSelected([]);
-
-        setTableData(sorted);
-      }
-    },
-    [sortField, order, tableData]
-  );
   const handleCollapse = (clickedIndex) => {
     if (open.includes(clickedIndex)) {
       const openCopy = open.filter((element) => {
@@ -245,11 +185,11 @@ const TransferApprovalHq = () => {
     <>
       <div className="row mt-2">
         <div className="d-flex justify-content-start">
-          <p className="fs-6">APPORVAL DESK</p>
+          <p className="fs-6">TRNSFER APPORVAL (HQ)</p>
         </div>
       </div>
       <div className="row d-flex justify-content-start mb-2">
-        <div className="col-6">
+        <div className="col-12">
           <div className="row align-items-center">
             <div className="col-auto">
               <label>Store Name</label>
@@ -269,18 +209,28 @@ const TransferApprovalHq = () => {
             <div className="col-auto">
               <label>Request Type</label>
             </div>
-            <div className="col-auto">
+            <div className="col-2">
               <CustomSelect
                 defaultValue={{
-                  value: "intentIssue",
-                  label: "Intent for Issue",
+                  value: "99",
+                  label: "All",
                 }}
                 options={[
                   {
-                    value: "intentIssue",
-                    label: "Intent for Issue",
+                    value: "9",
+                    label: "Transfer-Demand Request(Shortage)",
+                  },
+                  {
+                    value: "10",
+                    label: "Transfer-Demand Request(Excess)",
                   },
                 ]}
+                onChange={(selectedOption) => {
+                  setController({
+                    ...controller,
+                    type: selectedOption?.value,
+                  });
+                }}
               />
             </div>
           </div>
@@ -292,7 +242,7 @@ const TransferApprovalHq = () => {
           <div className="row align-items-center">
             <div className="col-auto">
               <div>
-                <Link to={"/openIssueToThirdparty"}>
+                <Link to={""}>
                   <Basicbutton
                     type="button"
                     buttonText="Approval"
@@ -312,7 +262,6 @@ const TransferApprovalHq = () => {
           <SearchField
             className="me-1 mt-1"
             iconPosition="end"
-            iconName={faSearch}
             onChange={(e) => {
               console.log(e);
             }}
@@ -321,38 +270,33 @@ const TransferApprovalHq = () => {
       </div>
       <Paper>
         {/* Table Rendering */}
-        <div className="row">
-          <div className="col-12">
-            <TableComponent
-              columns={columns}
-              sortField={sortField}
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
-              order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              handleSorting={handleSortingChange}
-              checkBoxRequired={true}
-            >
-              <TableBody>
-                {tableData &&
-                  tableData.length > 0 &&
-                  tableData?.map((row, index) => {
-                    const isItemSelected = isSelected(row.id);
-                    const labelId = `enhanced-table-checkbox-${index}`;
-                    return (
-                      <TableRow
-                        hover
-                        role="checkbox"
-                        aria-checked={isItemSelected}
-                        tabIndex={-1}
-                        key={row.id}
-                        selected={isItemSelected}
-                      >
-                        <TableCell padding="checkbox">
+
+        <TableComponent
+          columns={columns}
+          sortField={sortField}
+          order={order}
+          handleSorting={handleSortingChange}
+          checkBoxRequired={true}
+        >
+          <TableBody>
+            {tableData &&
+              tableData.length > 0 &&
+              tableData?.map((row, index) => {
+                const isItemSelected = isSelected(row.id);
+                const labelId = `enhanced-table-checkbox-${index}`;
+                return (
+                  <>
+                    <StyledTableRow
+                      role="checkbox"
+                      aria-checked={isItemSelected}
+                      tabIndex={-1}
+                      key={row.id}
+                      selected={isItemSelected}
+                    >
+                      <StyledTableCell padding="checkbox">
+                        <div className="d-flex">
                           <Checkbox
+                            size="small"
                             onClick={(event) => handleClick(event, row.id, row)}
                             color="primary"
                             checked={isItemSelected}
@@ -360,130 +304,124 @@ const TransferApprovalHq = () => {
                               "aria-labelledby": labelId,
                             }}
                           />
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {row?.fromStore}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {row?.toStore}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {row?.requestDate}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {row?.drugNameList &&
-                            row?.drugNameList.length > 1 && (
-                              <>
-                                <div className="d-flex justify-content-end">
-                                  <FontAwesomeIcon
-                                    icon={
-                                      open.includes(index)
-                                        ? faChevronUp
-                                        : faChevronDown
-                                    }
-                                    onClick={() => handleCollapse(index)}
-                                  />
-                                </div>
-                              </>
-                            )}
+                          {row?.transferDrugs &&
+                          row?.transferDrugs.length > 0 ? (
+                            <IconButton
+                              aria-label="expand row"
+                              size="small"
+                              onClick={() => handleCollapse(index)}
+                            >
+                              <FontAwesomeIcon
+                                icon={
+                                  open.includes(index)
+                                    ? faChevronUp
+                                    : faChevronDown
+                                }
+                              />
+                            </IconButton>
+                          ) : null}
+                        </div>
+                      </StyledTableCell>
+                      <StyledTableCell padding="none">
+                        {row?.fromStore}
+                      </StyledTableCell>
+                      <StyledTableCell padding="none">
+                        {row?.toStore}
+                      </StyledTableCell>
+                      <StyledTableCell padding="none">
+                        {row?.requestDate}
+                      </StyledTableCell>
 
-                          {row.drugNameList && row?.drugNameList.length > 1 && (
-                            <Collapse in={open.includes(index)}>
-                              {row?.drugNameList &&
-                                row?.drugNameList.length > 1 &&
-                                row?.drugNameList.map((elem, index) => {
-                                  return (
-                                    <div className="pt-2 pb-2 ">{elem}</div>
-                                  );
-                                })}
-                            </Collapse>
-                          )}
-
-                          {row.drugNameList &&
-                            row?.drugNameList.length === 1 &&
-                            row?.drugNameList.map((elem, index) => {
-                              return <div className="">{elem}</div>;
-                            })}
+                      <StyledTableCell padding="none">
+                        {row?.requestType}
+                      </StyledTableCell>
+                      <StyledTableCell padding="none">
+                        {row?.status}
+                      </StyledTableCell>
+                    </StyledTableRow>
+                    {row?.transferDrugs && row?.transferDrugs.length > 0 ? (
+                      <NormalTableRow>
+                        <TableCell
+                          style={{ paddingBottom: 0, paddingTop: 0 }}
+                          colSpan={6}
+                        >
+                          <Collapse
+                            in={open.includes(index)}
+                            timeout="auto"
+                            unmountOnExit
+                          >
+                            <Box sx={{ margin: 1 }}>
+                              <Typography
+                                variant="h6"
+                                gutterBottom
+                                component="div"
+                              >
+                                Transfer Details
+                              </Typography>
+                              <Table size="small" aria-label="purchases">
+                                <TableHead>
+                                  <TableRow>
+                                    <StyledTableCell>DRUG NAME</StyledTableCell>
+                                    <StyledTableCell>
+                                      PROG. NAME
+                                    </StyledTableCell>
+                                    <StyledTableCell>BATCH NO</StyledTableCell>
+                                    <StyledTableCell>EXP DATE</StyledTableCell>
+                                    <StyledTableCell>
+                                      DAYS TO EXP
+                                    </StyledTableCell>
+                                    <StyledTableCell>REQ QTY</StyledTableCell>
+                                  </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                  {row?.transferDrugs &&
+                                    row?.transferDrugs.length > 0 &&
+                                    row?.transferDrugs.map((ele) => {
+                                      return (
+                                        <>
+                                          <NormalTableRow hover key={ele?.id}>
+                                            <StyledTableCell padding="none">
+                                              {ele?.drugName}
+                                            </StyledTableCell>
+                                            <StyledTableCell padding="none">
+                                              {ele?.programName}
+                                            </StyledTableCell>
+                                            <StyledTableCell padding="none">
+                                              {ele?.batchNo}
+                                            </StyledTableCell>
+                                            <StyledTableCell padding="none">
+                                              {ele?.requestQty}
+                                            </StyledTableCell>
+                                            <StyledTableCell padding="none">
+                                              {ele?.transQty}
+                                            </StyledTableCell>
+                                            <StyledTableCell padding="none">
+                                              {ele?.transferQty}
+                                            </StyledTableCell>
+                                          </NormalTableRow>
+                                        </>
+                                      );
+                                    })}
+                                </TableBody>
+                              </Table>
+                            </Box>
+                          </Collapse>
                         </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {row?.programList && row?.programList.length > 1 && (
-                            <Collapse in={open.includes(index)}>
-                              {row?.programList &&
-                                row?.programList.length > 1 &&
-                                row?.programList.map((elem, index) => {
-                                  return (
-                                    <div className="pt-2 pb-2 ">{elem}</div>
-                                  );
-                                })}
-                            </Collapse>
-                          )}
-                        </TableCell>
-
-                        {/* <TableCell padding="none" className={classes.tableCell}>
-                          {row.batchNo && row?.batchNo.length > 1 && (
-                            <Collapse in={open?.includes(index)}>
-                              {row?.batchNo &&
-                                row?.batchNo?.length > 0 &&
-                                row?.batchNo?.map((elem, index) => {
-                                  return (
-                                    <div className="pt-2 pb-2 ">{elem}</div>
-                                  );
-                                })}
-                            </Collapse>
-                          )}
-                        </TableCell> */}
-
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {row.expiryDate && row?.expiryDate.length > 1 && (
-                            <Collapse in={open.includes(index)}>
-                              {row?.expiryDate &&
-                                row?.expiryDate.length > 1 &&
-                                row?.expiryDate.map((elem, index) => {
-                                  return (
-                                    <div className="pt-2 pb-2 ">{elem}</div>
-                                  );
-                                })}
-                            </Collapse>
-                          )}
-                        </TableCell>
-
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {row?.dayToExp}
-                        </TableCell>
-
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {row.requestQty && row?.requestQty.length > 1 && (
-                            <Collapse in={open.includes(index)}>
-                              {row?.requestQty &&
-                                row?.requestQty.length > 1 &&
-                                row?.requestQty.map((elem, index) => {
-                                  return (
-                                    <div className="pt-2 pb-2 ">{elem}</div>
-                                  );
-                                })}
-                            </Collapse>
-                          )}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {row?.reqType}
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
-                          {row?.status}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-              </TableBody>
-            </TableComponent>
-            <TablePagination
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller?.rowsPerPage}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
-          </div>
-        </div>
+                      </NormalTableRow>
+                    ) : null}
+                  </>
+                );
+              })}
+            <EmptyRow loading={loading} tableData={tableData} />
+          </TableBody>
+        </TableComponent>
+        <TablePagination
+          page={controller.page + 1}
+          count={totalRows}
+          rowsPerPage={controller?.rowsPerPage}
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleChangeRowsPerPage}
+        />
       </Paper>
     </>
   );

@@ -8,16 +8,22 @@ import { useDispatch, useSelector } from "react-redux";
 import { showLoader, hideLoader } from "../../store/loader/actions";
 import { loginResponse, logout } from "../../store/login/actions";
 import toastMessage from "../../common/toastmessage/toastmessage";
+import CheckBox from "../../components/switch/switchcheckbox";
+import { handledarkMode } from "../../store/darkmode/action";
 const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const mode = useSelector((state) => state.darkMode);
+  const { isdarkMode } = mode;
   const logOutResponse = useSelector((state) => state?.login?.logoutResponse);
+  console.log("logout Response", logOutResponse);
   useEffect(() => {
     if (logOutResponse && logOutResponse.status === 200) {
       dispatch(hideLoader());
       tokenhandle.clearToken();
-      dispatch(loginResponse(""));
-      navigate("/");
+
+      // dispatch(loginResponse(""));
+      // navigate("/");
     } else if (logOutResponse && logOutResponse?.status === 500) {
       dispatch(hideLoader());
       dispatch(loginResponse(""));
@@ -39,6 +45,15 @@ const Navbar = () => {
         >
           <i className="fas fa-bars"></i>
         </button>
+        <CheckBox
+          type="checkbox"
+          onChange={() => {
+            isdarkMode
+              ? dispatch(handledarkMode(false))
+              : dispatch(handledarkMode(true));
+          }}
+          labelText="DarkMode"
+        />
         {/* <!-- Navbar Search--> */}
         <form className="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
           <div className="input-group">

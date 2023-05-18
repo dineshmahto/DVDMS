@@ -1,426 +1,198 @@
 import React, { useState, useEffect } from "react";
-import CustomSelect from "../../../components/select/customSelect";
-import Basicbutton from "../../../components/button/basicbutton";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faFloppyDisk,
-  faRefresh,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
 import BasicModal from "../../../components/modal/basicmodal";
-import { Form, Formik, Field } from "formik";
 import * as Yup from "yup";
+import FormikDynamic from "../../../components/form/forms";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createStore,
+  createStoreResponse,
+  getStoreDeskList,
+} from "../../../store/admin/action";
+import toastMessage from "../../../common/toastmessage/toastmessage";
 const CreateStoreModalForm = ({
-  openCreateuserModal,
-  handleCloseCreateUserModal,
+  openCreateStoreModal,
+  handleCloseCreateStoreModal,
+  blockList,
+  districtList,
+  ownerList,
+  storeList,
+  storeTypeList,
 }) => {
+  const dispatch = useDispatch();
+  const createStoreResp = useSelector((state) => state?.admin?.createStoreResp);
+  console.log("createStoreResp", createStoreResp);
   const newStoreSchema = Yup.object().shape({
     storeName: Yup.string()
       .min(2, "Too Short!")
       .max(50, "Too Long!")
       .required("User Id is Required"),
 
-    storeType: Yup.string().ensure().required("Select the Store!"),
-    parentStoreName: Yup.string()
-      .ensure()
-      .required("Select the Parent Store Type"),
-    ownerType: Yup.string().ensure().required("Select the Owner Type"),
-    districtName: Yup.string().ensure().required("Select the District"),
-    blockName: Yup.string().ensure().required("Select the Block"),
+    storeTypeId: Yup.string().ensure().required("Select the Store Type!"),
+    toStoreId: Yup.string().ensure().required("Select the Parent Store Type"),
+    ownerTypeId: Yup.string().ensure().required("Select the Owner Type"),
+    address: Yup.string().required("Address is Required"),
+    opd: Yup.string().required("Check the OPD Field"),
+    districtId: Yup.string().ensure().required("Select the District"),
+    blockId: Yup.string().ensure().required("Select the Block"),
     contactNo: Yup.number().required("Contact No is Required"),
     longitude: Yup.number().required("Longitude is Required"),
     latitude: Yup.number().required("latitude is Required"),
-    ninNumber: Yup.number().required("NIN Number is Required"),
+    ninNo: Yup.number().required("NIN Number is Required"),
   });
+
+  const addStoreField = [
+    {
+      type: "text",
+      name: "storeName",
+      placeholder: "Enter Store Name",
+      value: "",
+      label: "Store Name",
+    },
+    {
+      type: "select",
+      name: "storeTypeId",
+      placeholder: "Full Name",
+      value: "",
+      option: storeList,
+      label: "Store Type",
+    },
+    {
+      type: "select",
+      name: "toStoreId",
+
+      value: "",
+      option: storeTypeList,
+      label: "Parent Store Name",
+    },
+    {
+      type: "select",
+      name: "ownerTypeId",
+
+      value: "",
+      option: ownerList,
+      label: "Owner Type",
+    },
+    {
+      type: "text",
+      name: "address",
+      value: "",
+      label: "Address",
+    },
+    {
+      type: "radio",
+      name: "opd",
+      list: [
+        { labelText: "Yes", value: "1" },
+        {
+          labelText: "No",
+          value: "2",
+        },
+        {
+          labelText: "Others",
+          value: "3",
+        },
+      ],
+      label: "Is this an OPD/DEPT/WARD of a Hospital?",
+      value: "",
+    },
+    {
+      type: "select",
+      name: "districtId",
+
+      value: "",
+      option: districtList,
+      label: "District Name",
+    },
+    {
+      type: "select",
+      name: "blockId",
+
+      value: "",
+      option: blockList,
+      label: "Block Name",
+    },
+    {
+      type: "number",
+      name: "contactNo",
+      placeholder: "Enter Contact No",
+      value: "",
+      label: "Contact No",
+    },
+    {
+      type: "number",
+      name: "longitude",
+      placeholder: "Enter the Longitude",
+      value: "",
+      label: "Longitude",
+    },
+    {
+      type: "number",
+      name: "latitude",
+      placeholder: " Enter the Latitude",
+
+      value: "",
+      label: "Latitude",
+    },
+    {
+      type: "number",
+      name: "ninNo",
+      placeholder: "Enter NIN Number",
+
+      value: "",
+      label: "NIN Number",
+    },
+  ];
+  const handleSubmit = (values) => {
+    console.log("values", values);
+    dispatch(createStore(values));
+  };
+
+  useEffect(() => {
+    if (createStoreResp && createStoreResp?.status === 201) {
+      dispatch(getStoreDeskList());
+      dispatch(createStoreResponse(""));
+      // formRef?.current?.resetForm({ values: "" });
+      handleCloseCreateStoreModal();
+    } else if (createStoreResp && createStoreResp?.status === 500) {
+      dispatch(createStoreResponse(""));
+      toastMessage("STORE DESK", "Something went wrong", "error");
+    }
+  }, [createStoreResp]);
   return (
     <>
       <BasicModal
-        title="Create Role"
-        show={openCreateuserModal}
+        title="Create Store"
+        show={openCreateStoreModal}
         close={() => {
-          handleCloseCreateUserModal(false);
+          handleCloseCreateStoreModal();
         }}
         isStatic={false}
         scrollable={true}
         isCenterAlign={false}
         fullScreen={false}
         size="lg"
-        key="create_user"
+        key="create_store"
       >
-        <Formik
-          validateOnMount
+        <FormikDynamic
           initialValues={{
             storeName: "",
-            storeType: "",
-            parentStoreName: "",
-            ownerType: "",
-            districtName: "",
-            blockName: "",
+            storeTypeId: "",
+            toStoreId: "",
+            ownerTypeId: "",
+            address: "",
+            districtId: "",
+            blockId: "",
             contactNo: "",
             longitude: "",
             latitude: "",
-            ninNumber: "",
+            ninNo: "",
+            opd: "",
           }}
+          buttonText="Save"
           validationSchema={newStoreSchema}
-          onSubmit={async (values) => {
-            await new Promise((r) => setTimeout(r, 500));
-            alert(JSON.stringify(values, null, 2));
-          }}
-        >
-          {({
-            errors,
-            touched,
-            values,
-            isSubmitting,
-            handleChange,
-            handleBlur,
-            setFieldTouched,
-            isValid,
-          }) => (
-            <Form>
-              <div className="row">
-                <div className="col-10 offset-1">
-                  <div className="row mb-2 align-items-center">
-                    <div className="col-2">
-                      <label htmlFor="storeName" class="col-form-label">
-                        Store Name:
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <Field
-                        className="form-control shadow-none"
-                        value={values?.storeName}
-                        type="text"
-                        id="storeName"
-                        name="storeName"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                    </div>
-                    <div className="col-4">
-                      {errors.userId && touched.storeName ? (
-                        <div className="text-danger float-end">
-                          {errors.storeName}
-                        </div>
-                      ) : null}
-                      <span class="form-text">Between 2 to 50 characters.</span>
-                    </div>
-                  </div>
-
-                  <div className="row mb-2 align-items-center">
-                    <div className="col-2">
-                      <label htmlFor="storeType" class="col-form-label">
-                        Store Type:
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <CustomSelect
-                        className="form-control shadow-none"
-                        name="storeType"
-                        id="storeType"
-                        value={values?.storeType}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
-                        }}
-                      />
-                    </div>
-                    <div className="col-4">
-                      {errors.storeType && touched.storeType ? (
-                        <div className="text-danger float-end">
-                          {errors.storeType}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                  <div className="row mb-2 align-items-center">
-                    <div class="col-2">
-                      <label htmlFor="parentStoreName" class="col-form-label">
-                        Parent Store Name
-                      </label>
-                    </div>
-                    <div class="col-6">
-                      <CustomSelect
-                        className="form-control shadow-none"
-                        name="parentStoreName"
-                        id="parentStoreName"
-                        value={values?.parentStoreName}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
-                        }}
-                      />
-                    </div>
-                    <div class="col-4">
-                      {errors.parentStoreName && touched.parentStoreName ? (
-                        <div className="text-danger float-end">
-                          {errors.parentStoreName}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="row mb-2 align-items-center">
-                    <div class="col-2">
-                      <label htmlFor="ownerType" class="col-form-label">
-                        Owner Type
-                      </label>
-                    </div>
-                    <div class="col-6">
-                      <CustomSelect
-                        className="form-control shadow-none"
-                        name="ownerType"
-                        id="ownerType"
-                        value={values?.ownerType}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
-                        }}
-                      />
-                    </div>
-                    <div class="col-4">
-                      {errors.ownerType && touched.ownerType ? (
-                        <div className="text-danger float-end">
-                          {errors.ownerType}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="row mb-2 align-items-center">
-                    <div class="col-2">
-                      <label htmlFor="address" class="col-form-label">
-                        Address
-                      </label>
-                    </div>
-                    <div class="col-6">
-                      <Field
-                        className="form-control shadow-none"
-                        value={values?.address}
-                        type="textarea"
-                        id="address"
-                        name="address"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                    </div>
-                    <div className="col-4">
-                      {errors.address && touched.address ? (
-                        <div className="text-danger float-end">
-                          {errors.address}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                  <div className="row mb-2 align-items-center">
-                    <div class="col-2">
-                      <label
-                        htmlFor="address"
-                        className=""
-                        class="col-form-label"
-                      >
-                        District Name
-                      </label>
-                    </div>
-                    <div class="col-6">
-                      <CustomSelect
-                        className="form-control shadow-none"
-                        name="districtName"
-                        id="districtName"
-                        value={values?.districtName}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
-                        }}
-                      />
-                    </div>
-                    <div className="col-4">
-                      {errors.districtName && touched.districtName ? (
-                        <div className="text-danger float-end">
-                          {errors.districtName}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                  <div className="row mb-2">
-                    <div className="col-2">
-                      <label htmlFor="blockName" class="col-form-label">
-                        Block Name:
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <CustomSelect
-                        id="blockName"
-                        name="blockName"
-                        value={values?.blockName}
-                        options={[]}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
-                        }}
-                      />
-                    </div>
-                    <div className="col-4">
-                      {errors.blockName && touched.blockName ? (
-                        <div className="text-danger float-end">
-                          {errors.blockName}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="row mb-2">
-                    <div className="col-2">
-                      <label htmlFor="contactNo" class="col-form-label">
-                        Contact No:
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <Field
-                        className="form-control shadow-none"
-                        value={values?.contactNo}
-                        type="number"
-                        id="contactNo"
-                        name="contactNo"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                    </div>
-                    <div className="col-4">
-                      {errors.contactNo && touched.contactNo ? (
-                        <div className="text-danger float-end">
-                          {errors.contactNo}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="row mb-2">
-                    <div className="col-2">
-                      <label htmlFor="longitude" class="col-form-label">
-                        Longitude:
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <Field
-                        className="form-control shadow-none"
-                        value={values?.longitude}
-                        type="number"
-                        id="longitude"
-                        name="longitude"
-                        onChange={handleChange}
-                        onBlur={handleBlur}
-                      />
-                    </div>
-                    <div className="col-4">
-                      {errors.longitude && touched.longitude ? (
-                        <div className="text-danger float-end">
-                          {errors.longitude}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="row mb-2">
-                    <div className="col-2">
-                      <label htmlFor="latitude" class="col-form-label">
-                        Latitude:
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <Field
-                        className="form-control shadow-none"
-                        name="latitude"
-                        id="latitude"
-                        value={values?.latitude}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
-                        }}
-                      />
-                    </div>
-                    <div className="col-4">
-                      {errors.latitude && touched.latitude ? (
-                        <div className="text-danger float-end">
-                          {errors.latitude}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-
-                  <div className="row mb-2">
-                    <div className="col-2">
-                      <label htmlFor="ninNumber" class="col-form-label">
-                        NIN Number:
-                      </label>
-                    </div>
-                    <div className="col-6">
-                      <Field
-                        className="form-control shadow-none"
-                        name="ninNumber"
-                        id="ninNumber"
-                        value={values?.ninNumber}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
-                        }}
-                      />
-                    </div>
-                    <div className="col-4">
-                      {errors.ninNumber && touched.ninNumber ? (
-                        <div className="text-danger float-end">
-                          {errors.ninNumber}
-                        </div>
-                      ) : null}
-                    </div>
-                  </div>
-                  <div className="row  mb-2">
-                    <div className="col-12">
-                      <div className="d-flex justify-content-center">
-                        <Basicbutton
-                          icon={
-                            <FontAwesomeIcon
-                              icon={faRefresh}
-                              className="me-1"
-                            />
-                          }
-                          type="button"
-                          buttonText="Reset"
-                          className="secondary rounded-0 me-1"
-                          outlineType={true}
-                        />
-                        <Basicbutton
-                          icon={
-                            <FontAwesomeIcon
-                              icon={faFloppyDisk}
-                              className="me-1"
-                            />
-                          }
-                          type="submit"
-                          buttonText="Save"
-                          className="success rounded-0 me-1"
-                          outlineType={true}
-                          disabled={!isValid}
-                        />
-                        <Basicbutton
-                          type="button"
-                          buttonText="Close"
-                          className="danger rounded-0"
-                          outlineType={true}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Form>
-          )}
-        </Formik>
+          inputs={addStoreField}
+          handleSubmit={handleSubmit}
+        />
       </BasicModal>
     </>
   );

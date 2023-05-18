@@ -3,14 +3,22 @@ import BasicButton from "../../../components/button/basicbutton";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import SearchField from "../../../components/search/search";
-import { faSearch, faAdd } from "@fortawesome/free-solid-svg-icons";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { Paper, TableBody } from "@mui/material";
 import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
 import { useDispatch, useSelector } from "react-redux";
 import toastMessage from "../../../common/toastmessage/toastmessage";
-import { getRateContractDeskList } from "../../../store/admin/action";
+import {
+  getRateContractDeskList,
+  getRateContractDeskListResponse,
+} from "../../../store/admin/action";
 import moment from "moment";
-import { Spinner } from "react-bootstrap";
+import handleSortingFunc from "../../../components/tables/datatable/sortable";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
+import StyledTableRow from "../../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../../components/tables/datatable/customTableCell";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import TablePagination from "../../../components/tables/datatable/tablepagination";
 const DrugListModal = lazy(() => import("./druglistmodal"));
 const RateContractDesk = () => {
   const dispatch = useDispatch();
@@ -99,10 +107,7 @@ const RateContractDesk = () => {
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-
-    handleSorting(accessor, sortOrder);
-    console.log("sortedData", sortedData);
-    setTableData(sortedData);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
 
   useEffect(() => {
@@ -118,20 +123,30 @@ const RateContractDesk = () => {
     }
     return () => {
       isApiSubcribed = false;
+      dispatch(getRateContractDeskListResponse(""));
     };
   }, [controller]);
 
   useEffect(() => {
     if (rateContractListResponse && rateContractListResponse?.status === 200) {
-      setTotalRows(rateContractListResponse?.data?.totalElements);
-      setTableData(rateContractListResponse?.data?.content);
+      if (
+        rateContractListResponse &&
+        rateContractListResponse?.data?.pageList &&
+        rateContractListResponse?.data?.pageList?.content
+      ) {
+        setTotalRows(rateContractListResponse?.data?.pageList?.totalElements);
+        setTableData(rateContractListResponse?.data?.pageList?.content);
+      }
+
       setLoading(false);
+      dispatch(getRateContractDeskListResponse(""));
     } else if (
       rateContractListResponse &&
       rateContractListResponse?.status == 400
     ) {
       setLoading(false);
-      toastMessage("Login Error", "Please enter valid ID", "error");
+      dispatch(getRateContractDeskListResponse(""));
+      toastMessage("Rate Contract Desk", "", "error");
     }
   }, [rateContractListResponse]);
 
@@ -150,104 +165,91 @@ const RateContractDesk = () => {
         <div className="row mt-2">
           <HorizonatalLine text="Rate Contract Management Desk" />
         </div>
-
-        <div className="row mt-1 mb-2">
-          <div className="d-flex justify-content-end ">
-            <SearchField
-              iconPosition="end"
-              iconName={faSearch}
-              onChange={(e) => {
-                console.log(e);
-              }}
-            />
+        <Paper>
+          <div className="row mt-1 mb-2">
+            <div className="d-flex justify-content-end ">
+              <SearchField
+                iconPosition="end"
+                iconName={faSearch}
+                onChange={(e) => {
+                  console.log(e);
+                }}
+              />
+            </div>
           </div>
-        </div>
-        <div className="row">
-          <div className="col-12">
-            <TableComponent
-              columns={columns}
-              sortField={sortField}
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
-              order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              rowCount={tableData?.length}
-              handleSorting={handleSortingChange}
-              handleChangeRowsPerPage={handleChangeRowsPerPage}
-            >
-              <TableBody>
-                {loading ? (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  tableData &&
-                  tableData?.map((row, index) => {
-                    return (
-                      <TableRow hover>
-                        {columns.map((d, k) => {
-                          if (
-                            d.id === "contactTo" ||
-                            d.id === "contactFrom" ||
-                            d.id === "contactDate" ||
-                            d.id === "tenderDate"
-                          ) {
-                            return (
-                              <TableCell
-                                key={k}
-                                padding="none"
-                                style={{
-                                  padding: "10px",
-                                  fontSize: "0.7rem",
-                                }}
-                              >
-                                {moment(row[d.id]).format("DD/MM/YYYY")}
-                              </TableCell>
-                            );
-                          } else if (d.id === "druglist") {
-                            return (
-                              <TableCell
-                                key={k}
-                                padding="none"
-                                style={{
-                                  padding: "10px",
-                                  fontSize: "0.7rem",
-                                }}
-                                onClick={() => {
-                                  setShowDrugList(true);
-                                  setModalData(row[d.id]);
-                                }}
-                              >
-                                VIEW DRUG LIST
-                              </TableCell>
-                            );
-                          } else {
-                            return (
-                              <TableCell
-                                key={k}
-                                padding="none"
-                                style={{
-                                  padding: "10px",
-                                  fontSize: "0.7rem",
-                                }}
-                              >
-                                {row[d.id]}
-                              </TableCell>
-                            );
-                          }
-                        })}
-                      </TableRow>
-                    );
-                  })
-                )}
-              </TableBody>
-            </TableComponent>
+          <div className="row">
+            <div className="col-12">
+              <TableComponent
+                columns={columns}
+                sortField={sortField}
+                page={controller.page + 1}
+                count={totalRows}
+                rowsPerPage={controller.rowsPerPage}
+                order={order}
+                paginationRequired={true}
+                onPageChange={handlePageChange}
+                rowCount={tableData?.length}
+                handleSorting={handleSortingChange}
+                handleChangeRowsPerPage={handleChangeRowsPerPage}
+              >
+                <TableBody>
+                  {loading ? (
+                    <TableRowLaoder />
+                  ) : (
+                    tableData &&
+                    tableData?.map((row, index) => {
+                      return (
+                        <StyledTableRow>
+                          {columns.map((d, k) => {
+                            if (
+                              d.id === "contactTo" ||
+                              d.id === "contactFrom" ||
+                              d.id === "contactDate" ||
+                              d.id === "tenderDate"
+                            ) {
+                              return (
+                                <StyledTableCell key={k} padding="none">
+                                  {moment(row[d.id]).format("DD/MM/YYYY")}
+                                </StyledTableCell>
+                              );
+                            } else if (d.id === "druglist") {
+                              return (
+                                <StyledTableCell
+                                  key={k}
+                                  padding="none"
+                                  onClick={() => {
+                                    setShowDrugList(true);
+                                    setModalData(row[d.id]);
+                                  }}
+                                >
+                                  VIEW DRUG LIST
+                                </StyledTableCell>
+                              );
+                            } else {
+                              return (
+                                <StyledTableCell key={k} padding="none">
+                                  {row[d.id]}
+                                </StyledTableCell>
+                              );
+                            }
+                          })}
+                        </StyledTableRow>
+                      );
+                    })
+                  )}
+                  <EmptyRow loading={loading} tableData={tableData} />
+                </TableBody>
+              </TableComponent>
+              <TablePagination
+                page={controller.page + 1}
+                count={totalRows}
+                rowsPerPage={controller?.rowsPerPage}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </div>
           </div>
-        </div>
+        </Paper>
         <Suspense>
           <DrugListModal
             showDrugListModal={showDrugList}

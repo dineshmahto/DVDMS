@@ -4,44 +4,31 @@ import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine"
 import SearchField from "../../../components/search/search";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import { Paper } from "@mui/material";
-import { TableBody, TableRow, TableCell } from "@mui/material";
-import { makeStyles } from "@mui/styles";
-import { Spinner } from "react-bootstrap";
+import { TableBody } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faSearch,
-  faPenToSquare,
-  faTrash,
-  faFloppyDisk,
-} from "@fortawesome/free-solid-svg-icons";
-import API from "../../../config/config";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
 import { useDispatch, useSelector } from "react-redux";
-import { getDrugDeksList } from "../../../store/admin/action";
+import {
+  getDrugDeksList,
+  getDrugDeksListResponse,
+} from "../../../store/admin/action";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import handleSortingFunc from "../../../components/tables/datatable/sortable";
 import StyledTableRow from "../../../components/tables/datatable/customTableRow";
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
 const AddNewDrugModal = lazy(() => import("./addnewdrug"));
 const AddNewAssetModal = lazy(() => import("./addnewasset"));
 const EditDrugModal = lazy(() => import("./editdrugmodal"));
 
-const useStyles = makeStyles({
-  tableCell: {
-    padding: "10px !important",
-    fontSize: "0.8rem !important",
-  },
-  lineHeight: {
-    lineHeight: "3",
-  },
-});
 const DrugDesk = () => {
   const dispatch = useDispatch();
   const drugDeskListResponse = useSelector(
     (state) => state?.admin?.drugDeskListResponse
   );
   console.log("drugDeskListResponse", drugDeskListResponse);
-  const classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
@@ -56,6 +43,10 @@ const DrugDesk = () => {
   const [showAddAssetModal, setShowAddAssetModal] = useState(false);
   const [showEditDrugModal, setEditDrugModal] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const [categoryList, setCategoryList] = useState([]);
+  const [manufactureList, setManufactureList] = useState([]);
+  const [classList, setClassList] = useState([]);
   const columns = useMemo(() => [
     {
       id: "id",
@@ -114,25 +105,41 @@ const DrugDesk = () => {
     }
     return () => {
       isApiSubcribed = false;
+      dispatch(getDrugDeksListResponse(""));
     };
   }, [controller]);
 
   useEffect(() => {
     if (drugDeskListResponse && drugDeskListResponse?.status === 200) {
-      setTotalRows(drugDeskListResponse?.data?.totalElements);
-      setTableData(drugDeskListResponse?.data?.content);
-
-      setTimeout(() => {
-        setLoading(false);
-      }, 500);
+      if (
+        drugDeskListResponse?.data?.pageList &&
+        drugDeskListResponse?.data?.pageList?.content
+      ) {
+        setTotalRows(drugDeskListResponse?.data?.pagelist?.totalElements);
+        setTableData(drugDeskListResponse?.data?.pageList?.content);
+        setCategoryList(drugDeskListResponse?.data?.categoryList);
+        setManufactureList(drugDeskListResponse?.data?.manufactureList);
+        setClassList(drugDeskListResponse?.data?.classList);
+      }
+      setLoading(false);
+      dispatch(getDrugDeksListResponse(""));
     } else if (drugDeskListResponse && drugDeskListResponse?.status == 400) {
       setLoading(false);
-      toastMessage("Login Error", "Please enter valid ID", "error");
+      toastMessage("Drug Desk", "", "error");
+      dispatch(getDrugDeksListResponse(""));
+    } else if (
+      drugDeskListResponse &&
+      drugDeskListResponse?.code === "ERR_NETWORK"
+    ) {
+      setLoading(false);
+      toastMessage("Drug List", "Internet Connection Problem");
+      dispatch(getDrugDeksListResponse(""));
     } else if (
       drugDeskListResponse &&
       drugDeskListResponse?.response?.status == 500
     ) {
       setLoading(false);
+      dispatch(getDrugDeksListResponse(""));
       toastMessage(
         "Drug Desk",
         "Something went wrong please try after sometime",
@@ -160,7 +167,6 @@ const DrugDesk = () => {
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    handleSortingFunc(accessor, sortOrder, tableData);
     setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
   const handleOpenAddDrugModal = () => {
@@ -181,9 +187,8 @@ const DrugDesk = () => {
         </div>
       </div>
 
-      <div className="row mt-1">
-        <HorizonatalLine text="Drug Management Desk" />
-      </div>
+      <HorizonatalLine text="Drug Management Desk" />
+
       <div className="row ">
         <div className="d-flex flex-row justify-content-between">
           <Basicbutton
@@ -196,7 +201,6 @@ const DrugDesk = () => {
           <SearchField
             className="me-1 "
             iconPosition="end"
-            iconName={faSearch}
             onChange={(e) => {
               console.log(e);
             }}
@@ -209,19 +213,13 @@ const DrugDesk = () => {
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page + 1}
               order={order}
-              paginationRequired={true}
               handleSorting={handleSortingChange}
               checkBoxRequired={false}
             >
               <TableBody>
                 {loading ? (
-                  <StyledTableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </StyledTableRow>
+                  <TableRowLaoder />
                 ) : (
                   tableData &&
                   tableData.length > 0 &&
@@ -259,15 +257,7 @@ const DrugDesk = () => {
                     );
                   })
                 )}
-                {!loading && tableData.length === 0 && (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <p style={{ fontSize: "0.8rem" }}>
-                        NO DATA AVAILABE IN TABLE
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
 
@@ -283,6 +273,9 @@ const DrugDesk = () => {
             <AddNewDrugModal
               openAddNewDrugModal={showAddDrugModal}
               handleOpenAddDrugModal={handleOpenAddDrugModal}
+              categoryList={categoryList}
+              manufactureList={manufactureList}
+              classList={classList}
             />
           </Suspense>
 

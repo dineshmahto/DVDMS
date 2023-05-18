@@ -5,13 +5,18 @@ import SelectOption from "../../../components/option/option";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import SearchField from "../../../components/search/search";
 import { faSearch, faAdd } from "@fortawesome/free-solid-svg-icons";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { TableBody, TableRow, TableCell, Paper } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
 import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
 import { useDispatch, useSelector } from "react-redux";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import { getPurchaseOrderList } from "../../../store/admin/action";
 import moment from "moment";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import TablePagination from "../../../components/tables/datatable/tablepagination";
+import StyledTableRow from "../../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 const PurchaseOrderList = () => {
   const dispatch = useDispatch();
   const purchaseOrderListResponse = useSelector(
@@ -148,8 +153,8 @@ const PurchaseOrderList = () => {
       purchaseOrderListResponse &&
       purchaseOrderListResponse?.status === 200
     ) {
-      setTotalRows(purchaseOrderListResponse?.data?.totalElements);
-      setTableData(purchaseOrderListResponse?.data?.content);
+      setTotalRows(purchaseOrderListResponse?.data?.pageList?.totalElements);
+      setTableData(purchaseOrderListResponse?.data?.pageList?.content);
       setLoading(false);
     } else if (
       purchaseOrderListResponse &&
@@ -201,7 +206,7 @@ const PurchaseOrderList = () => {
         <div className="row mt-2">
           <HorizonatalLine text="Purchase Order Management Desk" />
         </div>
-        <div className="row mt-2 lightBlueBackGround">
+        <div className="row mt-2">
           <div className="d-flex justify-content-start">
             <BasicButton
               type="button"
@@ -219,92 +224,86 @@ const PurchaseOrderList = () => {
             />
           </div>
         </div>
-
-        <div className="row mt-1">
-          <div className="d-flex justify-content-end">
-            <SearchField
-              iconPosition="end"
-              iconName={faSearch}
-              onChange={(e) => {
-                console.log(e);
-              }}
-            />
+        <Paper>
+          <div className="row mt-1">
+            <div className="d-flex justify-content-end">
+              <SearchField
+                iconPosition="end"
+                iconName={faSearch}
+                onChange={(e) => {
+                  console.log(e);
+                }}
+              />
+            </div>
           </div>
-        </div>
-        <div className="row">
-          <div className="col-12">
-            <TableComponent
-              columns={columns}
-              sortField={sortField}
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
-              order={order}
-              checkBoxRequired={true}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              numSelected={selected.length}
-              rowCount={tableData?.length}
-              actionIcon={faAdd}
-              showTableActionBar={false}
-              handleSorting={handleSortingChange}
-            >
-              <TableBody>
-                {tableData &&
-                  tableData?.map((row, index) => {
-                    const labelId = `enhanced-table-checkbox-${index}`;
-                    return (
-                      <TableRow
-                        hover
-                        role="checkbox"
-                        aria-checked={selected.includes(index)}
-                        tabIndex={-1}
-                        key={row.id}
-                        selected={selected.includes(index)}
-                      >
-                        <TableCell padding="none">
-                          <Checkbox
-                            onClick={(event) => handleClick(event, index, row)}
-                            color="primary"
-                            checked={selected.includes(index)}
-                            inputProps={{
-                              "aria-labelledby": labelId,
-                            }}
-                          />
-                        </TableCell>
-                        {columns.map((d, k) => {
-                          if (d.id === "poDate") {
+          <div className="row">
+            <div className="col-12">
+              <TableComponent
+                columns={columns}
+                sortField={sortField}
+                order={order}
+                checkBoxRequired={true}
+                handleSorting={handleSortingChange}
+              >
+                <TableBody>
+                  {loading ? (
+                    <TableRowLaoder />
+                  ) : (
+                    tableData &&
+                    tableData?.length > 0 &&
+                    tableData?.map((row, index) => {
+                      const labelId = `enhanced-table-checkbox-${index}`;
+                      return (
+                        <StyledTableRow
+                          role="checkbox"
+                          aria-checked={selected.includes(index)}
+                          tabIndex={-1}
+                          key={row.id}
+                          selected={selected.includes(index)}
+                        >
+                          <StyledTableCell padding="none">
+                            <Checkbox
+                              onClick={(event) =>
+                                handleClick(event, index, row)
+                              }
+                              color="primary"
+                              checked={selected.includes(index)}
+                              inputProps={{
+                                "aria-labelledby": labelId,
+                              }}
+                            />
+                          </StyledTableCell>
+                          {columns.map((d, k) => {
+                            if (d.id === "poDate") {
+                              return (
+                                <StyledTableCell key={k} padding="none">
+                                  {moment(row[d.id]).format("DD/MM/YYYY")}
+                                </StyledTableCell>
+                              );
+                            }
                             return (
-                              <TableCell
-                                key={k}
-                                padding="none"
-                                style={{
-                                  padding: "4px",
-                                  fontSize: "0.7rem",
-                                }}
-                              >
-                                {moment(row[d.id]).format("DD/MM/YYYY")}
-                              </TableCell>
+                              <StyledTableCell key={k} padding="none">
+                                {row[d.id]}
+                              </StyledTableCell>
                             );
-                          }
-                          return (
-                            <TableCell
-                              key={k}
-                              padding="none"
-                              style={{ padding: "4px", fontSize: "0.7rem" }}
-                            >
-                              {row[d.id]}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    );
-                  })}
-              </TableBody>
-            </TableComponent>
+                          })}
+                        </StyledTableRow>
+                      );
+                    })
+                  )}
+                  <EmptyRow loading={loading} tableData={tableData} />
+                </TableBody>
+              </TableComponent>
+              <TablePagination
+                page={controller.page + 1}
+                count={totalRows}
+                rowsPerPage={controller?.rowsPerPage}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </div>
           </div>
-        </div>
+        </Paper>
       </div>
     </>
   );

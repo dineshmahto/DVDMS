@@ -8,23 +8,22 @@ import React, {
   Suspense,
 } from "react";
 import { Paper } from "@mui/material";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { TableBody } from "@mui/material";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import Basicbutton from "../../../components/button/basicbutton";
 import SearchField from "../../../components/search/search";
-import { Spinner } from "react-bootstrap";
 import {
   faPenToSquare,
   faSearch,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
-import { makeStyles } from "@mui/styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  deleteProgrm,
   getProgramDeskList,
   getProgramDeskListResponse,
 } from "../../../store/admin/action";
@@ -33,27 +32,24 @@ import { Seo } from "../../../components/seo/seo";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
 import StyledTableRow from "../../../components/tables/datatable/customTableRow";
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
 
 const CreateProgramDeskForm = lazy(() => import("./createprogram"));
 const EditProgramDeskForm = lazy(() => import("./editprogram"));
 const AlertDialog = lazy(() => import("../../../components/dialog/dialog"));
-const useStyles = makeStyles({
-  tableCell: {
-    padding: "10px !important",
-    fontSize: "0.8rem !important",
-  },
-  lineHeight: {
-    lineHeight: "3",
-  },
-});
+
 const ProgrammeDesk = () => {
   const programeDeskListResponse = useSelector(
     (state) => state.admin.programeDeskListResponse
   );
+  const deleteProgrmResponse = useSelector(
+    (state) => state?.admin?.deletePrgrmResp
+  );
+  console.log("deleteProgrmResponse", deleteProgrmResponse);
   console.log("programeDeskListResponse", programeDeskListResponse);
   const dispatch = useDispatch();
   const showActivitityTooltipRef = useRef();
-  let classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
@@ -70,6 +66,9 @@ const ProgrammeDesk = () => {
   const [showCreatProgrmModal, setShowCreateProgrmModal] = useState(false);
   const [showEditProgrmModal, setShowEditProgrmModal] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [editData, setEditData] = useState("");
+  const [totalDrugList, setTotalDrugList] = useState([]);
+  const [deleteId, setDeleteId] = useState("");
   const columns = useMemo(() => [
     {
       id: "id",
@@ -161,6 +160,7 @@ const ProgrammeDesk = () => {
     if (programeDeskListResponse && programeDeskListResponse?.status === 200) {
       // setTotalRoleList(programeDeskListResponse?.data?.activityList);
       // setActivityList(programeDeskListResponse?.data?.activityTypeList);
+      setTotalDrugList(programeDeskListResponse?.data?.drugList);
       setData(programeDeskListResponse?.data?.activityList);
       setTotalPages(programeDeskListResponse?.data?.pageList?.totalPages);
       setTotalRows(programeDeskListResponse?.data?.pageList?.totalElements);
@@ -175,6 +175,24 @@ const ProgrammeDesk = () => {
 
       toastMessage("Program Desk", "", "error");
       dispatch(getProgramDeskListResponse(""));
+    } else if (
+      programeDeskListResponse &&
+      programeDeskListResponse?.code === "ERR_NETWORK"
+    ) {
+      setLoading(false);
+      toastMessage("Program Desk", "Internet Connection Problem");
+      dispatch(getProgramDeskListResponse(""));
+    } else if (
+      programeDeskListResponse &&
+      programeDeskListResponse?.response?.status == 500
+    ) {
+      setLoading(false);
+      dispatch(getProgramDeskListResponse(""));
+      toastMessage(
+        "Program Desk",
+        "Something went wrong please try after sometime",
+        "error"
+      );
     }
   }, [programeDeskListResponse]);
 
@@ -185,6 +203,7 @@ const ProgrammeDesk = () => {
     setShowEditProgrmModal(false);
   };
   const handleDeleteDialog = () => {
+    setDeleteId("");
     setShowDeleteDialog(false);
   };
 
@@ -193,6 +212,18 @@ const ProgrammeDesk = () => {
       return <span class="badge rounded-pill bg-primary">Active</span>;
     }
   };
+
+  const handleDeleteProgram = () => {
+    dispatch(deleteProgrm({ id: deleteId }));
+  };
+
+  useEffect(() => {
+    if (deleteProgrmResponse && deleteProgrmResponse?.status === 200) {
+      toastMessage("DELETE PROGRAM", "Deleted Successfully");
+    } else if (deleteProgrmResponse && deleteProgrmResponse?.status === 500) {
+      toastMessage("DELETE PROGRAM", "Something went wrong");
+    }
+  }, [deleteProgrmResponse]);
 
   return (
     <>
@@ -236,23 +267,13 @@ const ProgrammeDesk = () => {
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
               handleSorting={handleSortingChange}
               checkBoxRequired={false}
             >
               <TableBody>
                 {loading ? (
-                  <StyledTableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </StyledTableRow>
+                  <TableRowLaoder />
                 ) : (
                   tableData &&
                   tableData.length > 0 &&
@@ -264,11 +285,11 @@ const ProgrammeDesk = () => {
                             return (
                               <StyledTableCell>
                                 <span
-                                  className={[
-                                    classes.tableCell,
-                                    "text-center text-decoration-underline ms-1",
-                                  ]}
-                                  onClick={() => setShowEditProgrmModal(true)}
+                                  className="text-center text-decoration-underline ms-1"
+                                  onClick={() => {
+                                    setShowEditProgrmModal(true);
+                                    setEditData(data);
+                                  }}
                                 >
                                   <FontAwesomeIcon
                                     icon={faPenToSquare}
@@ -283,7 +304,10 @@ const ProgrammeDesk = () => {
                                     fontSize: "0.8rem",
                                     cursor: "pointer",
                                   }}
-                                  onClick={() => setShowDeleteDialog(true)}
+                                  onClick={() => {
+                                    setDeleteId(data?.id);
+                                    setShowDeleteDialog(true);
+                                  }}
                                 >
                                   <FontAwesomeIcon
                                     icon={faTrash}
@@ -320,15 +344,7 @@ const ProgrammeDesk = () => {
                     );
                   })
                 )}
-                {!loading && tableData && tableData.length === 0 && (
-                  <StyledTableRow>
-                    <StyledTableCell className="text-center" colSpan={12}>
-                      <p style={{ fontSize: "0.8rem" }}>
-                        NO DATA AVAILABE IN TABLE
-                      </p>
-                    </StyledTableCell>
-                  </StyledTableRow>
-                )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
             <TablePagination
@@ -352,6 +368,8 @@ const ProgrammeDesk = () => {
         <EditProgramDeskForm
           openEditProgrmModal={showEditProgrmModal}
           handleCloseEditProgrmModal={handleCloseEditProgrmModal}
+          editData={editData}
+          totalDrugList={totalDrugList}
         />
       </Suspense>
       <Suspense>
@@ -365,7 +383,7 @@ Do you want to proceed?"
             buttonText="Disagree"
             onClick={() => setShowDeleteDialog(false)}
           />
-          <Basicbutton buttonText="Agree" />
+          <Basicbutton buttonText="Agree" onClick={handleDeleteProgram} />
         </AlertDialog>
       </Suspense>
     </>

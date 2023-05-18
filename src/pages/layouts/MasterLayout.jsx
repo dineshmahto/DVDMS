@@ -4,18 +4,25 @@ import { useEffect } from "react";
 import Footer from "./Footer";
 import Navbar from "./Navbar";
 import Sidenav from "./Sidenav";
-import { useSelector } from "react-redux";
+
 import { Spinner } from "react-bootstrap";
 import "../../assets/styles/styles.css";
 import IdleTimer from "../../common/timeout/idleTimer";
 import { useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faComments } from "@fortawesome/free-solid-svg-icons";
+import { useSelector, dispatch } from "react-redux";
 const MasterLayout = () => {
   const navigate = useNavigate();
   const loader = useSelector((state) => state?.loader?.loading);
+  const mode = useSelector((state) => state.darkMode);
+  const { isdarkMode } = mode;
+
   const [isTimeout, setIsTimeout] = useState(false);
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.style.backgroundColor = isdarkMode ? "#292c35" : "#fff";
+    document.body.style.color = isdarkMode ? "white" : "black";
+  }, [isdarkMode]);
   useEffect(() => {
     // Will be called after mounting the componnent.
     const sidebarToggle = document.body.querySelector("#sidebarToggle");

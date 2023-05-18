@@ -1,6 +1,5 @@
 import { lazy } from "react";
 import { Route, Routes } from "react-router-dom";
-import Home from "./pages/home/home";
 import "./App.css";
 import { Provider } from "react-redux";
 import store from "./store/store";
@@ -47,6 +46,9 @@ const UpdateStockRack = lazy(() =>
 const AddStockVerification = lazy(() =>
   import("./pages/stock/stockVerification/addstockverification")
 );
+const StockVerificationDesk = lazy(() =>
+  import("./pages/stock/stockVerification/stockverification")
+);
 // Admin
 const RoleDesk = lazy(() => import("./pages/admin/roledesk/roledesk"));
 const UserDesk = lazy(() => import("./pages/admin/userdesk/userdesk"));
@@ -89,8 +91,19 @@ const IssueToCamp = lazy(() =>
 const OffineIssue = lazy(() =>
   import("./pages/issue/issueDesk/offlineIssue/offlineIssue")
 );
+const ThirdPartyReturn = lazy(() =>
+  import("./pages/issue/returnDesk/thirdPartyReturn/thirdpartyreturn")
+);
+const SubStoreReturn = lazy(() =>
+  import("./pages/issue/returnDesk/subStoreReturn/substorereturn")
+);
+const MiscellaneousConsumption = lazy(() =>
+  import("./pages/issue/miscellaneous/stockconsumptionList")
+);
 // End of Issue
-
+const AddMisscellaneousConsumption = lazy(() =>
+  import("./pages/issue/miscellaneous/addmiscellanousConsumption")
+);
 // Order Management
 const PurchaseOrderList = lazy(() =>
   import("./pages/ordermanagement/purchaseorderlist/purchaseorderlist")
@@ -119,7 +132,24 @@ const ApprovalTransferListHq = lazy(() =>
     "./pages/ordermanagement/approvals/transferapprovalhq/transferapprovalhq"
   )
 );
+// end of Order Management
 
+//Requistion Module Import
+const IntentDrug = lazy(() =>
+  import("./pages/requisition/intentDrugs/intentdrug")
+);
+const TransferList = lazy(() =>
+  import("./pages/requisition/transferList/transferlist")
+);
+// end of Requistion module
+
+// Receiving Module
+const ChallanList = lazy(() =>
+  import("./pages/receiving/challanlist/challanlist")
+);
+const ReceivedDrug = lazy(() =>
+  import("./pages/receiving/receiveofdrugs/receiveofdrug")
+);
 const Test = lazy(() => import("./pages/drugList/test"));
 const DynamicRow = lazy(() => import("./pages/stock/stockEntry/stock"));
 function App() {
@@ -171,6 +201,10 @@ function App() {
                 path="openStockVerification"
                 element={<AddStockVerification />}
               />
+              <Route
+                path="openStockVerificationDeck"
+                element={<StockVerificationDesk />}
+              />
               {/* End of Stock */}
               {/* Issue */}
               <Route path="openIssueDesk" element={<IssueDesk />} />
@@ -192,6 +226,21 @@ function App() {
               <Route
                 path="openExtendNotificationForm"
                 element={<OpenExtendNotification />}
+              />
+
+              <Route
+                path="openReturnFromThirdparty"
+                element={<ThirdPartyReturn />}
+              />
+              <Route path="openOfflineReturn" element={<SubStoreReturn />} />
+
+              <Route
+                path="openStockForMisConsumptionDesk"
+                element={<MiscellaneousConsumption />}
+              />
+              <Route
+                path="openStockForMisConsumption"
+                element={<AddMisscellaneousConsumption />}
               />
 
               {/* End of Issue */}
@@ -225,6 +274,16 @@ function App() {
                 element={<ApprovalTransferListHq />}
               />
               {/* End of Order Management Module */}
+
+              {/* Requition Module */}
+              <Route path="openIndentDesk" element={<IntentDrug />} />
+              <Route path="transferList" element={<TransferList />} />
+              {/* End of Requistion Module */}
+
+              {/* Reveiving Module */}
+              <Route path="openChallanDesk" element={<ChallanList />} />
+              <Route path="openIndentReceiveDesk" element={<ReceivedDrug />} />
+              {/* End of Receiving Module */}
 
               <Route path="intent" element={<OpenIntentDesk />} />
               <Route path="pdf" element={<Pdf />} />

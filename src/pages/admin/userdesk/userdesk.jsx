@@ -7,11 +7,10 @@ import React, {
   Suspense,
 } from "react";
 import { Paper } from "@mui/material";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { TableBody } from "@mui/material";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import Basicbutton from "../../../components/button/basicbutton";
 import SearchField from "../../../components/search/search";
-import { Spinner } from "react-bootstrap";
 import {
   faPenToSquare,
   faSearch,
@@ -26,6 +25,10 @@ import StyledTableRow from "../../../components/tables/datatable/customTableRow"
 import handleSortingFunc from "../../../components/tables/datatable/sortable";
 import { Seo } from "../../../components/seo/seo";
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import { useNavigate } from "react-router-dom";
+import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 
 const CreateUserModalForm = lazy(() => import("./createusermodalform"));
 const EditUserModalForm = lazy(() => import("./editusermodalform"));
@@ -35,6 +38,7 @@ const UserDesk = () => {
   const userListResponse = useSelector((state) => state.admin.userListResponse);
   console.log("userListResponse", userListResponse);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
@@ -48,6 +52,7 @@ const UserDesk = () => {
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [editData, setEditData] = useState("");
 
   const [activityList, setActivityList] = useState([]);
   const [activityType, setActivityType] = useState([]);
@@ -159,19 +164,38 @@ const UserDesk = () => {
 
   useEffect(() => {
     if (userListResponse && userListResponse?.status === 200) {
-      setTotalPages(userListResponse?.data?.pageList.totalPages);
-      setTotalRows(userListResponse?.data?.pageList.totalElements);
-      setTableData(userListResponse?.data?.pageList.content);
-      setRoleList(userListResponse?.data?.roleList);
-      setStoreList(userListResponse?.data?.storeList);
-      setTimeout(() => {
+      if (
+        userListResponse?.data?.pageList &&
+        userListResponse?.data?.pageList?.content
+      ) {
+        setTotalPages(userListResponse?.data?.pageList?.totalPages);
+        setTotalRows(userListResponse?.data?.pageList?.totalElements);
+        setTableData(userListResponse?.data?.pageList?.content);
+        setRoleList(userListResponse?.data?.roleList);
+        setStoreList(userListResponse?.data?.storeList);
+
         setLoading(false);
-      }, 500);
+        dispatch(getUserListResponse(""));
+      } else if (userListResponse?.data?.status === 401) {
+        setLoading(false);
+        navigate("/");
+      }
+    } else if (userListResponse && userListResponse?.code === "ERR_NETWORK") {
+      setLoading(false);
+      toastMessage("User Desk", "Internet Connection Problem");
       dispatch(getUserListResponse(""));
     } else if (userListResponse && userListResponse?.status == 400) {
       setLoading(false);
       toastMessage("User Desk", "", "error");
       dispatch(getUserListResponse(""));
+    } else if (userListResponse && userListResponse?.response?.status == 500) {
+      setLoading(false);
+      dispatch(getUserListResponse(""));
+      toastMessage(
+        "User Desk",
+        "Something went wrong please try after sometime",
+        "error"
+      );
     }
   }, [userListResponse]);
 
@@ -179,6 +203,7 @@ const UserDesk = () => {
     setShowAddModal(false);
   }, [showAddModal]);
   const handleCloseEditUserModal = useCallback(() => {
+    setEditData("");
     setShowEditModal(false);
   }, [showEditModal]);
   const handleCloseActivityListModal = useCallback(() => {
@@ -192,7 +217,9 @@ const UserDesk = () => {
           <p className="fs-6">USER LIST</p>
         </div>
       </div>
-
+      <div className="row mt-1">
+        <HorizonatalLine text="User Management Desk" />
+      </div>
       <div className="row">
         <div className="d-flex flex-row justify-content-between">
           <Basicbutton
@@ -229,11 +256,7 @@ const UserDesk = () => {
             >
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </TableRow>
+                  <TableRowLaoder />
                 ) : (
                   tableData &&
                   tableData.length > 0 &&
@@ -278,6 +301,10 @@ const UserDesk = () => {
                               fontSize: "0.7rem",
                               cursor: "pointer",
                             }}
+                            onClick={() => {
+                              setShowEditModal(true);
+                              setEditData(data);
+                            }}
                           >
                             <FontAwesomeIcon
                               icon={faPenToSquare}
@@ -304,15 +331,7 @@ const UserDesk = () => {
                     );
                   })
                 )}
-                {!loading && tableData.length == 0 && (
-                  <TableRow>
-                    <StyledTableCell colSpan={12}>
-                      <p style={{ fontSize: "0.8rem" }}>
-                        NO DATA AVAILABE IN TABLE
-                      </p>
-                    </StyledTableCell>
-                  </TableRow>
-                )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
             <TablePagination
@@ -329,12 +348,17 @@ const UserDesk = () => {
         <CreateUserModalForm
           openCreateuserModal={showAddModal}
           handleCloseCreateUserModal={handleCloseCreateUserModal}
+          roleList={roleList}
+          storeList={storeList}
         />
       </Suspense>
       <Suspense>
         <EditUserModalForm
           openEdituserModal={showEditModal}
           handleCloseEditUserModal={handleCloseEditUserModal}
+          editData={editData}
+          roleList={roleList}
+          storeList={storeList}
         />
       </Suspense>
       <Suspense>

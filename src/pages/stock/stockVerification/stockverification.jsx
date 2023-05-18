@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import CustomSelect from "../../../components/select/customSelect";
 import Basicbutton from "../../../components/button/basicbutton";
 import SearchField from "../../../components/search/search";
-import { faPlus, faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { Paper } from "@mui/material";
 import { TableBody } from "@mui/material";
 import moment from "moment";
@@ -13,12 +13,24 @@ import StyledTableRow from "../../../components/tables/datatable/customTableRow"
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
 import handleSortingFunc from "../../../components/tables/datatable/sortable";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getStockVerificationListResponse,
+  getStockVerificationList,
+} from "../../../store/stock/action";
+import toastMessage from "../../../common/toastmessage/toastmessage";
+import { Link } from "react-router-dom";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
 const StockVerification = () => {
+  const dispatch = useDispatch();
+  const stockVerificationResponse = useSelector(
+    (state) => state?.stock?.stockVerificationListResponse
+  );
+  console.log("stockVerificationListResponse", stockVerificationResponse);
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
+  const [totalRows, setTotalRows] = useState(0);
   const [tableData, setTableData] = useState([]);
   const [controller, setController] = useState({
     page: 0,
@@ -33,12 +45,12 @@ const StockVerification = () => {
     },
 
     {
-      id: "progName",
+      id: "programName",
       name: "PROGRAM NAME",
       sortable: true,
     },
     {
-      id: "batchNO",
+      id: "batchNo",
       name: "BATCH NO",
       sortable: false,
       type: "select",
@@ -54,12 +66,12 @@ const StockVerification = () => {
       sortable: true,
     },
     {
-      id: "avlQty",
+      id: "transferQty",
       name: "AVAILABLE. QTY",
       sortable: true,
     },
     {
-      id: "remarks",
+      id: "remark",
       name: "REMARKS",
       sortable: true,
     },
@@ -91,6 +103,45 @@ const StockVerification = () => {
     setOrder(sortOrder);
     setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
+
+  useEffect(() => {
+    let isApiSubcribed = true;
+    if (isApiSubcribed) {
+      setLoading(true);
+      setTimeout(() => {
+        dispatch(
+          getStockVerificationList({
+            ...controller,
+            pageNumber: controller.page,
+            pageSize: controller.rowsPerPage,
+          })
+        );
+      }, 1000);
+    }
+    return () => {
+      dispatch(getStockVerificationListResponse(""));
+      clearTimeout();
+      isApiSubcribed = false;
+    };
+  }, [controller]);
+  useEffect(() => {
+    if (
+      stockVerificationResponse &&
+      stockVerificationResponse?.status === 200
+    ) {
+      setTotalRows(stockVerificationResponse?.data?.pageList?.totalElements);
+      setTableData(stockVerificationResponse?.data?.pageList?.content);
+      setLoading(false);
+      dispatch(getStockVerificationListResponse(""));
+    } else if (
+      stockVerificationResponse &&
+      stockVerificationResponse?.status === 400
+    ) {
+    }
+    setLoading(false);
+
+    dispatch(getStockVerificationListResponse(""));
+  }, [stockVerificationResponse]);
   return (
     <>
       <div className="row mt-2">
@@ -131,11 +182,13 @@ const StockVerification = () => {
       <Paper>
         <div className="row ">
           <div className="d-flex flex-row justify-content-end">
-            <Basicbutton
-              buttonText="Add New Stock Verification"
-              outlineType={true}
-              className="primary rounded-0 mb-2 me-1 mt-2"
-            />
+            <Link to={"/openStockVerification"}>
+              <Basicbutton
+                buttonText="Add New Stock Verification"
+                outlineType={true}
+                className="primary rounded-0 mb-2 me-1 mt-2"
+              />
+            </Link>
           </div>
         </div>
         <div className="row mb-1">
@@ -188,6 +241,7 @@ const StockVerification = () => {
                     </StyledTableRow>
                   ))
                 )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
             <TablePagination
@@ -199,8 +253,6 @@ const StockVerification = () => {
             />
           </div>
         </div>
-
-        {selected}
       </Paper>
     </>
   );

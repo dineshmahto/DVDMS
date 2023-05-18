@@ -51,6 +51,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
   handleRightListItemClick,
   isDisabled,
 }) => {
+  console.log("rendering");
   const classes = useStyles();
   return (
     <>
@@ -92,6 +93,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
 
           <div className="col-1 d-flex flex-column justify-content-center">
             <button
+              type="button"
               className="btn btn-secondary btn-sm mb-1"
               onClick={handleMoveSelectedItemToRight}
               style={{
@@ -105,6 +107,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
               />
             </button>
             <button
+              type="button"
               className="btn btn-secondary btn-sm mb-1"
               onClick={handleMoveSelectedItemToLeft}
               disabled={isDisabled}
@@ -115,6 +118,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
               <FontAwesomeIcon icon={faAngleLeft} />
             </button>
             <button
+              type="button"
               className="btn btn-secondary btn-sm mb-1"
               onClick={handleShiftAllElementToRight}
               disabled={isDisabled}
@@ -125,6 +129,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
               <FontAwesomeIcon icon={faAngleDoubleRight} />
             </button>
             <button
+              type="button"
               className="btn btn-secondary btn-sm mb-1"
               onClick={handleShiftAllElementToLeft}
               style={{
