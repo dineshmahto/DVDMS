@@ -12,6 +12,8 @@ import toastMessage from "../../../common/toastmessage/toastmessage";
 import {
   createRole,
   createRoleResponse,
+  getActivityByRoleId,
+  getActivityByRoleIdResp,
   getRoleList,
 } from "../../../store/admin/action";
 const CreateRoleModalForm = ({
@@ -22,6 +24,9 @@ const CreateRoleModalForm = ({
 }) => {
   const dispatch = useDispatch();
   const createRoleResp = useSelector((state) => state?.admin?.createRoleResp);
+  const activityListByType = useSelector(
+    (state) => state?.admin?.activityListByRoleIdResp
+  );
   console.log("Data", data);
   console.log("activityList", activityList);
 
@@ -288,6 +293,27 @@ const CreateRoleModalForm = ({
       toastMessage("CREATE ROLE", "Something went wrong");
     }
   }, [createRoleResp]);
+
+  useEffect(() => {
+    if (activityListByType && activityListByType?.status === 200) {
+      console.log("activityListByType", activityListByType);
+      setSelectedItem([]);
+      setRightTempArray([]);
+      setFirstClick(false);
+      setSelectedItemActiveIndices([]);
+      setTempArray([]);
+      setActiveIndicies(
+        activityListByType?.data?.activityList?.map(() => false)
+      );
+      setTransferableRoleList(activityListByType?.data?.activityList);
+      setCopyData(activityListByType?.data?.activityList);
+
+      dispatch(getActivityByRoleIdResp(""));
+    } else if (activityListByType && activityListByType?.status === 500) {
+      dispatch(getActivityByRoleIdResp(""));
+      toastMessage("ROLE DESK", "Something went wrong");
+    }
+  }, [activityListByType]);
   return (
     <>
       <BasicModal
@@ -372,6 +398,12 @@ const CreateRoleModalForm = ({
                                     }
                                     onChange={(val) => {
                                       setFieldValue(name, val.value);
+
+                                      dispatch(
+                                        getActivityByRoleId({
+                                          code: val?.value,
+                                        })
+                                      );
                                     }}
                                     options={
                                       props?.option && props?.option?.length > 0

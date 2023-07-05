@@ -31,6 +31,8 @@ import {
 } from "../../../store/stock/action";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import BackButon from "../../../components/button/backButon";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
 
 const useStyles = makeStyles({
   root: {
@@ -299,6 +301,7 @@ const AddStockVerification = () => {
   };
   return (
     <>
+      <BackButon routePath="openStockVerificationDeck" />
       <div className="row mt-2">
         <div className="d-flex justify-content-start">
           <p className="fs-6">Stock Verification</p>
@@ -352,18 +355,9 @@ const AddStockVerification = () => {
               <TableComponent
                 columns={columns}
                 sortField={sortField}
-                page={controller.page}
-                count={totalRows}
-                rowsPerPage={controller.rowsPerPage}
                 order={order}
                 checkBoxRequired={true}
                 paginationRequired={true}
-                onPageChange={handlePageChange}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                numSelected={selected.length}
-                rowCount={tableData?.length}
-                actionIcon={faAdd}
-                showTableActionBar={false}
                 handleSorting={handleSortingChange}
               >
                 <TableBody>
@@ -520,22 +514,16 @@ const AddStockVerification = () => {
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
               checkBoxRequired={true}
               paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              numSelected={selected.length}
-              rowCount={tableData?.length}
-              actionIcon={faAdd}
-              showTableActionBar={false}
               handleSorting={handleSortingChange}
             >
               <TableBody>
-                {tableData &&
+                {loading ? (
+                  <TableRowLaoder />
+                ) : (
+                  tableData &&
                   tableData?.map((row, index) => {
                     const isItemSelected = isSelected(row.id, selected);
                     const labelId = `enhanced-table-checkbox-${index}`;
@@ -617,7 +605,8 @@ const AddStockVerification = () => {
                         })}
                       </TableRow>
                     );
-                  })}
+                  })
+                )}
                 <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>

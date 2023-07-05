@@ -27,12 +27,24 @@ import MasterLayout from "./pages/layouts/MasterLayout";
 import StockEntry from "./pages/stock/stockEntry/stockEntry";
 import DrugCondemnationRegister from "./pages/stock/drugCondemnation/drugCondemnation";
 import ProtectedRoute from "./routes/middleware/ProtectedRoute";
+import StockStatus from "./pages/Report/stockReport/StockStatus";
+import StockLadger from "./pages/Report/stockReport/stockLadger";
+
+// order management
+import ManufacturerList from "./pages/ordermanagement/manufacturerlist/ManufacturerList";
+import CentralPurchase from "./pages/ordermanagement/centralpurchase/CentralPurchase";
+// End of order management
 const OpenNotification = lazy(() => import("./pages/demand/OpenNotification"));
 const DemandNotification = lazy(() => import("./pages/demand/Notification"));
+
+const AnnualDemandNotification = lazy(() =>
+  import("./pages/demand/annualDemand")
+);
 const OpenExtendNotification = lazy(() =>
   import("./pages/demand/extendDemandNotification")
 );
 
+const CompileDemand = lazy(() => import("./pages/demand/compile"));
 // Stock Module
 const StockListing = lazy(() =>
   import("./pages/stock/stockListing/stockListing")
@@ -60,6 +72,9 @@ const StoreTypeDrugMapping = lazy(() =>
 );
 const BudgetListDesk = lazy(() =>
   import("./pages/admin/budgetinterface/budgetlistdesk")
+);
+const NewBudgetInterface = lazy(() =>
+  import("./pages/admin/budgetinterface/newbudgetinterface")
 );
 
 const ProgrameDesk = lazy(() =>
@@ -100,6 +115,10 @@ const SubStoreReturn = lazy(() =>
 const MiscellaneousConsumption = lazy(() =>
   import("./pages/issue/miscellaneous/stockconsumptionList")
 );
+
+const OpenIssueIntent = lazy(() =>
+  import("./pages/issue/issueDesk/intentIssue/openissueintent")
+);
 // End of Issue
 const AddMisscellaneousConsumption = lazy(() =>
   import("./pages/issue/miscellaneous/addmiscellanousConsumption")
@@ -132,6 +151,7 @@ const ApprovalTransferListHq = lazy(() =>
     "./pages/ordermanagement/approvals/transferapprovalhq/transferapprovalhq"
   )
 );
+
 // end of Order Management
 
 //Requistion Module Import
@@ -159,7 +179,341 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="" element={<MasterLayout />}>
-            <Route element={<ProtectedRoute isAllowed={true} />}>
+            <Route
+              element={
+                <ProtectedRoute
+                  totalActivity={[
+                    {
+                      id: 1,
+                    },
+                    {
+                      id: 2,
+                    },
+                    {
+                      id: 3,
+                    },
+                    {
+                      id: 4,
+                    },
+                    {
+                      id: 6,
+                    },
+                    {
+                      id: 7,
+                    },
+                    {
+                      id: 11,
+                    },
+                    {
+                      id: 12,
+                    },
+                    {
+                      id: 13,
+                    },
+                    {
+                      id: 14,
+                    },
+                    {
+                      id: 50,
+                    },
+                    {
+                      id: 58,
+                    },
+                    {
+                      id: 62,
+                    },
+                    {
+                      id: 63,
+                    },
+                    {
+                      id: 64,
+                    },
+                    {
+                      id: 67,
+                    },
+                    {
+                      id: 68,
+                    },
+                    {
+                      id: 71,
+                    },
+                    {
+                      id: 72,
+                    },
+                    {
+                      id: 73,
+                    },
+                    {
+                      id: 74,
+                    },
+                    {
+                      id: 82,
+                    },
+                    {
+                      id: 85,
+                    },
+                    {
+                      id: 95,
+                    },
+                    {
+                      id: 101,
+                    },
+                    {
+                      id: 102,
+                    },
+                    {
+                      id: 103,
+                    },
+                    {
+                      id: 104,
+                    },
+                    {
+                      id: 105,
+                    },
+                    {
+                      id: 106,
+                    },
+                    {
+                      id: 121,
+                    },
+                    {
+                      id: 122,
+                    },
+                    {
+                      id: 123,
+                    },
+                    {
+                      id: 131,
+                    },
+                    {
+                      id: 132,
+                    },
+                    {
+                      id: 134,
+                    },
+                    {
+                      id: 140,
+                    },
+                    {
+                      id: 141,
+                    },
+                    {
+                      id: 142,
+                    },
+                    {
+                      id: 150,
+                    },
+                    {
+                      id: 151,
+                    },
+                    {
+                      id: 152,
+                    },
+                    {
+                      id: 153,
+                    },
+                    {
+                      id: 154,
+                    },
+                    {
+                      id: 161,
+                    },
+                    {
+                      id: 171,
+                    },
+                    {
+                      id: 172,
+                    },
+                    {
+                      id: 173,
+                    },
+                    {
+                      id: 201,
+                    },
+                    {
+                      id: 59,
+                    },
+                    {
+                      id: 81,
+                    },
+                    {
+                      id: 999,
+                    },
+                    {
+                      id: 202,
+                    },
+                    {
+                      id: 203,
+                    },
+                  ]}
+                  activityList={[
+                    {
+                      id: 1,
+                    },
+                    {
+                      id: 2,
+                    },
+                    {
+                      id: 3,
+                    },
+                    {
+                      id: 4,
+                    },
+                    {
+                      id: 6,
+                    },
+                    {
+                      id: 7,
+                    },
+                    {
+                      id: 11,
+                    },
+                    {
+                      id: 12,
+                    },
+                    {
+                      id: 13,
+                    },
+                    {
+                      id: 14,
+                    },
+                    {
+                      id: 50,
+                    },
+                    {
+                      id: 58,
+                    },
+                    {
+                      id: 62,
+                    },
+                    {
+                      id: 63,
+                    },
+                    {
+                      id: 64,
+                    },
+                    {
+                      id: 67,
+                    },
+                    {
+                      id: 68,
+                    },
+                    {
+                      id: 71,
+                    },
+                    {
+                      id: 72,
+                    },
+                    {
+                      id: 73,
+                    },
+                    {
+                      id: 74,
+                    },
+                    {
+                      id: 82,
+                    },
+                    {
+                      id: 85,
+                    },
+                    {
+                      id: 95,
+                    },
+                    {
+                      id: 101,
+                    },
+                    {
+                      id: 102,
+                    },
+                    {
+                      id: 103,
+                    },
+                    {
+                      id: 104,
+                    },
+                    {
+                      id: 105,
+                    },
+                    {
+                      id: 106,
+                    },
+                    {
+                      id: 121,
+                    },
+                    {
+                      id: 122,
+                    },
+                    {
+                      id: 123,
+                    },
+                    {
+                      id: 131,
+                    },
+                    {
+                      id: 132,
+                    },
+                    {
+                      id: 134,
+                    },
+                    {
+                      id: 140,
+                    },
+                    {
+                      id: 141,
+                    },
+                    {
+                      id: 142,
+                    },
+                    {
+                      id: 150,
+                    },
+                    {
+                      id: 151,
+                    },
+                    {
+                      id: 152,
+                    },
+                    {
+                      id: 153,
+                    },
+                    {
+                      id: 154,
+                    },
+                    {
+                      id: 161,
+                    },
+                    {
+                      id: 171,
+                    },
+                    {
+                      id: 172,
+                    },
+                    {
+                      id: 173,
+                    },
+                    {
+                      id: 201,
+                    },
+                    {
+                      id: 59,
+                    },
+                    {
+                      id: 81,
+                    },
+                    {
+                      id: 999,
+                    },
+                    {
+                      id: 202,
+                    },
+                    {
+                      id: 203,
+                    },
+                  ]}
+                  isAllowed={true}
+                />
+              }
+            >
               {/* admin */}
               <Route path="listrole" element={<RoleDesk />} />
               <Route path="listuser" element={<UserDesk />} />
@@ -175,7 +529,10 @@ function App() {
                 path="openBudgetListingInterface"
                 element={<BudgetListDesk />}
               />
-
+              <Route
+                path="openBudgetInterface"
+                element={<NewBudgetInterface />}
+              />
               <Route path="openFundingList" element={<FundingDeskList />} />
               <Route path="listDrug" element={<DrugDesk />} />
               <Route path="programpage" element={<ProgrameDesk />} />
@@ -183,9 +540,7 @@ function App() {
               {/* admin */}
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="annualdemand" element={<Notification />} />
-
               {/* Stock */}
-
               <Route path="stocklisting" element={<StockListing />} />
               <Route path="openstockentry" element={<DynamicRow />} />
               <Route
@@ -206,7 +561,22 @@ function App() {
                 element={<StockVerificationDesk />}
               />
               {/* End of Stock */}
+
+              {/* Demand */}
+              <Route
+                path="openNotificationDesk"
+                element={<DemandNotification />}
+              />
+
+              <Route
+                path="generateAnnualDemand"
+                element={<AnnualDemandNotification />}
+              />
+
+              <Route path="openAnnualCompileForm" element={<CompileDemand />} />
+              {/* End of Demand */}
               {/* Issue */}
+              <Route path="issuess" element={<Issue />} />
               <Route path="openIssueDesk" element={<IssueDesk />} />
               <Route path="openReturnDesk" element={<ReturnDesk />} />
               <Route
@@ -219,21 +589,14 @@ function App() {
               <Route path="openOfflineIssue" element={<OffineIssue />} />
 
               <Route
-                path="openNotificationDesk"
-                element={<DemandNotification />}
-              />
-
-              <Route
                 path="openExtendNotificationForm"
                 element={<OpenExtendNotification />}
               />
-
               <Route
                 path="openReturnFromThirdparty"
                 element={<ThirdPartyReturn />}
               />
               <Route path="openOfflineReturn" element={<SubStoreReturn />} />
-
               <Route
                 path="openStockForMisConsumptionDesk"
                 element={<MiscellaneousConsumption />}
@@ -242,9 +605,8 @@ function App() {
                 path="openStockForMisConsumption"
                 element={<AddMisscellaneousConsumption />}
               />
-
+              <Route path="openIssueIndent" element={<OpenIssueIntent />} />
               {/* End of Issue */}
-
               {/* Order Management Module */}
               <Route
                 path="openPurchaseOrderList"
@@ -256,7 +618,6 @@ function App() {
                 element={<RateContractList />}
               />
               <Route path="openDemandApproval" element={<ApprovalDeskList />} />
-
               <Route
                 path="openPurchaseOrderForApprovalList"
                 element={<ApprovalPurchaseOrderList />}
@@ -273,25 +634,33 @@ function App() {
                 path="openTransferManagerforHQ"
                 element={<ApprovalTransferListHq />}
               />
+              <Route path="openCentralPurchase" element={<CentralPurchase />} />
+              <Route path="manufecturingList" element={<ManufacturerList />} />
               {/* End of Order Management Module */}
-
               {/* Requition Module */}
               <Route path="openIndentDesk" element={<IntentDrug />} />
               <Route path="transferList" element={<TransferList />} />
               {/* End of Requistion Module */}
-
               {/* Reveiving Module */}
               <Route path="openChallanDesk" element={<ChallanList />} />
               <Route path="openIndentReceiveDesk" element={<ReceivedDrug />} />
               {/* End of Receiving Module */}
-
               <Route path="intent" element={<OpenIntentDesk />} />
               <Route path="pdf" element={<Pdf />} />
               <Route path="csv" element={<Csv />} />
+              {/* Report */}
+              <Route path="stockledger" element={<StockLadger />} />
+              <Route path="stockstatus" element={<StockStatus />} />
+              {/* <Route path="stockexpirereport" element={<StockExpiry />} />
+              <Route path="stockzeroreport" element={<StockZeroReport />} />
+              <Route
+                path="stockstatuspgmwise"
+                element={<StockStatusProgramwise />}
+              /> */}
+              {/* End of Report */}
               <Route path="openNotification" element={<OpenNotification />} />
               {/* <Route path="programmeList" element={<ProgramList />} /> */}
               <Route path="TransferComponent" element={<TransferComponent />} />
-
               <Route path="test" element={<Test />} />
               <Route path="stock" element={<DynamicRow />} />
             </Route>

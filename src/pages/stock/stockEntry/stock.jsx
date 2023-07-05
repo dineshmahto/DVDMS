@@ -29,6 +29,7 @@ import {
 } from "../../../store/stock/action";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import { useNavigate } from "react-router-dom";
+import { NETWORK_STATUS_CODE } from "../../../common/constant/constant";
 const useStyles = makeStyles({
   root: {
     "& .MuiInputBase-root": {
@@ -136,16 +137,12 @@ const Stock = () => {
     },
   ]);
   const handleChange = (idx, id, e) => {
-    console.log("Dinesh", idx);
-    console.log("Dinesh", id);
-    console.log("Dinesh", e);
     const clone = [...rows];
-    console.log("Dinesh", clone[idx]);
     clone[idx] = {
       ...clone[idx],
       [id]: e,
     };
-    console.log("Dinesh", clone);
+
     setRows(clone);
   };
 
@@ -282,7 +279,10 @@ const Stock = () => {
   }, []);
 
   useEffect(() => {
-    if (stockEntryDeskResponse && stockEntryDeskResponse?.status === 200) {
+    if (
+      stockEntryDeskResponse &&
+      stockEntryDeskResponse?.status === NETWORK_STATUS_CODE.SUCCESS
+    ) {
       setDrugClassList(stockEntryDeskResponse?.data?.drugClassList);
       setDrugList(stockEntryDeskResponse?.data?.drugList);
       setDrugPkgList(stockEntryDeskResponse?.data?.drugPkgList);
@@ -310,19 +310,22 @@ const Stock = () => {
       ]);
     } else if (
       stockEntryDeskResponse &&
-      stockEntryDeskResponse?.status === 404
+      stockEntryDeskResponse?.status === NETWORK_STATUS_CODE.PAGE_NOT_FOUND
     ) {
       toastMessage("Stock Entry Desk", "Failed to load the Data", "error");
     }
   }, [stockEntryDeskResponse]);
 
   useEffect(() => {
-    if (addStockEntryResponse && addStockEntryResponse?.status === 201) {
+    if (
+      addStockEntryResponse &&
+      addStockEntryResponse?.status === NETWORK_STATUS_CODE.CREATED_SUCCESSFULLY
+    ) {
       toastMessage("Stock Entry", "successfully created");
       navigate("/stocklisting");
     } else if (
       addStockEntryResponse &&
-      addStockEntryResponse?.status === 5000
+      addStockEntryResponse?.status === NETWORK_STATUS_CODE.INTERNAL_ERROR
     ) {
       toastMessage("Stock Entry", "Something went wrong", "error");
     }
@@ -334,7 +337,10 @@ const Stock = () => {
           <div className="col-4">
             <p className="fs-6">STOCK ENTRY DESK</p>
           </div>
-          <div className="col-8">
+        </div>
+
+        <div className="row">
+          <div className="col-12">
             <div className="d-flex justify-content-around">
               <div>
                 <SwitchCheckBox
@@ -384,9 +390,7 @@ const Stock = () => {
                     return (
                       <TableRow key={row.name}>
                         {columns.map((d, k) => {
-                          console.log("K", k);
                           if (d.type == "input") {
-                            console.log("Id", d.id);
                             return (
                               <TableCell key={k} align="right">
                                 <BasicInput
@@ -396,37 +400,21 @@ const Stock = () => {
                                   placeholder="Amount"
                                   onChange={(e) => {
                                     handleChange(idx, d.id, e.target.value);
-                                    // commonFunctionToUpdateValue(
-                                    //   row.id,
-                                    //   e.target.value,
-                                    //   d.id
-                                    // );
                                   }}
                                 />
                               </TableCell>
                             );
                           } else if (d.type == "select") {
-                            console.log("Key", d.id);
-                            console.log("Data", rows[idx][d.id]);
                             return (
                               <TableCell>
                                 <CustomSelect
                                   options={rows[idx][d.id]}
                                   onChange={(selectedOption) => {
-                                    console.log(
-                                      "change",
-                                      selectedOption?.value
-                                    );
                                     handleChange(
                                       idx,
                                       `${d.id}Id`,
                                       selectedOption?.value
                                     );
-                                    // commonFunctionToUpdateValue(
-                                    //   row.id,
-                                    //   selectedOption?.value,
-                                    //   `${d.id}Id`
-                                    // );
                                   }}
                                   id={row.id + row[d.id]}
                                 />
@@ -443,11 +431,6 @@ const Stock = () => {
                                     value={rows[idx][d.id]}
                                     onChange={(newValue) => {
                                       handleChange(idx, d.id, newValue);
-                                      // handleChange(
-                                      //   idx,
-                                      //   `${d.id}Date`,
-                                      //   moment(newValue).format("l")
-                                      // );
                                     }}
                                     renderInput={(params) => (
                                       <TextField {...params} />
@@ -457,7 +440,6 @@ const Stock = () => {
                               </TableCell>
                             );
                           } else if (d.type == "YMPicker") {
-                            console.log("DateValue", rows[idx][d.id], d.id);
                             return (
                               <TableCell>
                                 <LocalizationProvider
@@ -472,11 +454,6 @@ const Stock = () => {
                                     disablePast
                                     onChange={(newValue) => {
                                       handleChange(idx, d.id, newValue);
-                                      // handleChange(
-                                      //   idx,
-                                      //   `${d.id}Date`,
-                                      //   moment(newValue).format("l")
-                                      // );
                                     }}
                                     renderInput={(params) => (
                                       <TextField {...params} />

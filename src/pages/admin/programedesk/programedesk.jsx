@@ -1,12 +1,4 @@
-import React, {
-  useState,
-  useMemo,
-  useEffect,
-  useCallback,
-  useRef,
-  lazy,
-  Suspense,
-} from "react";
+import React, { useState, useMemo, useEffect, lazy, Suspense } from "react";
 import { Paper } from "@mui/material";
 import { TableBody } from "@mui/material";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
@@ -18,7 +10,6 @@ import {
   faSearch,
   faTrash,
 } from "@fortawesome/free-solid-svg-icons";
-import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import { useDispatch, useSelector } from "react-redux";
@@ -34,7 +25,8 @@ import StyledTableRow from "../../../components/tables/datatable/customTableRow"
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
-
+import searchFunc from "../../../components/tables/searchFunc";
+import handleSortingFunc from "../../../components/tables/datatable/sortable";
 const CreateProgramDeskForm = lazy(() => import("./createprogram"));
 const EditProgramDeskForm = lazy(() => import("./editprogram"));
 const AlertDialog = lazy(() => import("../../../components/dialog/dialog"));
@@ -49,13 +41,12 @@ const ProgrammeDesk = () => {
   console.log("deleteProgrmResponse", deleteProgrmResponse);
   console.log("programeDeskListResponse", programeDeskListResponse);
   const dispatch = useDispatch();
-  const showActivitityTooltipRef = useRef();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
-  const [totalPages, setTotalPages] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
   const [tableData, setTableData] = useState([]);
-  const [sortedData, handleSorting] = useSortableTable();
+  const [filterData, setFilterData] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
@@ -113,7 +104,6 @@ const ProgrammeDesk = () => {
     },
   ]);
   const handlePageChange = (newPage) => {
-    console.log("newPage", newPage);
     setLoading(true);
     setController({
       ...controller,
@@ -121,7 +111,6 @@ const ProgrammeDesk = () => {
     });
   };
   const handleChangeRowsPerPage = (current, pageSize) => {
-    console.log(current, pageSize);
     setController({
       ...controller,
       rowsPerPage: pageSize,
@@ -133,10 +122,7 @@ const ProgrammeDesk = () => {
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
-    console.log("tableData", tableData);
-    handleSorting(accessor, sortOrder, tableData);
-    console.log("sortedData", sortedData);
-    setTableData(sortedData);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
 
   useEffect(() => {
@@ -162,9 +148,11 @@ const ProgrammeDesk = () => {
       // setActivityList(programeDeskListResponse?.data?.activityTypeList);
       setTotalDrugList(programeDeskListResponse?.data?.drugList);
       setData(programeDeskListResponse?.data?.activityList);
-      setTotalPages(programeDeskListResponse?.data?.pageList?.totalPages);
+
+      //setTotalPages(programeDeskListResponse?.data?.pageList?.totalPages);
       setTotalRows(programeDeskListResponse?.data?.pageList?.totalElements);
       setTableData(programeDeskListResponse?.data?.pageList?.content);
+      setFilterData(programeDeskListResponse?.data?.pageList?.content);
       setLoading(false);
       dispatch(getProgramDeskListResponse(""));
     } else if (
@@ -239,7 +227,7 @@ const ProgrammeDesk = () => {
       </div>
       <Paper>
         <div className="row ">
-          <div className="d-flex flex-row justify-content-end">
+          <div className="d-flex flex-row justify-content-between">
             <Basicbutton
               buttonText="Add New Program"
               outlineType={true}
@@ -248,20 +236,25 @@ const ProgrammeDesk = () => {
                 setShowCreateProgrmModal(true);
               }}
             />
-          </div>
-        </div>
-        <div className="row mb-1">
-          <div className="d-flex justify-content-end">
             <SearchField
               className="me-1 "
               iconPosition="end"
               iconName={faSearch}
               onChange={(e) => {
-                console.log(e);
+                if (e.target?.value != "") {
+                  console.log(e.target?.value);
+                  setSearchValue(e?.target?.value);
+                  console.log("filterData", filterData);
+                  setTableData(searchFunc(filterData, e.target?.value));
+                } else {
+                  setTableData(filterData);
+                  setSearchValue("");
+                }
               }}
             />
           </div>
         </div>
+
         <div className="row">
           <div className="col-12">
             <TableComponent
@@ -344,7 +337,11 @@ const ProgrammeDesk = () => {
                     );
                   })
                 )}
-                <EmptyRow loading={loading} tableData={tableData} />
+                <EmptyRow
+                  loading={loading}
+                  tableData={tableData}
+                  searchValue={searchValue}
+                />
               </TableBody>
             </TableComponent>
             <TablePagination
@@ -362,6 +359,7 @@ const ProgrammeDesk = () => {
         <CreateProgramDeskForm
           openCreateProgrmModal={showCreatProgrmModal}
           handleCloseCreateProgrmModal={handleCloseCreateProgrmModal}
+          totalDrugList={totalDrugList}
         />
       </Suspense>
       <Suspense>

@@ -76,19 +76,20 @@ const TableComponent: React.FC<tableProps> = ({
         overFlow
           ? {
               width: "100%",
-              overflowX: "auto",
+              overflow: "hidden",
+              overflowX: "scroll",
             }
           : {
               width: "100%",
 
-              overflowX: "hidden",
+              overflow: "auto",
             }
       }
     >
       {toolbarRequired ? toolbar : null}
 
       <TableContainer
-        sx={{ width: customWidth, minHeight: overFlow ? 300 : "" }}
+        sx={{ width: customWidth, maxHeight: overFlow ? 440 : "" }}
       >
         <Table stickyHeader={stickyHeader} aria-label="sticky table">
           <caption>{caption}</caption>
@@ -139,6 +140,7 @@ const TableComponent: React.FC<tableProps> = ({
                       {name}
                       {sortable ? (
                         <FontAwesomeIcon
+                          style={{ cursor: "pointer" }}
                           className="ms-1"
                           icon={sortableIcon}
                           onClick={

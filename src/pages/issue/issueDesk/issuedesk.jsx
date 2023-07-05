@@ -3,11 +3,9 @@ import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine"
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import { TableBody, TableRow, TableCell } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import moment from "moment";
 import {
   faChevronDown,
   faFilePdf,
-  faSearch,
   faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -31,9 +29,12 @@ import Typography from "@mui/material/Typography";
 import StyledTableRow from "../../../components/tables/datatable/customTableRow";
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
-import { Spinner } from "react-bootstrap";
 import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import { Seo } from "../../../components/seo/seo";
+import dayjs from "dayjs";
+import { NETWORK_STATUS_CODE } from "../../../common/constant/constant";
+import NextBreadcrumbs from "../../../components/breadcumb/breadcumb";
 
 const useStyles = makeStyles({
   tableCell: {
@@ -145,7 +146,10 @@ const IssueDesk = () => {
   }, [controller]);
 
   useEffect(() => {
-    if (issueDeskResponse && issueDeskResponse?.status === 200) {
+    if (
+      issueDeskResponse &&
+      issueDeskResponse?.status === NETWORK_STATUS_CODE.SUCCESS
+    ) {
       if (
         issueDeskResponse?.data?.pageList &&
         issueDeskResponse?.data?.pageList?.content
@@ -155,7 +159,10 @@ const IssueDesk = () => {
       }
       dispatch(getIssueDeskListResponse(""));
       setLoading(false);
-    } else if (issueDeskResponse && issueDeskResponse?.status === 401) {
+    } else if (
+      issueDeskResponse &&
+      issueDeskResponse?.status === NETWORK_STATUS_CODE.UNAUTHORIZED_ACCESS
+    ) {
       setLoading(false);
     }
   }, [issueDeskResponse]);
@@ -173,14 +180,19 @@ const IssueDesk = () => {
       setOpen(openCopy);
     }
   };
+  const formatDate = (date) => {
+    return dayjs(date).format("MM/DD/YYYY");
+  };
 
   return (
     <>
+      <Seo title="DVDMS | Issue Desk" description="Issue Related Desk" />
       <div className="row mt-2">
         <div className="d-flex justify-content-start">
           <p className="fs-6">ISSUE DESK</p>
         </div>
       </div>
+      <NextBreadcrumbs className="mb-1" />
       <div className="row d-flex justify-content-start mb-2">
         <div className="col-6">
           <div className="row align-items-center">
@@ -311,7 +323,7 @@ const IssueDesk = () => {
                           {data?.request_id}
                         </StyledTableCell>
                         <StyledTableCell padding="none">
-                          {data?.request_date}
+                          {formatDate(data?.request_date)}
                         </StyledTableCell>
 
                         <StyledTableCell padding="none">
@@ -387,7 +399,7 @@ const IssueDesk = () => {
                                               {ele?.batchNo}
                                             </StyledTableCell>
                                             <StyledTableCell padding="none">
-                                              {ele?.expiryDate}
+                                              {formatDate(ele?.expiryDate)}
                                             </StyledTableCell>
                                             <StyledTableCell padding="none">
                                               {ele?.requestQty}

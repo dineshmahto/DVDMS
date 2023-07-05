@@ -4,11 +4,27 @@ import Basicbutton from "../../../components/button/basicbutton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 import TransferComponent from "../../../components/transfer/transferComponent";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  editRole,
+  editRoleResponse,
+  getRoleList,
+} from "../../../store/admin/action";
+import toastMessage from "../../../common/toastmessage/toastmessage";
 const EditRoleModal = ({
   openEditRoleModal,
   handleCloseEditRoleModal,
-  data,
+  currentRoleList,
+  availableRoleList,
+  totalActivitList,
+  modalHeaderData,
+  resetPageDetails,
 }) => {
+  const dispatch = useDispatch();
+  const editRoleResponses = useSelector((state) => state?.admin?.editRoleResp);
+  console.log("editRoleResponse", editRoleResponses);
+  console.log("totalActivityList", totalActivitList, modalHeaderData);
+
   const [tempArray, setTempArray] = useState([]);
   const [rightTempArray, setRightTempArray] = useState([]);
   const [selectedItem, setSelectedItem] = useState([]);
@@ -16,22 +32,37 @@ const EditRoleModal = ({
   const [firstClick, setFirstClick] = useState(false);
   const [selectItemActiveIndices, setSelectedItemActiveIndices] = useState([]);
   const [copyData, setCopyData] = useState([]);
-  const [transferableRoleList, setTransferableRoleList] = useState([]);
-
-  const [totalRoleList, setTotalRoleList] = useState([]);
-  const [currentRoleList, setCurrentRoleList] = useState([]);
-  const [availableRoleList, setAvailableRoleList] = useState([]);
+  const [drugData, setDrugData] = useState([]);
 
   useEffect(() => {
-    setSelectedItem([]);
-    setRightTempArray([]);
-    setFirstClick(false);
-    setSelectedItemActiveIndices([]);
-    setTempArray([]);
-    setActiveIndicies(data?.map(() => false));
-    setTransferableRoleList(data);
-    setCopyData(data);
-  }, [data]);
+    setFirstClick(true);
+    setTempArray(currentRoleList);
+    setSelectedItemActiveIndices(currentRoleList.map(() => true));
+    setSelectedItem(currentRoleList);
+
+    setActiveIndicies(availableRoleList?.map(() => false));
+    setDrugData(availableRoleList);
+    setCopyData(totalActivitList);
+  }, [currentRoleList]);
+
+  useEffect(() => {
+    if (editRoleResponses && editRoleResponses?.status === 201) {
+      if (editRoleResponses?.data?.status === 1) {
+        handleCloseEditRoleModal();
+        toastMessage("Role Desk", editRoleResponses?.data?.message);
+        resetPageDetails();
+        dispatch(getRoleList());
+        dispatch(editRoleResponse(""));
+      } else if (editRoleResponses?.data?.status === 0) {
+        toastMessage("Role Desk", editRoleResponses?.data?.message);
+        dispatch(editRoleResponse(""));
+      }
+    } else if (editRoleResponses && editRoleResponses?.status === 500) {
+      handleCloseEditRoleModal();
+      dispatch(editRoleResponse(""));
+      toastMessage("Role Desk", "Something went wrong", "");
+    }
+  }, [editRoleResponses]);
   const handleRightListItemClick = (e, id, element, index) => {
     const elementExist = rightTempArray?.filter((item) => {
       return item.id === id;
@@ -143,34 +174,28 @@ const EditRoleModal = ({
     const allACtiveClasses = selectItemActiveIndices.every((e) => e === true);
     if (rightTempArray.length > 0) {
       setFirstClick(true);
-      console.log("selectedItem", selectedItem);
       const cloneData = [...selectedItem];
       const rightDispalyList = cloneData.filter((elem) => {
         return !rightTempArray.find((ele) => {
           return ele.id === elem.id;
         });
       });
-      console.log("Right Display List", rightDispalyList);
       setSelectedItemActiveIndices(rightDispalyList?.map(() => true));
       const reverseBackElements = cloneData.filter((elem) => {
         return rightTempArray.find((ele) => {
           return ele.id === elem.id;
         });
       });
-      console.log("ReverseBackElements", reverseBackElements);
       const updateTempArray = tempArray.filter((elem) => {
         return !reverseBackElements.find((ele) => {
           return ele.id === elem.id;
         });
       });
-      console.log("TempArray", updateTempArray);
       setTempArray(updateTempArray);
-      console.log("copiedData", data);
       const storeIntoOne = [...data];
       reverseBackElements.map((elem) => {
         storeIntoOne.push(elem);
       });
-      console.log("storeIntoOne", storeIntoOne);
       setData(storeIntoOne);
       setSelectedItem(rightDispalyList);
       setRightTempArray([]);
@@ -218,8 +243,6 @@ const EditRoleModal = ({
     activeIndicies
   ) => {
     const cloneData = [...copyiedData];
-    console.log("cloneData", cloneData);
-
     setSelectedItemActiveIndices([]);
     setData(cloneData);
     setRightTempArray([]);
@@ -227,12 +250,24 @@ const EditRoleModal = ({
     setSelectedItem([]);
     setActiveIndicies(activeIndicies.map((bool) => false));
   };
+
   return (
     <>
       <BasicModal
-        title="Edit Role"
+        title={`Edit Role: ${modalHeaderData?.id} (${modalHeaderData?.name})`}
         show={openEditRoleModal}
-        close={() => handleCloseEditRoleModal()}
+        close={() => {
+          setSelectedItem([]);
+          setRightTempArray([]);
+          setFirstClick(false);
+          setSelectedItemActiveIndices([]);
+
+          setActiveIndicies([]);
+
+          setCopyData([]);
+          setDrugData([]);
+          handleCloseEditRoleModal();
+        }}
         isStatic={false}
         scrollable={true}
         isCenterAlign={false}
@@ -242,7 +277,7 @@ const EditRoleModal = ({
       >
         <div className="row m-1">
           <TransferComponent
-            apiData={transferableRoleList}
+            apiData={drugData}
             activeIndicies={activeIndicies}
             handleMoveSelectedItemToLeft={() => {
               handleMoveSelectedItemToLeft(
@@ -253,8 +288,9 @@ const EditRoleModal = ({
                 setSelectedItemActiveIndices,
                 tempArray,
                 setTempArray,
-                transferableRoleList,
-                setTransferableRoleList,
+                drugData,
+
+                setDrugData,
                 setSelectedItem,
                 setRightTempArray,
                 setActiveIndicies,
@@ -272,7 +308,7 @@ const EditRoleModal = ({
                 setActiveIndicies,
                 activeIndicies,
                 setSelectedItem,
-                setTransferableRoleList
+                setDrugData
               );
             }}
             handleShiftAllElementToRight={() => {
@@ -283,14 +319,14 @@ const EditRoleModal = ({
                 setSelectedItem,
                 setRightTempArray,
                 setTempArray,
-                setTransferableRoleList
+                setDrugData
               );
             }}
             handleShiftAllElementToLeft={() => {
               handleShiftAllElementToLeft(
                 copyData,
                 setSelectedItemActiveIndices,
-                setTransferableRoleList,
+                setDrugData,
                 setRightTempArray,
                 setTempArray,
                 setSelectedItem,
@@ -313,6 +349,24 @@ const EditRoleModal = ({
                 buttonText="Save"
                 className="primary"
                 outlineType={true}
+                onClick={() => {
+                  if (selectedItem && selectedItem?.length === 0) {
+                    toastMessage("CREATE ROLE", "please map the role list");
+                  } else {
+                    const cloneData = [...selectedItem];
+                    let programId = [];
+                    cloneData &&
+                      cloneData.map(({ id }) => {
+                        let ele = {};
+                        ele["id"] = id;
+                        programId.push(ele);
+                        return id;
+                      });
+                    dispatch(
+                      editRole({ id: modalHeaderData?.id, list: programId })
+                    );
+                  }
+                }}
               />
             </div>
           </div>

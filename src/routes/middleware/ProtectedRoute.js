@@ -1,6 +1,12 @@
 import { Navigate, Outlet } from "react-router-dom";
-const ProtectedRoute = ({ isAllowed, redirectPath = "/", children }) => {
-  if (!isAllowed) {
+const ProtectedRoute = ({
+  totalActivity,
+  activityList,
+  isAllowed,
+  redirectPath = "/",
+  children,
+}) => {
+  if (!totalActivity.length || totalActivity.includes(activityList)) {
     return <Navigate to={redirectPath} replace />;
   }
 

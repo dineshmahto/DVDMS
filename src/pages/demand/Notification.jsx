@@ -1,9 +1,8 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import BasicButton from "../../components/button/basicbutton";
 import HorizonatalLine from "../../components/horizontalLine/horizonatalLine";
-import SelectOption from "../../components/option/option";
 import TableComponent from "../../components/tables/datatable/tableComponent";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { TableBody } from "@mui/material";
 import "./notification.css";
 import SearchField from "../../components/search/search";
 import { faSearch, faDownload } from "@fortawesome/free-solid-svg-icons";
@@ -12,13 +11,12 @@ import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import BasicModal from "../../components/modal/basicmodal";
 import Checkbox from "@mui/material/Checkbox";
-import { Spinner } from "react-bootstrap";
-import { makeStyles } from "@mui/styles";
 import TablePagination from "../../components/tables/datatable/tablepagination";
 import { Paper } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   cancelNotification,
+  cancelNotificationResponse,
   getNotificationList,
   getNotificationListResponse,
 } from "../../store/demand/action";
@@ -26,29 +24,28 @@ import toastMessage from "../../common/toastmessage/toastmessage";
 import CustomSelect from "../../components/select/customSelect";
 import { showLoader } from "../../store/loader/actions";
 import AlertDialog from "../../components/dialog/dialog";
+import TableRowLaoder from "../../components/tables/datatable/tableRowLaoder";
+import StyledTableRow from "../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../components/tables/datatable/customTableCell";
+import EmptyRow from "../../components/tables/datatable/emptyRow";
+import {
+  DELETE_MESSAGE_DESCRIPTION,
+  NETWORK_STATUS_CODE,
+  SORTINGORDER,
+} from "../../common/constant/constant";
+import Basicbutton from "../../components/button/basicbutton";
 
-const useStyles = makeStyles({
-  tableCell: {
-    padding: "10px !important",
-    fontSize: "0.8rem !important",
-  },
-  lineHeight: {
-    lineHeight: "3",
-  },
-});
 const Notification = () => {
   const dispatch = useDispatch();
   const notficationListResponse = useSelector(
     (state) => state?.demand?.notficationListResponse
   );
-  const cancelNotificationResponse = useSelector(
+  const cancelNotificationResponses = useSelector(
     (state) => state?.demand?.cancelNotificationResponse
   );
-  console.log("cancelNotificationResponse", cancelNotificationResponse);
+  console.log("cancelNotificationResponse", cancelNotificationResponses);
   console.log("notficationListResponse", notficationListResponse);
   let navigate = useNavigate();
-  let classes = useStyles();
-  const [totalPages, setTotalPages] = useState(0);
   const [tableData, setTableData] = useState([]);
   console.log(typeof tableData, tableData?.length);
   const [controller, setController] = useState({
@@ -58,14 +55,14 @@ const Notification = () => {
   });
   const [totalRows, setTotalRows] = useState(0);
   const [sortField, setSortField] = useState("");
-  const [order, setOrder] = useState("asc");
+  const [order, setOrder] = useState(SORTINGORDER.ASC);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
   const [show, setShow] = useState(false);
   const [previewList, setPreviewList] = useState([]);
   const [modalTitle, setModalTitle] = useState("");
   const [selectedRow, setSelectedRow] = useState([]);
-
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [open, setOpen] = React.useState(false);
 
   const [notificationId, setNotificationId] = useState("");
@@ -98,6 +95,11 @@ const Notification = () => {
       name: "DRUG DETAIL",
       sortable: true,
     },
+    {
+      id: "status",
+      name: "STATUS",
+      sortable: true,
+    },
 
     {
       id: "dwonload",
@@ -125,13 +127,16 @@ const Notification = () => {
   }, [controller]);
 
   useEffect(() => {
-    if (notficationListResponse && notficationListResponse?.status === 200) {
+    if (
+      notficationListResponse &&
+      notficationListResponse?.status === NETWORK_STATUS_CODE.SUCCESS
+    ) {
       setTotalRows(notficationListResponse?.data?.pageList?.totalElements);
       setTableData(notficationListResponse?.data?.pageList?.content);
       setLoading(false);
     } else if (
       notficationListResponse &&
-      notficationListResponse?.status == 400
+      notficationListResponse?.status == NETWORK_STATUS_CODE.BAD_REQUEST
     ) {
       setLoading(false);
       dispatch(getNotificationListResponse(""));
@@ -141,8 +146,9 @@ const Notification = () => {
 
   useEffect(() => {
     if (
-      cancelNotificationResponse &&
-      cancelNotificationResponse?.status === 201
+      cancelNotificationResponses &&
+      cancelNotificationResponses?.status ===
+        NETWORK_STATUS_CODE.CREATED_SUCCESSFULLY
     ) {
       setSelectedRow([]);
       setSelected([]);
@@ -154,24 +160,23 @@ const Notification = () => {
         })
       );
       setOpen(false);
-      toastMessage("Notification", cancelNotificationResponse?.data?.message);
+      toastMessage("Notification", cancelNotificationResponses?.data?.message);
       dispatch(cancelNotificationResponse(""));
     } else if (
-      cancelNotificationResponse &&
-      cancelNotificationResponse?.status == 404
+      cancelNotificationResponses &&
+      cancelNotificationResponses?.status == NETWORK_STATUS_CODE.PAGE_NOT_FOUND
     ) {
       setOpen(false);
       toastMessage(
         "Notication",
-        cancelNotificationResponse?.data?.message,
+        cancelNotificationResponses?.data?.message,
         "error"
       );
       dispatch(cancelNotificationResponse(""));
     }
-  }, [cancelNotificationResponse]);
+  }, [cancelNotificationResponses]);
 
   const handlePageChange = (newPage) => {
-    console.log("newPage", newPage);
     setLoading(true);
     setController({
       ...controller,
@@ -187,7 +192,9 @@ const Notification = () => {
   };
   const handleSortingChange = (accessor) => {
     const sortOrder =
-      accessor === sortField && order === "asc" ? "desc" : "asc";
+      accessor === sortField && order === SORTINGORDER.ASC
+        ? SORTINGORDER.DESC
+        : SORTINGORDER.ASC;
     setSortField(accessor);
     setOrder(sortOrder);
     handleSorting(accessor, sortOrder);
@@ -237,10 +244,11 @@ const Notification = () => {
       notitificationStatus: selectedOption?.value,
     });
   };
-  const handleClose = () => {
-    setOpen(false);
+
+  const handleDeleteDialog = () => {
+    setShowDeleteDialog(false);
   };
-  const handleAction = () => {
+  const handleCancelNotification = () => {
     console.log("selelcted", selectedRow?.id);
     console.log("clicked handle Action");
     dispatch(cancelNotification(selectedRow?.id));
@@ -280,7 +288,7 @@ const Notification = () => {
       </div>
 
       <div className="row d-flex justify-content-start mb-2">
-        <div className="col-6">
+        <div className="col-12">
           <div className="row align-items-center">
             <div className="col-auto">
               <label className="labellineHeight" htmlFor="storeName">
@@ -331,25 +339,29 @@ const Notification = () => {
                 type="button"
                 buttonText="Cancel Notification"
                 outlineType={true}
-                className="primary btn-sm ms-1"
+                className="primary btn-sm ms-1 rounded-0"
                 disabled={selected.length > 0 ? null : "disabled"}
                 onClick={(e) => {
-                  setOpen(true);
+                  setShowDeleteDialog(true);
                 }}
               />
               <BasicButton
                 type="button"
                 buttonText="Compile"
                 outlineType={true}
-                className="primary btn-sm ms-1"
+                className="primary btn-sm ms-1 rounded-0"
                 disabled={selected.length > 0 ? null : "disabled"}
-                onClick={(e) => console.log("Selected Data", selectedRow)}
+                onClick={(e) => {
+                  navigate("/openAnnualCompileForm", {
+                    state: selectedRow,
+                  });
+                }}
               />
               <BasicButton
                 type="button"
                 buttonText="Change Last Date"
                 outlineType={true}
-                className="primary btn-sm ms-1"
+                className="primary btn-sm ms-1 rounded-0"
                 disabled={selected.length > 0 ? null : "disabled"}
                 onClick={(e) => {
                   navigate("/openExtendNotificationForm", {
@@ -361,9 +373,11 @@ const Notification = () => {
                 type="button"
                 outlineType={true}
                 buttonText="Annual Demand"
-                className="primary btn-sm ms-1"
+                className="primary btn-sm ms-1 rounded-0"
                 disabled={selected.length > 0 ? null : "disabled"}
-                onClick={(e) => console.log("Selected Data", [selectedRow])}
+                onClick={(e) =>
+                  navigate("/generateAnnualDemand", { state: selectedRow })
+                }
               />
             </>
           ) : (
@@ -398,18 +412,14 @@ const Notification = () => {
             >
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </TableRow>
+                  <TableRowLaoder />
                 ) : (
                   tableData &&
                   tableData?.length > 0 &&
                   tableData?.map((data, index) => {
                     return (
-                      <TableRow key={data.id}>
-                        <TableCell padding="none">
+                      <StyledTableRow key={data.id}>
+                        <StyledTableCell padding="none">
                           <Checkbox
                             onClick={(event) => handleClick(event, index, data)}
                             color="primary"
@@ -418,27 +428,18 @@ const Notification = () => {
                               "aria-labelledby": `enhanced-table-checkbox-${index}`,
                             }}
                           />
-                        </TableCell>
-                        <TableCell padding="none" className={classes.tableCell}>
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {moment(data.notificationDate).format("DD/MM/YYYY")}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data.financialDate}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {moment.utc(data.lastDate).format("DD/MM/YYYY")}
-                        </TableCell>
+                        </StyledTableCell>
 
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        <StyledTableCell padding="none">
                           {data?.programList && data?.programList.length > 0 ? (
                             <span
                               className="text-decoration-underline"
@@ -454,11 +455,8 @@ const Notification = () => {
                           ) : (
                             "NONE"
                           )}
-                        </TableCell>
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.drugList && data?.drugList.length > 0 ? (
                             <span
                               className="text-decoration-underline"
@@ -474,32 +472,22 @@ const Notification = () => {
                           ) : (
                             ""
                           )}
-                        </TableCell>
-
-                        <TableCell
-                          padding="none"
-                          className={[classes.tableCell, "text-center"]}
-                        >
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data?.status}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
                           {data?.staus === 10 || data?.status === 11 ? (
                             <FontAwesomeIcon icon={faDownload} />
                           ) : (
                             ""
                           )}
-                        </TableCell>
-                      </TableRow>
+                        </StyledTableCell>
+                      </StyledTableRow>
                     );
                   })
                 )}
-                {console.log(tableData?.length)}
-                {!loading && tableData && tableData.length === 0 && (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <p style={{ fontSize: "0.8rem" }}>
-                        NO DATA AVAILABE IN TABLE
-                      </p>
-                    </TableCell>
-                  </TableRow>
-                )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
             <TablePagination
@@ -513,12 +501,16 @@ const Notification = () => {
           </div>
         </div>
         <AlertDialog
-          open={open}
-          handleClose={handleClose}
-          dialogTitle="Cancel"
-          description="Are you sure to cancel demand notification?"
-          handleAction={handleAction}
-        />
+          open={showDeleteDialog}
+          handleClose={handleDeleteDialog}
+          description={DELETE_MESSAGE_DESCRIPTION}
+        >
+          <Basicbutton
+            buttonText="Disagree"
+            onClick={() => setShowDeleteDialog(false)}
+          />
+          <Basicbutton buttonText="Agree" onClick={handleCancelNotification} />
+        </AlertDialog>
       </Paper>
     </>
   );

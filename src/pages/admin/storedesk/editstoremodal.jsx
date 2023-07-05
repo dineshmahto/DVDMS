@@ -10,35 +10,72 @@ import {
 import BasicModal from "../../../components/modal/basicmodal";
 import { Form, Formik, Field } from "formik";
 import * as Yup from "yup";
+import RadioCheckBox from "../../../components/switch/radiocheckbox";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  editStoreRecord,
+  editStoreRecordResponse,
+  getStoreDeskList,
+} from "../../../store/admin/action";
+import toastMessage from "../../../common/toastmessage/toastmessage";
 const EditStoreModalForm = ({
-  openCreateuserModal,
-  handleCloseCreateUserModal,
+  openEditStoreModal,
+  handleCloseEditStoreModal,
+  storeList,
+  storeTypeList,
+  districtList,
+  ownerList,
+  blockList,
+  editData,
+  resetPageDetails,
 }) => {
+  const dispatch = useDispatch();
+  const editStoreRcrdResp = useSelector(
+    (state) => state?.admin?.editStoreRecrdResp
+  );
+  console.log("editStoreRcrdResp", editStoreRcrdResp);
+  console.log("editDataa", editData, blockList);
   const newStoreSchema = Yup.object().shape({
-    storeName: Yup.string()
-      .min(2, "Too Short!")
-      .max(50, "Too Long!")
-      .required("User Id is Required"),
+    storeName: Yup.string().required("Store Name is Required"),
 
-    storeType: Yup.string().ensure().required("Select the Store!"),
-    parentStoreName: Yup.string()
-      .ensure()
-      .required("Select the Parent Store Type"),
-    ownerType: Yup.string().ensure().required("Select the Owner Type"),
-    districtName: Yup.string().ensure().required("Select the District"),
-    blockName: Yup.string().ensure().required("Select the Block"),
+    storeTypeId: Yup.string().ensure().required("Select the Store Type!"),
+    toStoreId: Yup.string().ensure().required("Select the Parent Store Type"),
+    ownerTypeId: Yup.string().ensure().required("Select the Owner Type"),
+    address: Yup.string().required("Address is Required"),
+    opd: Yup.string().required("Check the OPD Field"),
+    districtId: Yup.string().ensure().required("Select the District"),
+    blockId: Yup.string().ensure().required("Select the Block"),
     contactNo: Yup.number().required("Contact No is Required"),
     longitude: Yup.number().required("Longitude is Required"),
     latitude: Yup.number().required("latitude is Required"),
-    ninNumber: Yup.number().required("NIN Number is Required"),
+    ninNo: Yup.string().required("NIN Number is Required"),
   });
+
+  useEffect(() => {
+    if (editStoreRcrdResp && editStoreRcrdResp?.status === 201) {
+      if (editStoreRcrdResp?.data?.status === 1) {
+        handleCloseEditStoreModal();
+        toastMessage("Store Desk", editStoreRcrdResp?.data?.message);
+        resetPageDetails();
+        dispatch(getStoreDeskList());
+        dispatch(editStoreRecordResponse(""));
+      } else if (editStoreRcrdResp?.data?.status === 0) {
+        toastMessage("Store Desk", editStoreRcrdResp?.data?.message);
+        dispatch(editStoreRecordResponse(""));
+      }
+    } else if (editStoreRcrdResp && editStoreRcrdResp?.status === 500) {
+      handleCloseEditStoreModal();
+      dispatch(editStoreRecordResponse(""));
+      toastMessage("Store Desk", "Something went wrong", "");
+    }
+  }, [editStoreRcrdResp]);
   return (
     <>
       <BasicModal
-        title="Create Role"
-        show={openCreateuserModal}
+        title="Edit Store"
+        show={openEditStoreModal}
         close={() => {
-          handleCloseCreateUserModal(false);
+          handleCloseEditStoreModal(false);
         }}
         isStatic={false}
         scrollable={true}
@@ -50,21 +87,24 @@ const EditStoreModalForm = ({
         <Formik
           validateOnMount
           initialValues={{
-            storeName: "",
-            storeType: "",
-            parentStoreName: "",
-            ownerType: "",
-            districtName: "",
-            blockName: "",
-            contactNo: "",
-            longitude: "",
-            latitude: "",
-            ninNumber: "",
+            id: editData?.id,
+            storeName: editData?.storeName,
+            storeTypeId: editData?.storeTypeId,
+            toStoreId: editData?.toStoreId,
+            ownerTypeId: editData?.ownerTypeId,
+            address: editData?.address,
+            districtId: editData?.districtId,
+            blockId: editData?.blockId,
+            contactNo: parseInt(editData?.contactNo),
+            longitude: editData?.longitude,
+            latitude: editData?.latitude,
+            opd: editData?.deptOpd === true ? 1 : 0,
+            ninNo: editData?.nin === null ? "" : editData?.nin,
           }}
           validationSchema={newStoreSchema}
           onSubmit={async (values) => {
             await new Promise((r) => setTimeout(r, 500));
-            alert(JSON.stringify(values, null, 2));
+            dispatch(editStoreRecord(values));
           }}
         >
           {({
@@ -76,6 +116,7 @@ const EditStoreModalForm = ({
             handleBlur,
             setFieldTouched,
             isValid,
+            setFieldValue,
           }) => (
             <Form>
               <div className="row">
@@ -83,7 +124,8 @@ const EditStoreModalForm = ({
                   <div className="row mb-2 align-items-center">
                     <div className="col-2">
                       <label htmlFor="storeName" class="col-form-label">
-                        Store Name:
+                        Store Name:{" "}
+                        {console.log("values", JSON.stringify(values))}
                       </label>
                     </div>
                     <div className="col-6">
@@ -116,20 +158,29 @@ const EditStoreModalForm = ({
                     <div className="col-6">
                       <CustomSelect
                         className="form-control shadow-none"
-                        name="storeType"
-                        id="storeType"
-                        value={values?.storeType}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
+                        name="storeTypeId"
+                        id="storeTypeId"
+                        defaultValue={storeTypeList?.find(
+                          (c) => c.value === values?.storeTypeId
+                        )}
+                        value={storeTypeList?.find(
+                          (c) => c.value === values?.storeTypeId
+                        )}
+                        onChange={(val) => {
+                          setFieldValue("storeTypeId", val.value);
                         }}
+                        options={
+                          storeTypeList && storeTypeList?.length > 0
+                            ? storeTypeList
+                            : []
+                        }
+                        onBlur={setFieldTouched}
                       />
                     </div>
                     <div className="col-4">
-                      {errors.storeType && touched.storeType ? (
+                      {errors.storeTypeId && touched.storeTypeId ? (
                         <div className="text-danger float-end">
-                          {errors.storeType}
+                          {errors.storeTypeId}
                         </div>
                       ) : null}
                     </div>
@@ -143,20 +194,27 @@ const EditStoreModalForm = ({
                     <div class="col-6">
                       <CustomSelect
                         className="form-control shadow-none"
-                        name="parentStoreName"
-                        id="parentStoreName"
-                        value={values?.parentStoreName}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
+                        name="toStoreId"
+                        id="toStoreId"
+                        defaultValue={storeList?.find(
+                          (c) => c.value === values?.toStoreId
+                        )}
+                        value={storeList?.find(
+                          (c) => c.value === values?.toStoreId
+                        )}
+                        onChange={(val) => {
+                          setFieldValue("toStoreId", val.value);
                         }}
+                        options={
+                          storeList && storeList?.length > 0 ? storeList : []
+                        }
+                        onBlur={setFieldTouched}
                       />
                     </div>
                     <div class="col-4">
-                      {errors.parentStoreName && touched.parentStoreName ? (
+                      {errors.toStoreId && touched.toStoreId ? (
                         <div className="text-danger float-end">
-                          {errors.parentStoreName}
+                          {errors.toStoreId}
                         </div>
                       ) : null}
                     </div>
@@ -171,20 +229,27 @@ const EditStoreModalForm = ({
                     <div class="col-6">
                       <CustomSelect
                         className="form-control shadow-none"
-                        name="ownerType"
-                        id="ownerType"
-                        value={values?.ownerType}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
+                        name="ownerTypeId"
+                        id="ownerTypeId"
+                        defaultValue={ownerList?.find(
+                          (c) => c.value === values?.ownerTypeId
+                        )}
+                        value={ownerList?.find(
+                          (c) => c.value === values?.ownerTypeId
+                        )}
+                        onChange={(val) => {
+                          setFieldValue("ownerTypeId", val.value);
                         }}
+                        options={
+                          ownerList && ownerList?.length > 0 ? ownerList : []
+                        }
+                        onBlur={setFieldTouched}
                       />
                     </div>
                     <div class="col-4">
-                      {errors.ownerType && touched.ownerType ? (
+                      {errors.ownerTypeId && touched.ownerTypeId ? (
                         <div className="text-danger float-end">
-                          {errors.ownerType}
+                          {errors.ownerTypeId}
                         </div>
                       ) : null}
                     </div>
@@ -215,10 +280,49 @@ const EditStoreModalForm = ({
                       ) : null}
                     </div>
                   </div>
+
+                  <div className="row mb-2">
+                    <div className="col-3">
+                      <label htmlFor="opd" class="col-form-label">
+                        Is this an OPD/DEPT/WARD of a Hospital? :
+                      </label>
+                    </div>
+                    <div className="col-6">
+                      <RadioCheckBox
+                        list={[
+                          {
+                            id: "1",
+                            labelText: "Yes",
+                            value: "1",
+                            name: "opd",
+                            checked: values?.opd,
+                          },
+                          {
+                            id: "2",
+                            labelText: "No",
+                            value: "0",
+                            name: "opd",
+                            checked: values?.opd,
+                          },
+                        ]}
+                        onChange={(e) => {
+                          console.log("val", e);
+                          setFieldValue("opd", e.target?.value);
+                        }}
+                      />
+                      <div className="col-3">
+                        {errors?.opd && touched?.opd ? (
+                          <div className="text-danger float-end">
+                            {errors.opd}
+                          </div>
+                        ) : null}
+                      </div>
+                    </div>
+                  </div>
                   <div className="row mb-2 align-items-center">
                     <div class="col-2">
                       <label
-                        htmlFor="address"
+                        htmlFor="districtId"
                         className=""
                         class="col-form-label"
                       >
@@ -228,45 +332,62 @@ const EditStoreModalForm = ({
                     <div class="col-6">
                       <CustomSelect
                         className="form-control shadow-none"
-                        name="districtName"
-                        id="districtName"
-                        value={values?.districtName}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
+                        name="districtId"
+                        id="districtId"
+                        defaultValue={districtList?.find(
+                          (c) => c.value === values?.districtId
+                        )}
+                        value={districtList?.find(
+                          (c) => c.value === values?.districtId
+                        )}
+                        onChange={(val) => {
+                          setFieldValue("districtId", val.value);
                         }}
+                        options={
+                          districtList && districtList?.length > 0
+                            ? districtList
+                            : []
+                        }
+                        onBlur={setFieldTouched}
                       />
                     </div>
                     <div className="col-4">
-                      {errors.districtName && touched.districtName ? (
+                      {errors.districtId && touched.districtId ? (
                         <div className="text-danger float-end">
-                          {errors.districtName}
+                          {errors.districtId}
                         </div>
                       ) : null}
                     </div>
                   </div>
                   <div className="row mb-2">
                     <div className="col-2">
-                      <label htmlFor="blockName" class="col-form-label">
+                      <label htmlFor="blockId" class="col-form-label">
                         Block Name:
                       </label>
                     </div>
                     <div className="col-6">
                       <CustomSelect
-                        id="blockName"
-                        name="blockName"
-                        value={values?.blockName}
-                        options={[]}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
+                        id="blockId"
+                        name="blockId"
+                        defaultValue={blockList?.find(
+                          (c) => c.value === values?.blockId
+                        )}
+                        value={blockList?.find(
+                          (c) => c.value === values?.blockId
+                        )}
+                        onChange={(val) => {
+                          setFieldValue("blockId", val.value);
                         }}
+                        options={
+                          blockList && blockList?.length > 0 ? blockList : []
+                        }
+                        onBlur={setFieldTouched}
                       />
                     </div>
                     <div className="col-4">
-                      {errors.blockName && touched.blockName ? (
+                      {errors.blockId && touched.blockId ? (
                         <div className="text-danger float-end">
-                          {errors.blockName}
+                          {errors.blockId}
                         </div>
                       ) : null}
                     </div>
@@ -335,12 +456,10 @@ const EditStoreModalForm = ({
                         className="form-control shadow-none"
                         name="latitude"
                         id="latitude"
+                        type="number"
                         value={values?.latitude}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
-                        }}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
                       />
                     </div>
                     <div className="col-4">
@@ -361,20 +480,18 @@ const EditStoreModalForm = ({
                     <div className="col-6">
                       <Field
                         className="form-control shadow-none"
-                        name="ninNumber"
-                        id="ninNumber"
-                        value={values?.ninNumber}
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
-                        }}
+                        name="ninNo"
+                        id="ninNo"
+                        type="ninNo"
+                        value={values?.ninNo}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
                       />
                     </div>
                     <div className="col-4">
-                      {errors.ninNumber && touched.ninNumber ? (
+                      {errors.ninNo && touched.ninNo ? (
                         <div className="text-danger float-end">
-                          {errors.ninNumber}
+                          {errors.ninNo}
                         </div>
                       ) : null}
                     </div>
@@ -412,6 +529,7 @@ const EditStoreModalForm = ({
                           buttonText="Close"
                           className="danger rounded-0"
                           outlineType={true}
+                          onClick={handleCloseEditStoreModal}
                         />
                       </div>
                     </div>

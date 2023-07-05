@@ -19,6 +19,7 @@ import EmptyRow from "../../../components/tables/datatable/emptyRow";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
 import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
 import handleSortingFunc from "../../../components/tables/datatable/sortable";
+import { Link } from "react-router-dom";
 
 const DrugCondemnationRegister = () => {
   const dispatch = useDispatch();
@@ -162,16 +163,15 @@ const DrugCondemnationRegister = () => {
       </div>
       <Paper>
         <div className="row ">
-          <div className="d-flex flex-row justify-content-end">
-            <Basicbutton
-              buttonText="Add New Condemnation"
-              outlineType={true}
-              className="primary rounded-0 mb-2 me-1 mt-2"
-            />
-          </div>
-        </div>
-        <div className="row mb-1">
-          <div className="d-flex justify-content-end">
+          <div className="d-flex flex-row justify-content-between">
+            <Link to={"/openVerificationDesk"}>
+              <Basicbutton
+                buttonText="Add New Condemnation"
+                outlineType={true}
+                className="primary rounded-0 mb-2 me-1 mt-2"
+              />
+            </Link>
+
             <SearchField
               className="me-1 "
               iconPosition="end"
@@ -182,18 +182,13 @@ const DrugCondemnationRegister = () => {
             />
           </div>
         </div>
+
         <div className="row">
           <div className="col-12">
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page + 1}
-              count={totalPages}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
               handleSorting={handleSortingChange}
               checkBoxRequired={false}
             >

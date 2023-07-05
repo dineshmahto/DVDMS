@@ -7,7 +7,8 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
   "&:hover": {
     backgroundColor: "orange",
-    fontSize: "0.8rem !important",
+    color: "#ffffff",
+    fontSize: "1.2rem",
   },
   "&:last-child td, &:last-child th": {
     border: 0,

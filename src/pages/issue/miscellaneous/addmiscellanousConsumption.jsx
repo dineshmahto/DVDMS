@@ -29,6 +29,7 @@ import {
   getAddMiscellanousListResponse,
 } from "../../../store/issue/action";
 import { useNavigate } from "react-router-dom";
+import BackButon from "../../../components/button/backButon";
 
 const AddMiscellanousConsmpt = () => {
   const navigate = useNavigate();
@@ -253,16 +254,7 @@ const AddMiscellanousConsmpt = () => {
   };
   return (
     <>
-      <div className="row mt-2">
-        <div className="d-flex jsutify-content-start">
-          <Basicbutton
-            buttonText="Back"
-            className="warning rounded-0"
-            icon={<FontAwesomeIcon icon={faArrowLeft} />}
-            onClick={() => navigate("/openIssueDesk")}
-          />
-        </div>
-      </div>
+      <BackButon routePath="openStockForMisConsumptionDesk" />
       <div className="row mt-2">
         <div className="d-flex justify-content-start">
           <p className="fs-6">ADD MISCELLANEOUS CONSUMPTION</p>

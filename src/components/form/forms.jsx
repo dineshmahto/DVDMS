@@ -5,12 +5,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFloppyDisk, faXmark } from "@fortawesome/free-solid-svg-icons";
 import Basicbutton from "../button/basicbutton";
 import RadioCheckBox from "../switch/radiocheckbox";
+import "./form.css";
+import BasicInput from "../inputbox/floatlabel/basicInput";
 const FormikDynamic = ({
   initialValues,
   validationSchema,
   inputs,
   handleSubmit,
   buttonText,
+  handleCancel,
 }) => {
   return (
     <Formik
@@ -34,14 +37,19 @@ const FormikDynamic = ({
         <Form noValidate>
           <div className="row">
             <div className="col-10 offset-1">
-              {inputs.map(({ name, type, value, label, ...props }) => {
+              {inputs.map(({ name, type, value, label, ...props }, index) => {
                 switch (type) {
                   case "select":
                     return (
                       <>
-                        <div className="row mb-2">
+                        <div className="row mb-2" key={name + index}>
                           <div className="col-3">
-                            <label htmlFor={name} class="col-form-label">
+                            <label
+                              htmlFor={name}
+                              className={`col-form-label ${
+                                props?.required ? "required" : ""
+                              }`}
+                            >
                               {label}
                             </label>
                           </div>
@@ -50,7 +58,9 @@ const FormikDynamic = ({
                               id={name}
                               key={name}
                               name={name}
-                              defaultValue={values[`${name}`]}
+                              defaultValue={props.option?.find(
+                                (c) => c.value === values[`${name}`]
+                              )}
                               value={
                                 props?.option &&
                                 props?.option?.find(
@@ -69,11 +79,12 @@ const FormikDynamic = ({
                             />
                           </div>
                           <div className="col-3">
-                            {errors.name && touched.name ? (
+                            {errors?.[`${name}`] && touched?.[`${name}`] ? (
                               <div className="text-danger float-end">
-                                {errors.name}
+                                {errors?.[`${name}`]}
                               </div>
                             ) : null}
+                            <span className="form-text">{props.hint}</span>
                           </div>
                         </div>
                       </>
@@ -81,14 +92,20 @@ const FormikDynamic = ({
                   case "radio":
                     return (
                       <>
-                        <div className="row mb-2">
+                        <div className="row mb-2" key={name + index}>
                           <div className="col-3">
-                            <label htmlFor={name} class="col-form-label">
+                            <label
+                              htmlFor={name}
+                              className={`col-form-label ${
+                                props?.required ? "required" : ""
+                              }`}
+                            >
                               {label} :
                             </label>
                           </div>
                           <div className="col-6">
                             <RadioCheckBox
+                              key={name}
                               list={[
                                 {
                                   id: `${name}1`,
@@ -111,11 +128,12 @@ const FormikDynamic = ({
                               }}
                             />
                             <div className="col-3">
-                              {errors.name && touched.name ? (
+                              {errors?.[`${name}`] && touched?.[`${name}`] ? (
                                 <div className="text-danger float-end">
-                                  {errors.name}
+                                  {errors?.[`${name}`]}
                                 </div>
                               ) : null}
+                              <span className="form-text">{props?.hint}</span>
                             </div>
                           </div>
                         </div>
@@ -125,14 +143,20 @@ const FormikDynamic = ({
                   case "date":
                     return (
                       <>
-                        <div className="row mb-2">
+                        <div className="row mb-2" key={name + index}>
                           <div className="col-3">
-                            <label htmlFor={name} class="col-form-label">
+                            <label
+                              htmlFor={name}
+                              className={`col-form-label ${
+                                props?.required ? "required" : ""
+                              }`}
+                            >
                               {label} :
                             </label>
                           </div>
                           <div className="col-6">
                             <CustDatepicker
+                              key={name}
                               value={values[`${name}`]}
                               name={name}
                               inputFormat={
@@ -151,14 +175,23 @@ const FormikDynamic = ({
                   default:
                     return (
                       <>
-                        <div className="row mb-2">
+                        <div className="row mb-2" key={name + index}>
                           <div className="col-3">
-                            <label htmlFor={name} className="col-form-label">
+                            <label
+                              htmlFor={name}
+                              className={`col-form-label ${
+                                props?.required ? "required" : ""
+                              }`}
+                            >
                               {label}
                             </label>
                           </div>
                           <div className="col-6">
-                            <Field
+                            <BasicInput
+                              floatingLabel={false}
+                              htmlFor={name}
+                              labelText={label}
+                              key={name}
                               className="form-control shadow-none"
                               value={values[`${name}`]}
                               type={type}
@@ -170,11 +203,12 @@ const FormikDynamic = ({
                             />
                           </div>
                           <div className="col-3">
-                            {errors?.name && touched?.name ? (
+                            {errors?.[`${name}`] && touched?.[`${name}`] ? (
                               <div className="text-danger float-end">
-                                {errors?.name}
+                                {errors?.[`${name}`]}
                               </div>
                             ) : null}
+                            <span className="form-text">{props?.hint}</span>
                           </div>
                         </div>
                       </>
@@ -191,6 +225,7 @@ const FormikDynamic = ({
                       buttonText="Cancel"
                       className="danger rounded-0"
                       outlineType={true}
+                      onClick={handleCancel}
                     />
                     <Basicbutton
                       icon={
@@ -204,6 +239,10 @@ const FormikDynamic = ({
                     />
                   </div>
                 </div>
+
+                <small className="form-text text-danger">
+                  NOTE:- A star (asterisk) marked fields are mandatory
+                </small>
               </div>
             </div>
           </div>

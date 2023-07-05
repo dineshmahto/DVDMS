@@ -10,6 +10,7 @@ import {
   faPlus,
   faFloppyDisk,
   faRefresh,
+  faArrowLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { TableBody, TableRow, TableCell } from "@mui/material";
 import { Paper } from "@mui/material";
@@ -24,6 +25,7 @@ import Basicbutton from "../../../components/button/basicbutton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import {
   addDrugCondemnation,
   getAddDrugCondemnationList,
@@ -33,6 +35,10 @@ import {
 import TablePagination from "../../../components/tables/datatable/tablepagination";
 import RadioCheckBox from "../../../components/switch/radiocheckbox";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
+import searchFunc from "../../../components/tables/searchFunc";
+import NormalTableRow from "../../../components/tables/datatable/normalTableRow";
+import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 
 const useStyles = makeStyles({
   root: {
@@ -44,29 +50,11 @@ const useStyles = makeStyles({
     },
   },
 });
-const tempData = [
-  {
-    id: 1,
-    drugName: "DVT PREVENTION DEVICE",
-    programName: "CORONA VIRUS",
-    batchNo: "SN:DMO6B-13201",
-    lastVerified: null,
-    stockQty: 1,
-    institute: "NHM",
-  },
-  {
-    id: 2,
-    drugName: "DVT PREVENTION DEVICE",
-    programName: "CORONA VIRUS",
-    batchNo: "SN:DMO6B-13201",
-    lastVerified: null,
-    stockQty: 1,
-    institute: "NHM",
-  },
-];
+
 const AddDrugCondemnation = () => {
   const classes = useStyles();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const addDrugCondemnationListResp = useSelector(
     (state) => state?.stock?.addDrugCondemnationListResponse
@@ -76,6 +64,8 @@ const AddDrugCondemnation = () => {
   );
   const [cloneData, setCloneData] = useState([]);
   const [tableData, setTableData] = useState([]);
+  const [filterData, setFilterData] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
   const [totalRows, setTotalRows] = useState(0);
   const [remarks, setRemarks] = useState("");
   const [loading, setLoading] = useState(false);
@@ -248,6 +238,7 @@ const AddDrugCondemnation = () => {
       setSelected([]);
       setTotalRows(addDrugCondemnationListResp?.data?.pageList?.totalElements);
       setTableData(addDrugCondemnationListResp?.data?.pageList?.content);
+      setFilterData(addDrugCondemnationListResp?.data?.pageList?.content);
       setCloneData(addDrugCondemnationListResp?.data?.pageList?.content);
       setLoading(false);
       dispatch(getAddDrugCondemnationListResponse(""));
@@ -300,6 +291,16 @@ const AddDrugCondemnation = () => {
   };
   return (
     <>
+      <div className="row mt-2">
+        <div className="d-flex jsutify-content-start">
+          <Basicbutton
+            buttonText="Back"
+            className="warning rounded-0"
+            icon={<FontAwesomeIcon icon={faArrowLeft} />}
+            onClick={() => navigate("/openCondeminationRegister")}
+          />
+        </div>
+      </div>
       <div className="row mt-2">
         <div className="d-flex justify-content-start">
           <p className="fs-6">ADD DRUG CONDEMNATION</p>
@@ -422,18 +423,8 @@ const AddDrugCondemnation = () => {
               <TableComponent
                 columns={columns}
                 sortField={sortField}
-                page={controller.page}
-                count={totalRows}
-                rowsPerPage={controller.rowsPerPage}
                 order={order}
                 checkBoxRequired={true}
-                paginationRequired={true}
-                onPageChange={handlePageChange}
-                onRowsPerPageChange={handleChangeRowsPerPage}
-                numSelected={selected.length}
-                rowCount={tableData?.length}
-                actionIcon={faAdd}
-                showTableActionBar={false}
                 handleSorting={handleSortingChange}
               >
                 <TableBody>
@@ -446,7 +437,7 @@ const AddDrugCondemnation = () => {
                       );
                       const labelId = `enhanced-table-checkbox-${index}`;
                       return (
-                        <TableRow
+                        <NormalTableRow
                           hover
                           role="checkbox"
                           aria-checked={displaySelected.includes(index)}
@@ -454,7 +445,10 @@ const AddDrugCondemnation = () => {
                           key={row.id}
                           selected={isItemSelected}
                         >
-                          <TableCell padding="none">
+                          <StyledTableCell
+                            padding="none"
+                            style={{ textAlign: "center" }}
+                          >
                             <Checkbox
                               onClick={(event) =>
                                 handleClick(
@@ -469,19 +463,11 @@ const AddDrugCondemnation = () => {
                                 "aria-labelledby": labelId,
                               }}
                             />
-                          </TableCell>
+                          </StyledTableCell>
                           {columns.map((d, k) => {
-                            console.log("Dinesh", row[d.id]);
                             if (d.id === "avlQty") {
                               return (
-                                <TableCell
-                                  key={k}
-                                  padding="none"
-                                  style={{
-                                    padding: "4px",
-                                    fontSize: "0.7rem",
-                                  }}
-                                >
+                                <StyledTableCell key={k} padding="none">
                                   <BasicInput
                                     value={row[d.id]}
                                     type="text"
@@ -497,40 +483,26 @@ const AddDrugCondemnation = () => {
                                     placeholder="Enter the Quantity"
                                     disabled={!isItemSelected}
                                   />
-                                </TableCell>
+                                </StyledTableCell>
                               );
                             } else if (
                               d.id === "mnfDate" ||
                               d.id === "expDate"
                             ) {
                               return (
-                                <TableCell
-                                  key={k}
-                                  padding="none"
-                                  style={{
-                                    padding: "4px",
-                                    fontSize: "0.7rem",
-                                  }}
-                                >
+                                <StyledTableCell key={k} padding="none">
                                   {moment(row[d.id]).format("DD/MM/YYYY")}
-                                </TableCell>
+                                </StyledTableCell>
                               );
                             } else {
                               return (
-                                <TableCell
-                                  key={k}
-                                  padding="none"
-                                  style={{
-                                    padding: "4px",
-                                    fontSize: "0.7rem",
-                                  }}
-                                >
+                                <StyledTableCell key={k} padding="none">
                                   {row[d.id]}
-                                </TableCell>
+                                </StyledTableCell>
                               );
                             }
                           })}
-                        </TableRow>
+                        </NormalTableRow>
                       );
                     })}
                 </TableBody>
@@ -580,7 +552,15 @@ const AddDrugCondemnation = () => {
               iconPosition="end"
               iconName={faSearch}
               onChange={(e) => {
-                console.log(e);
+                if (e.target?.value != "") {
+                  console.log(e.target?.value);
+                  setSearchValue(e?.target?.value);
+                  console.log("filterData", filterData);
+                  setTableData(searchFunc(filterData, e.target?.value));
+                } else {
+                  setTableData(filterData);
+                  setSearchValue("");
+                }
               }}
             />
           </div>
@@ -590,27 +570,21 @@ const AddDrugCondemnation = () => {
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page}
-              count={totalRows}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
               checkBoxRequired={true}
               paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-              numSelected={selected.length}
-              rowCount={tableData?.length}
-              actionIcon={faAdd}
-              showTableActionBar={false}
               handleSorting={handleSortingChange}
             >
               <TableBody>
-                {tableData &&
+                {loading ? (
+                  <TableRowLaoder />
+                ) : (
+                  tableData &&
                   tableData?.map((row, index) => {
                     const isItemSelected = isSelected(row.id, selected);
                     const labelId = `enhanced-table-checkbox-${index}`;
                     return (
-                      <TableRow
+                      <NormalTableRow
                         hover
                         role="checkbox"
                         aria-checked={selected.includes(index)}
@@ -618,7 +592,7 @@ const AddDrugCondemnation = () => {
                         key={row.id}
                         selected={isItemSelected}
                       >
-                        <TableCell padding="none">
+                        <StyledTableCell padding="none">
                           <Checkbox
                             onClick={(event) =>
                               handleClick(selected, row.id, setSelected)
@@ -629,18 +603,11 @@ const AddDrugCondemnation = () => {
                               "aria-labelledby": labelId,
                             }}
                           />
-                        </TableCell>
+                        </StyledTableCell>
                         {columns.map((d, k) => {
                           if (d.id === "condemnQty") {
                             return (
-                              <TableCell
-                                key={k}
-                                padding="none"
-                                style={{
-                                  padding: "4px",
-                                  fontSize: "0.7rem",
-                                }}
-                              >
+                              <StyledTableCell key={k} padding="none">
                                 <BasicInput
                                   onChange={(e) =>
                                     handleChange(
@@ -655,39 +622,26 @@ const AddDrugCondemnation = () => {
                                   placeholder="Enter the Quantity"
                                   disabled={!isItemSelected}
                                 />
-                              </TableCell>
+                              </StyledTableCell>
                             );
                           } else if (d.id === "mnfDate" || d.id === "expDate") {
                             return (
-                              <TableCell
-                                key={k}
-                                padding="none"
-                                style={{
-                                  padding: "4px",
-                                  fontSize: "0.7rem",
-                                }}
-                              >
+                              <StyledTableCell key={k} padding="none">
                                 {moment(row[d.id]).format("DD/MM/YYYY")}
-                              </TableCell>
+                              </StyledTableCell>
                             );
                           } else {
                             return (
-                              <TableCell
-                                key={k}
-                                padding="none"
-                                style={{
-                                  padding: "4px",
-                                  fontSize: "0.7rem",
-                                }}
-                              >
+                              <StyledTableCell key={k} padding="none">
                                 {row[d.id]}
-                              </TableCell>
+                              </StyledTableCell>
                             );
                           }
                         })}
-                      </TableRow>
+                      </NormalTableRow>
                     );
-                  })}
+                  })
+                )}
                 <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>

@@ -1,27 +1,20 @@
-import React, {
-  useState,
-  useMemo,
-  useEffect,
-  useCallback,
-  Suspense,
-  lazy,
-} from "react";
+import React, { useState, useMemo, useEffect, Suspense, lazy } from "react";
 import { Paper } from "@mui/material";
 import { TableBody } from "@mui/material";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import Basicbutton from "../../../components/button/basicbutton";
 import SearchField from "../../../components/search/search";
-import {
-  faPenToSquare,
-  faSearch,
-  faTrash,
-} from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare, faTrash } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import { Seo } from "../../../components/seo/seo";
 import { useDispatch, useSelector } from "react-redux";
-import { getStoreDeskList } from "../../../store/admin/action";
+import {
+  deleteStoreRecord,
+  deleteStoreRecordResponse,
+  getStoreDeskList,
+} from "../../../store/admin/action";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
 import StyledTableRow from "../../../components/tables/datatable/customTableRow";
 import { getStockDeskListResponse } from "../../../store/stock/action";
@@ -29,17 +22,26 @@ import StyledTableCell from "../../../components/tables/datatable/customTableCel
 import handleSortingFunc from "../../../components/tables/datatable/sortable";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
 import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
+import searchFunc from "../../../components/tables/searchFunc";
 const CreateStoreModal = lazy(() => import("./createstoremodal"));
+const EditStoreModal = lazy(() => import("./editstoremodal"));
+const AlertDialog = lazy(() => import("../../../components/dialog/dialog"));
+
 const StoreDesk = () => {
   const dispatch = useDispatch();
   const storeDeskListResponse = useSelector(
     (state) => state.admin.storeDeskListResponse
   );
+  const deltestoreRcrdResp = useSelector(
+    (state) => state?.admin?.deleteStoreRecrdResp
+  );
+  console.log("deltestoreRcrdResp", deltestoreRcrdResp);
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
-  const [totalPages, setTotalPages] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
   const [tableData, setTableData] = useState([]);
+  const [filterData, setFilterData] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
 
   const [controller, setController] = useState({
     page: 0,
@@ -47,6 +49,9 @@ const StoreDesk = () => {
   });
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteId, setDeleteId] = useState("");
   const [showEditModal, setShowEditModal] = useState(false);
 
   const [activityList, setActivityList] = useState([]);
@@ -56,6 +61,7 @@ const StoreDesk = () => {
   const [storeList, setStoreList] = useState([]);
   const [blockList, setBlockList] = useState([]);
   const [districtList, setDistrictList] = useState([]);
+  const [editData, setEditData] = useState({});
 
   const [dropDwonRoleList, setDropDownRoleList] = useState([]);
   const [dropDownStoreList, setDropDownStoreList] = useState([]);
@@ -172,11 +178,19 @@ const StoreDesk = () => {
     };
   }, [controller]);
 
+  const resetPageDetails = () => {
+    setController({
+      page: 0,
+      rowsPerPage: 10,
+    });
+  };
+
   useEffect(() => {
     if (storeDeskListResponse && storeDeskListResponse?.status === 200) {
       setActivityList(storeDeskListResponse?.data?.activityTypeList);
       setTotalRows(storeDeskListResponse?.data?.pageList?.totalElements);
       setTableData(storeDeskListResponse?.data?.pageList?.content);
+      setFilterData(storeDeskListResponse?.data?.pageList?.content);
       setDistrictList(storeDeskListResponse?.data?.districtList);
       setBlockList(storeDeskListResponse?.data?.blockList);
       setOwnerList(storeDeskListResponse?.data?.ownerList);
@@ -209,8 +223,38 @@ const StoreDesk = () => {
       );
     }
   }, [storeDeskListResponse]);
+
+  useEffect(() => {
+    if (deltestoreRcrdResp && deltestoreRcrdResp?.status === 201) {
+      if (deltestoreRcrdResp?.data?.status === 1) {
+        setShowDeleteDialog(false);
+        toastMessage("Store Desk", deltestoreRcrdResp?.data?.message);
+        resetPageDetails();
+        dispatch(getStoreDeskList());
+        dispatch(deleteStoreRecordResponse(""));
+      } else if (deltestoreRcrdResp?.data?.status === 0) {
+        toastMessage("Store Desk", deltestoreRcrdResp?.data?.message);
+        dispatch(deleteStoreRecordResponse(""));
+      }
+    } else if (deltestoreRcrdResp && deltestoreRcrdResp?.status === 500) {
+      setShowDeleteDialog(false);
+      dispatch(deleteStoreRecordResponse(""));
+      toastMessage("Store Desk", "Something went wrong", "");
+    }
+  }, [deltestoreRcrdResp]);
   const handleCloseCreateStoreModal = () => {
     setShowAddModal(false);
+  };
+
+  const handleDeleteDialog = () => {
+    setDeleteId("");
+    setShowDeleteDialog(false);
+  };
+  const handleDeleteStore = () => {
+    dispatch(deleteStoreRecord({ id: deleteId }));
+  };
+  const handleCloseEditStoreModal = () => {
+    setShowEditModal(false);
   };
   return (
     <>
@@ -236,8 +280,15 @@ const StoreDesk = () => {
           <SearchField
             className="me-1 mt-1"
             iconPosition="end"
+            disabled={tableData.length === 0 ? true : false}
             onChange={(e) => {
-              console.log(e);
+              if (e.target?.value != "") {
+                setSearchValue(e?.target?.value);
+                setTableData(searchFunc(filterData, e.target?.value));
+              } else {
+                setTableData(filterData);
+                setSearchValue("");
+              }
             }}
           />
         </div>
@@ -276,6 +327,10 @@ const StoreDesk = () => {
                                     fontSize: "0.7rem",
                                     cursor: "pointer",
                                   }}
+                                  onClick={() => {
+                                    setEditData(data);
+                                    setShowEditModal(true);
+                                  }}
                                 >
                                   <FontAwesomeIcon
                                     icon={faPenToSquare}
@@ -289,6 +344,10 @@ const StoreDesk = () => {
                                   style={{
                                     fontSize: "0.7rem",
                                     cursor: "pointer",
+                                  }}
+                                  onClick={() => {
+                                    setDeleteId(data?.id);
+                                    setShowDeleteDialog(true);
                                   }}
                                 >
                                   <FontAwesomeIcon
@@ -315,7 +374,11 @@ const StoreDesk = () => {
                     );
                   })
                 )}
-                <EmptyRow loading={loading} tableData={tableData} />
+                <EmptyRow
+                  loading={loading}
+                  tableData={tableData}
+                  searchValue={searchValue}
+                />
               </TableBody>
             </TableComponent>
             <TablePagination
@@ -337,6 +400,33 @@ const StoreDesk = () => {
             ownerList={ownerList}
             blockList={blockList}
           />
+        </Suspense>
+        <Suspense>
+          <EditStoreModal
+            openEditStoreModal={showEditModal}
+            handleCloseEditStoreModal={handleCloseEditStoreModal}
+            storeList={storeList}
+            storeTypeList={storeTypeList}
+            districtList={districtList}
+            ownerList={ownerList}
+            blockList={blockList}
+            editData={editData}
+            resetPageDetails={resetPageDetails}
+          />
+        </Suspense>
+        <Suspense>
+          <AlertDialog
+            open={showDeleteDialog}
+            handleClose={handleDeleteDialog}
+            description="You are about to delete one record, this procedure is irreversible.
+Do you want to proceed?"
+          >
+            <Basicbutton
+              buttonText="Disagree"
+              onClick={() => setShowDeleteDialog(false)}
+            />
+            <Basicbutton buttonText="Agree" onClick={handleDeleteStore} />
+          </AlertDialog>
         </Suspense>
       </Paper>
     </>

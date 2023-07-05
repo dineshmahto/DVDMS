@@ -51,7 +51,6 @@ const TransferComponent: React.FC<transferComponentProps> = ({
   handleRightListItemClick,
   isDisabled,
 }) => {
-  console.log("rendering");
   const classes = useStyles();
   return (
     <>

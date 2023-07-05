@@ -1,6 +1,8 @@
 import {
   GET_ADD_MISCELLANOUS_LIST,
   GET_ADD_MISCELLANOUS_LIST_RSPONSE,
+  GET_INTENT_DRUG,
+  GET_INTENT_DRUG_RESPONSE,
   GET_INTENT_ISSUE_LIST,
   GET_INTENT_ISSUE_LIST_RESPONSE,
   GET_ISSUE_CAMP_LIST,
@@ -19,6 +21,8 @@ import {
   GET_SUB_STORE_RETURN_LIST_RESPONSE,
   GET_THIRD_PARTY_RETURN,
   GET_THIRD_PARTY_RETURN_RESPONSE,
+  SAVE_ISSUE_TO_THIRD_PARTY,
+  SAVE_ISSUE_TO_THIRD_PARTY_RESPONSE,
 } from "./actionTypes";
 
 export const getIssueDeskList = (pageDetails) => {
@@ -146,5 +150,32 @@ export const getAddMiscellanousListResponse = (addMisListResp) => {
   return {
     type: GET_ADD_MISCELLANOUS_LIST_RSPONSE,
     payload: addMisListResp,
+  };
+};
+
+export const saveIssueToThirdParty = (saveThirdPartyDetails) => {
+  return {
+    type: SAVE_ISSUE_TO_THIRD_PARTY,
+    payload: saveThirdPartyDetails,
+  };
+};
+export const saveIssueToThirdPartyResponse = (saveThirdPartyDetailsResp) => {
+  return {
+    type: SAVE_ISSUE_TO_THIRD_PARTY_RESPONSE,
+    payload: saveThirdPartyDetailsResp,
+  };
+};
+
+export const getIntentDrug = (intentNo) => {
+  return {
+    type: GET_INTENT_DRUG,
+    payload: intentNo,
+  };
+};
+
+export const getIntentDrugResponse = (intentDrugResponse) => {
+  return {
+    type: GET_INTENT_DRUG_RESPONSE,
+    payload: intentDrugResponse,
   };
 };

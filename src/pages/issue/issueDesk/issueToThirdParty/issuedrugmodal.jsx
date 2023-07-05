@@ -5,20 +5,26 @@ import { TableBody, TableRow, TableCell } from "@mui/material";
 import { Spinner } from "react-bootstrap";
 import BasicInput from "../../../../components/inputbox/floatlabel/basicInput";
 import Basicbutton from "../../../../components/button/basicbutton";
+import dayjs from "dayjs";
+import NormalTableRow from "../../../../components/tables/datatable/normalTableRow";
+import StyledTableCell from "../../../../components/tables/datatable/customTableCell";
 const IssueDrugModal = ({
   title,
   loadingState,
   modalData,
   showAddDrugModal,
   handleAddDrugModal,
+  handleIssueDrugList,
 }) => {
+  console.log("modalDatas", modalData);
   const [loading, setLoading] = useState(loadingState);
-  const [remainingQty, setRemainingQty] = useState("");
-  const [issuedQty, setIssuedQty] = useState("");
+  const [issuedQty, setIssuedQty] = useState(0);
 
+  const [updatedDrugDetail, setUpdatedDrugDetail] = useState([]);
+  const [data, setData] = useState([]);
   const columns = useMemo(() => [
     {
-      id: "ledgNo",
+      id: "stockId",
       name: "LEDG. NO",
       sortable: false,
     },
@@ -28,13 +34,13 @@ const IssueDrugModal = ({
       sortable: false,
     },
     {
-      id: "expDate",
+      id: "expiryDate",
       name: "EXPIRY DATE",
       sortable: false,
     },
 
     {
-      id: "qty",
+      id: "availableQty",
       name: "QUANTITY",
       sortable: false,
     },
@@ -49,6 +55,20 @@ const IssueDrugModal = ({
   useEffect(() => {
     setLoading(false);
   });
+
+  const handleChange = (idx, id, e, data, setData) => {
+    const clone = [...data];
+    clone[idx] = {
+      ...clone[idx],
+      [id]: e,
+    };
+    setData(clone);
+  };
+
+  const formatDate = (date) => {
+    return dayjs(date).format("MM/DD/YYYY");
+  };
+
   return (
     <BasicModal
       title={title}
@@ -67,55 +87,50 @@ const IssueDrugModal = ({
             columns={columns}
             paginationRequired={false}
             checkBoxRequired={false}
-            colouredHeader={true}
           >
             <TableBody>
-              {loading ? (
-                <TableRow>
-                  <TableCell className="text-center" colSpan={12}>
-                    <Spinner />
-                  </TableCell>
-                </TableRow>
-              ) : (
-                modalData &&
+              {modalData &&
                 modalData?.length > 0 &&
                 modalData?.map((data, index) => (
-                  <TableRow key={data.id}>
+                  <NormalTableRow key={data.id}>
                     {columns.map((d, k) => {
                       if (d.id === "issueQty") {
                         return (
-                          <TableCell
-                            key={k}
-                            padding="none"
-                            style={{
-                              padding: "4px",
-                              fontSize: "0.7rem",
-                            }}
-                          >
+                          <StyledTableCell key={k} padding="none">
                             <BasicInput
                               type="number"
-                              onChange={() => console.log("change")}
+                              onChange={(e) => {
+                                if (e.target.value === "") {
+                                  setIssuedQty(0);
+                                }
+                                setIssuedQty(parseInt(e?.target?.value));
+                                handleChange(
+                                  index,
+                                  d?.id,
+                                  parseInt(e?.target?.value),
+                                  modalData,
+                                  setUpdatedDrugDetail
+                                );
+                              }}
                             />
-                          </TableCell>
+                          </StyledTableCell>
+                        );
+                      } else if (d.id === "expiryDate") {
+                        return (
+                          <StyledTableCell key={k} padding="none">
+                            {formatDate(data[d.id])}
+                          </StyledTableCell>
                         );
                       } else {
                         return (
-                          <TableCell
-                            key={k}
-                            padding="none"
-                            style={{
-                              padding: "4px",
-                              fontSize: "0.7rem",
-                            }}
-                          >
+                          <StyledTableCell key={k} padding="none">
                             {data[d.id]}
-                          </TableCell>
+                          </StyledTableCell>
                         );
                       }
                     })}
-                  </TableRow>
-                ))
-              )}
+                  </NormalTableRow>
+                ))}
             </TableBody>
           </TableComponent>
         </div>
@@ -124,11 +139,12 @@ const IssueDrugModal = ({
         <div className="col-12">
           <div className="d-flex justify-content-between">
             <div>
-              <p>Total Quantity</p> {modalData?.avaibleQty}
+              <p>Total Quantity</p> {modalData[0]?.availableQty}
             </div>
 
             <div>
-              <p>Remaining Quantity</p> {remainingQty}
+              <p>Remaining Quantity</p>{" "}
+              {parseInt(modalData[0]?.availableQty - issuedQty)}
             </div>
             <div>
               <p>Issued Quantity</p> {issuedQty}
@@ -143,6 +159,10 @@ const IssueDrugModal = ({
               type="button"
               buttonText="ADD DRUG(S)"
               className="warning rounded-0 me-1"
+              onClick={() => {
+                handleIssueDrugList(updatedDrugDetail);
+                handleAddDrugModal();
+              }}
             />
 
             <Basicbutton

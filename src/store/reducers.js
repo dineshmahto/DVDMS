@@ -10,6 +10,7 @@ import issueReturnReducer from "../store/issue/reducer";
 import requisitionReducer from "../store/requisition/reducer";
 import darkModeReducer from "./darkmode/reducer";
 import receivingReducer from "../store/receiving/reducer";
+import reportReducer from "../store/report/reducer";
 export default combineReducers({
   loader: loaderReducer,
   activemenu: activemenuReducer,
@@ -22,4 +23,5 @@ export default combineReducers({
   requisition: requisitionReducer,
   darkMode: darkModeReducer,
   receiving: receivingReducer,
+  report: reportReducer,
 });

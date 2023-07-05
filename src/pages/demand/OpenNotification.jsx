@@ -9,8 +9,6 @@ import { makeStyles } from "@mui/styles";
 import RadioCheckBox from "../../components/switch/radiocheckbox";
 import CustomSelect from "../../components/select/customSelect";
 import { useDispatch, useSelector } from "react-redux";
-import { hideLoader } from "../../store/loader/actions";
-import API from "../../config/config";
 import {
   getAllOpenNotification,
   getDrugListByProgramId,
@@ -21,6 +19,10 @@ import { Paper } from "@mui/material";
 import Basicbutton from "../../components/button/basicbutton";
 import moment from "moment";
 import { useNavigate } from "react-router";
+import {
+  NETWORK_STATUS_CODE,
+  SERVER_STATUS_CODE,
+} from "../../common/constant/constant";
 
 const useStyles = makeStyles({
   root: {
@@ -77,7 +79,7 @@ const OpenNotification = () => {
   const [drugActiveIndicies, setDrugActiveIndicies] = useState([]);
   const [drugFirstClick, setDrugFirstClick] = useState(false);
   const [selectDrugItemActiveIndices, setSelectedDrugItemActiveIndices] =
-    useState();
+    useState([]);
   const [copyDrugData, setCopyDrugData] = useState([]);
 
   const [show, setShow] = useState(false);
@@ -118,7 +120,7 @@ const OpenNotification = () => {
         openNotificationListResponse?.data?.programMappingList
       );
       setProgrammeActiveIndicies(
-        openNotificationListResponse?.data?.programDrugLists?.map(() => false)
+        openNotificationListResponse?.data?.programMappingList?.map(() => false)
       );
       setCopyprogrmmeData(
         openNotificationListResponse?.data?.programMappingList
@@ -126,14 +128,14 @@ const OpenNotification = () => {
       setprogrammeData(openNotificationListResponse?.data?.programMappingList);
 
       setDrugActiveIndicies(
-        openNotificationListResponse?.data?.drugLists?.map(() => false)
+        openNotificationListResponse?.data?.drugList?.map(() => false)
       );
       setCopyDrugData(openNotificationListResponse?.data?.drugList);
       setDrugData(openNotificationListResponse?.data?.drugList);
 
       setTotalDrugList(openNotificationListResponse?.data?.drugList);
 
-      setPeriodicDropDownList(openNotificationListResponse?.data?.periodic);
+      setPeriodicDropDownList(openNotificationListResponse?.data?.periodicList);
       setFinancialDropDownList(
         openNotificationListResponse?.data?.financialYearList
       );
@@ -160,13 +162,14 @@ const OpenNotification = () => {
           return ele.id === elem.id;
         });
       });
-      console.log("leftSelectedDrugList", leftSelectedDrugList);
+
       setDrugFirstClick(true);
       setDrugTempArray(drugListByProgramIdResponse?.data);
       setSelectedDrugItemActiveIndices(
         drugListByProgramIdResponse?.data?.map(() => true)
       );
       setSelectedDrugItem(drugListByProgramIdResponse?.data);
+
       setDrugActiveIndicies(
         drugListByProgramIdResponse?.data?.map(() => false)
       );
@@ -196,9 +199,27 @@ const OpenNotification = () => {
   useEffect(() => {
     if (
       saveDemandNotificationResponse &&
-      saveDemandNotificationResponse?.status === 201
+      saveDemandNotificationResponse?.status ===
+        NETWORK_STATUS_CODE.CREATED_SUCCESSFULLY
     ) {
-      navigate("/openNotificationDesk");
+      if (
+        saveDemandNotificationResponse?.data?.status ===
+        SERVER_STATUS_CODE.SUCCESS
+      ) {
+        toastMessage(
+          "Notification Desk",
+          saveDemandNotificationResponse?.data?.message
+        );
+        navigate("/openNotificationDesk");
+      } else if (
+        saveDemandNotificationResponse?.data?.status ===
+        SERVER_STATUS_CODE.FAILED
+      ) {
+        toastMessage(
+          "Notification Desk",
+          saveDemandNotificationResponse?.data?.message
+        );
+      }
     }
   }, [saveDemandNotificationResponse]);
 
@@ -520,10 +541,10 @@ const OpenNotification = () => {
     setSelectedProgrammeItem([]);
 
     setProgrammeActiveIndicies(
-      openNotificationListResponse?.data?.programDrugLists?.map(() => false)
+      openNotificationListResponse?.data?.programMappingList?.map(() => false)
     );
-    setCopyprogrmmeData(openNotificationListResponse?.data?.programDrugLists);
-    setprogrammeData(openNotificationListResponse?.data?.programDrugLists);
+    setCopyprogrmmeData(openNotificationListResponse?.data?.programMappingList);
+    setprogrammeData(openNotificationListResponse?.data?.programMappingList);
   };
 
   const getDrugListByProgId = () => {

@@ -19,7 +19,12 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserList, getUserListResponse } from "../../../store/admin/action";
+import {
+  deleteUser,
+  getUserList,
+  getUserListResponse,
+  userDeleteResponse,
+} from "../../../store/admin/action";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
 import StyledTableRow from "../../../components/tables/datatable/customTableRow";
 import handleSortingFunc from "../../../components/tables/datatable/sortable";
@@ -29,21 +34,35 @@ import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder"
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
 import { useNavigate } from "react-router-dom";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
+import searchFunc from "../../../components/tables/searchFunc";
+import {
+  DELETE_MESSAGE_DESCRIPTION,
+  INTERNET_CONNECTION_MESSAGE,
+  NETWORK_STATUS_CODE,
+  SERVER_STATUS_CODE,
+  SORTINGORDER,
+} from "../../../common/constant/constant";
 
 const CreateUserModalForm = lazy(() => import("./createusermodalform"));
 const EditUserModalForm = lazy(() => import("./editusermodalform"));
 const UserActivityListModal = lazy(() => import("./useractivitylistmodal"));
-
+const AlertDialog = lazy(() => import("../../../components/dialog/dialog"));
 const UserDesk = () => {
-  const userListResponse = useSelector((state) => state.admin.userListResponse);
+  const userListResponse = useSelector(
+    (state) => state?.admin?.userListResponse
+  );
+  const deleteUserResponse = useSelector(
+    (state) => state?.admin?.deleteResponse
+  );
   console.log("userListResponse", userListResponse);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [sortField, setSortField] = useState("");
-  const [order, setOrder] = useState("asc");
-  const [totalPages, setTotalPages] = useState(0);
+  const [order, setOrder] = useState(SORTINGORDER.ASC);
   const [totalRows, setTotalRows] = useState(0);
   const [tableData, setTableData] = useState([]);
+  const [filterData, setFilterData] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
 
   const [controller, setController] = useState({
     page: 0,
@@ -53,9 +72,8 @@ const UserDesk = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editData, setEditData] = useState("");
-
-  const [activityList, setActivityList] = useState([]);
-  const [activityType, setActivityType] = useState([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteId, setDeleteId] = useState("");
   const [showActivityModal, setShowActivityModal] = useState(false);
   const [roleList, setRoleList] = useState([]);
   const [storeList, setStoreList] = useState([]);
@@ -139,7 +157,9 @@ const UserDesk = () => {
   };
   const handleSortingChange = (accessor) => {
     const sortOrder =
-      accessor === sortField && order === "asc" ? "desc" : "asc";
+      accessor === sortField && order === SORTINGORDER.ASC
+        ? SORTINGORDER.DESC
+        : SORTINGORDER.ASC;
     setSortField(accessor);
     setOrder(sortOrder);
     setTableData(handleSortingFunc(accessor, sortOrder, tableData));
@@ -163,32 +183,47 @@ const UserDesk = () => {
   }, [controller]);
 
   useEffect(() => {
-    if (userListResponse && userListResponse?.status === 200) {
+    if (
+      userListResponse &&
+      userListResponse?.status === NETWORK_STATUS_CODE.SUCCESS
+    ) {
       if (
         userListResponse?.data?.pageList &&
         userListResponse?.data?.pageList?.content
       ) {
-        setTotalPages(userListResponse?.data?.pageList?.totalPages);
         setTotalRows(userListResponse?.data?.pageList?.totalElements);
         setTableData(userListResponse?.data?.pageList?.content);
+        setFilterData(userListResponse?.data?.pageList?.content);
         setRoleList(userListResponse?.data?.roleList);
         setStoreList(userListResponse?.data?.storeList);
 
         setLoading(false);
         dispatch(getUserListResponse(""));
-      } else if (userListResponse?.data?.status === 401) {
+      } else if (
+        userListResponse?.data?.status ===
+        NETWORK_STATUS_CODE.UNAUTHORIZED_ACCESS
+      ) {
         setLoading(false);
         navigate("/");
       }
-    } else if (userListResponse && userListResponse?.code === "ERR_NETWORK") {
+    } else if (
+      userListResponse &&
+      userListResponse?.code === NETWORK_STATUS_CODE.NETWORK_ERROR
+    ) {
       setLoading(false);
-      toastMessage("User Desk", "Internet Connection Problem");
+      toastMessage("User Desk", INTERNET_CONNECTION_MESSAGE);
       dispatch(getUserListResponse(""));
-    } else if (userListResponse && userListResponse?.status == 400) {
+    } else if (
+      userListResponse &&
+      userListResponse?.status == NETWORK_STATUS_CODE.BAD_REQUEST
+    ) {
       setLoading(false);
       toastMessage("User Desk", "", "error");
       dispatch(getUserListResponse(""));
-    } else if (userListResponse && userListResponse?.response?.status == 500) {
+    } else if (
+      userListResponse &&
+      userListResponse?.response?.status == NETWORK_STATUS_CODE.PAGE_NOT_FOUND
+    ) {
       setLoading(false);
       dispatch(getUserListResponse(""));
       toastMessage(
@@ -198,6 +233,46 @@ const UserDesk = () => {
       );
     }
   }, [userListResponse]);
+
+  useEffect(() => {
+    if (
+      deleteUserResponse &&
+      deleteUserResponse?.status === NETWORK_STATUS_CODE.CREATED_SUCCESSFULLY
+    ) {
+      if (deleteUserResponse?.data?.status === SERVER_STATUS_CODE.SUCCESS) {
+        setShowDeleteDialog(false);
+        toastMessage("USER DESK", deleteUserResponse?.data?.message);
+        dispatch(
+          getUserList({
+            pageNumber: controller.page,
+            pageSize: controller.rowsPerPage,
+          })
+        );
+        dispatch(userDeleteResponse(""));
+      } else if (
+        deleteUserResponse?.data?.status === SERVER_STATUS_CODE.FAILED
+      ) {
+        setShowDeleteDialog(false);
+        toastMessage("USER DESK", deleteUserResponse?.data?.message);
+        dispatch(userDeleteResponse(""));
+      }
+    } else if (
+      deleteUserResponse &&
+      deleteUserResponse?.status === NETWORK_STATUS_CODE.INTERNAL_ERROR
+    ) {
+      setShowDeleteDialog(false);
+      toastMessage(
+        "ROLE DESK",
+        "Something went wrong to delete the record Please try again"
+      );
+    } else if (
+      deleteUserResponse &&
+      deleteUserResponse?.status === NETWORK_STATUS_CODE.PAGE_NOT_FOUND
+    ) {
+      setShowDeleteDialog(false);
+      toastMessage("USER DESK", deleteUserResponse?.data?.message);
+    }
+  }, [deleteUserResponse]);
 
   const handleCloseCreateUserModal = useCallback(() => {
     setShowAddModal(false);
@@ -209,6 +284,14 @@ const UserDesk = () => {
   const handleCloseActivityListModal = useCallback(() => {
     setShowActivityModal(true);
   }, [showActivityModal]);
+
+  const handleDeleteDialog = () => {
+    setDeleteId("");
+    setShowDeleteDialog(false);
+  };
+  const handleDeleteUser = () => {
+    dispatch(deleteUser({ userName: deleteId }));
+  };
   return (
     <>
       <Seo title="DVDMS | User Desk" description="User Desk" />
@@ -225,7 +308,7 @@ const UserDesk = () => {
           <Basicbutton
             buttonText="Add New User"
             outlineType={true}
-            className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
+            className="btn btn-outline-primary btn-sm rounded-0 mb-2 me-1 mt-2"
             onClick={() => {
               setDropDownRoleList(roleList);
               setDropDownStoreList(storeList);
@@ -236,8 +319,17 @@ const UserDesk = () => {
             className="me-1 "
             iconPosition="end"
             iconName={faSearch}
+            disabled={tableData.length === 0 ? true : false}
             onChange={(e) => {
-              console.log(e);
+              if (e.target?.value != "") {
+                console.log(e.target?.value);
+                setSearchValue(e?.target?.value);
+                console.log("filterData", filterData);
+                setTableData(searchFunc(filterData, e.target?.value));
+              } else {
+                setTableData(filterData);
+                setSearchValue("");
+              }
             }}
           />
         </div>
@@ -262,7 +354,7 @@ const UserDesk = () => {
                   tableData.length > 0 &&
                   tableData.map((data, index) => {
                     return (
-                      <StyledTableRow key={data.id}>
+                      <StyledTableRow key={data?.username}>
                         <StyledTableCell padding="none">
                           {data.username}
                         </StyledTableCell>
@@ -319,6 +411,10 @@ const UserDesk = () => {
                               fontSize: "0.7rem",
                               cursor: "pointer",
                             }}
+                            onClick={() => {
+                              setDeleteId(data?.username);
+                              setShowDeleteDialog(true);
+                            }}
                           >
                             <FontAwesomeIcon
                               icon={faTrash}
@@ -331,7 +427,11 @@ const UserDesk = () => {
                     );
                   })
                 )}
-                <EmptyRow loading={loading} tableData={tableData} />
+                <EmptyRow
+                  loading={loading}
+                  tableData={tableData}
+                  searchValue={searchValue}
+                />
               </TableBody>
             </TableComponent>
             <TablePagination
@@ -366,6 +466,20 @@ const UserDesk = () => {
           showActivityModal={showActivityModal}
           handleCloseActivityListModal={handleCloseActivityListModal}
         />
+      </Suspense>
+
+      <Suspense>
+        <AlertDialog
+          open={showDeleteDialog}
+          handleClose={handleDeleteDialog}
+          description={DELETE_MESSAGE_DESCRIPTION}
+        >
+          <Basicbutton
+            buttonText="Disagree"
+            onClick={() => setShowDeleteDialog(false)}
+          />
+          <Basicbutton buttonText="Agree" onClick={handleDeleteUser} />
+        </AlertDialog>
       </Suspense>
     </>
   );

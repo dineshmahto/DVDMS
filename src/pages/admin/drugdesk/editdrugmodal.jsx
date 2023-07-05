@@ -1,28 +1,67 @@
-import React from "react";
+import React, { useEffect } from "react";
 import BasicModal from "../../../components/modal/basicmodal";
 import CustomSelect from "../../../components/select/customSelect";
 import Basicbutton from "../../../components/button/basicbutton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
+import { faFloppyDisk, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Form, Formik, Field } from "formik";
 import * as Yup from "yup";
-const EditDrugModal = ({ openEditDrugModal, handleEditDrugModal }) => {
-  const editDrugSchema = Yup.object().shape({
-    drugName: Yup.string()
-      .min(2, "Too Short!")
-      .max(50, "Too Long!")
-      .required("Drug Name is Required"),
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getDrugDeksList,
+  editDrug,
+  editDrugResponse,
+} from "../../../store/admin/action";
+import toastMessage from "../../../common/toastmessage/toastmessage";
 
-    category: Yup.string().ensure().required("Select the Store!"),
-    brandName: Yup.string().required("Select the Parent Store Type"),
-    pkgDescription: Yup.string().required("Packaging Decription is Required"),
-    strgthValue: Yup.string().required("Strength Value is Required"),
-    strgthUnit: Yup.string().required("Strength Unit is Required"),
-    manufactureName: Yup.string()
+const EditDrugModal = ({
+  openEditDrugModal,
+  handleEditDrugModal,
+  editData,
+  classList,
+  manufactureList,
+  categoryList,
+}) => {
+  const dispatch = useDispatch();
+  const editDrugResponses = useSelector((state) => state?.admin?.editDrugResp);
+  console.log("editDrugResponse", editDrugResponses);
+  console.log("editData", editData, editData?.classList);
+
+  const editDrugSchema = Yup.object().shape({
+    drugName: Yup.string().required("Drug Name is Required"),
+
+    categoryId: Yup.string().ensure().required("Select the Store!"),
+    brandName: Yup.string(),
+    packDesc: Yup.string().required("Packaging Decription is Required"),
+    packQty: Yup.string().required("Package Quantity is Required"),
+    strengthValue: Yup.string().required("Strength Value is Required"),
+    strengthUnit: Yup.string().required("Strength Unit is Required"),
+    manufactureId: Yup.string()
       .ensure()
       .required("Select the manufacture Name!"),
-    clasName: Yup.string().ensure().required("Select the Class Name!"),
+    drugClassId: Yup.string().ensure().required("Select the Class Name!"),
   });
+  useEffect(() => {
+    if (editDrugResponses && editDrugResponses?.status === 201) {
+      if (editDrugResponses?.data?.status === 1) {
+        console.log("Dinesh");
+        handleEditDrugModal();
+        toastMessage("DRUG DESK", editDrugResponses?.data?.message);
+        dispatch(editDrugResponse(""));
+        dispatch(getDrugDeksList());
+      } else if (editDrugResponses?.data?.status === 0) {
+        console.log("Kumar");
+        toastMessage("DRUG DESK", editDrugResponses?.data?.message);
+        dispatch(editDrugResponse(""));
+      }
+    } else if (
+      (editDrugResponses && editDrugResponses?.status === 500) ||
+      editDrugResponses?.status === 404
+    ) {
+      handleEditDrugModal();
+      toastMessage("DRUG DESK", "Something went wrong");
+    }
+  }, [editDrugResponses]);
   return (
     <>
       <BasicModal
@@ -33,27 +72,30 @@ const EditDrugModal = ({ openEditDrugModal, handleEditDrugModal }) => {
         }}
         isStatic={false}
         scrollable={true}
-        isCenterAlign={false}
+        isCenterAlign={true}
         fullScreen={false}
         size="lg"
         key="edit_new_drug"
       >
         <Formik
+          validateOnMount
           initialValues={{
-            drugName: "",
-            category: "",
-            brandName: "",
-            pkgDescription: "",
-            pkgQty: "",
-            strgthValue: "",
-            strgthUnit: "",
-            mfgName: "",
-            clsName: "",
+            id: editData?.id,
+            drugName: editData?.name,
+            categoryId: editData?.categoryId,
+            brandName: editData?.brandName === null ? "" : editData?.brandName,
+            packDesc: editData?.packDesc,
+            packQty: editData?.packQty,
+            strengthValue: editData?.strengthValue,
+            strengthUnit: editData?.unit,
+            manufactureId: editData?.manuId,
+            drugClassId: editData?.drugClassId,
           }}
           validationSchema={editDrugSchema}
           onSubmit={async (values) => {
+            console.log("values", values);
             await new Promise((r) => setTimeout(r, 500));
-            alert(JSON.stringify(values, null, 2));
+            dispatch(editDrug(values));
           }}
         >
           {({
@@ -64,6 +106,8 @@ const EditDrugModal = ({ openEditDrugModal, handleEditDrugModal }) => {
             handleChange,
             handleBlur,
             setFieldTouched,
+            setFieldValue,
+            isValid,
           }) => (
             <Form>
               <div className="row">
@@ -92,7 +136,39 @@ const EditDrugModal = ({ openEditDrugModal, handleEditDrugModal }) => {
                       ) : null}
                     </div>
                   </div>
-
+                  <div className="row mb-2">
+                    <div className="col-3">
+                      <label htmlFor="categoryId" class="col-form-label">
+                        Category :
+                      </label>
+                    </div>
+                    <div className="col-9">
+                      <CustomSelect
+                        id="categoryId"
+                        name="categoryId"
+                        defaultValue={categoryList?.find(
+                          (c) => c.value === values?.categoryId
+                        )}
+                        value={categoryList?.find(
+                          (c) => c.value === values?.categoryId
+                        )}
+                        onChange={(val) => {
+                          setFieldValue("categoryId", val.value);
+                        }}
+                        options={
+                          categoryList && categoryList?.length > 0
+                            ? categoryList
+                            : []
+                        }
+                        onBlur={setFieldTouched}
+                      />
+                      {errors.categoryId && touched.categoryId ? (
+                        <div className="text-danger float-end">
+                          {errors.categoryId}
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
                   <div className="row mb-2">
                     <div className="col-3">
                       <label htmlFor="brandName" class="col-form-label">
@@ -107,6 +183,8 @@ const EditDrugModal = ({ openEditDrugModal, handleEditDrugModal }) => {
                         type="text"
                         placeholder="Enter Brand Name"
                         id="brandName"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
                       />
                       {errors.brandName && touched.brandName ? (
                         <div className="text-danger float-end">
@@ -118,22 +196,24 @@ const EditDrugModal = ({ openEditDrugModal, handleEditDrugModal }) => {
 
                   <div className="row mb-2">
                     <div className="col-3">
-                      <label htmlFor="pkgDescription" class="col-form-label">
+                      <label htmlFor="packDesc" class="col-form-label">
                         Package Description :
                       </label>
                     </div>
                     <div className="col-9">
                       <Field
                         className="form-control shadow-none"
-                        value={values?.pkgDescription}
+                        value={values?.packDesc}
                         type="text"
                         placeholder="Enter Brand Name"
-                        id="pkgDescription"
-                        name="pkgDescription"
+                        id="packDesc"
+                        name="packDesc"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
                       />
-                      {errors.pkgDescription && touched.pkgDescription ? (
+                      {errors.packDesc && touched.packDesc ? (
                         <div className="text-danger flaot-end">
-                          {errors.pkgDescription}
+                          {errors.packDesc}
                         </div>
                       ) : null}
                     </div>
@@ -141,22 +221,24 @@ const EditDrugModal = ({ openEditDrugModal, handleEditDrugModal }) => {
 
                   <div className="row mb-2">
                     <div className="col-3">
-                      <label htmlFor="pkgQty" class="col-form-label">
+                      <label htmlFor="packQty" class="col-form-label">
                         Package Qty :
                       </label>
                     </div>
                     <div className="col-9">
                       <Field
                         className="form-control shadow-none"
-                        value={values?.pkgQty}
+                        value={values?.packQty}
                         type="text"
                         placeholder="e.g 10, 100"
-                        id="pkgQty"
-                        name="pkgQty"
+                        id="packQty"
+                        name="packQty"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
                       />
-                      {errors.pkgQty && touched.pkgQty ? (
+                      {errors.packQty && touched.packQty ? (
                         <div className="text-danger float-end">
-                          {errors.pkgQty}
+                          {errors.packQty}
                         </div>
                       ) : null}
                     </div>
@@ -164,22 +246,24 @@ const EditDrugModal = ({ openEditDrugModal, handleEditDrugModal }) => {
 
                   <div className="row mb-2">
                     <div className="col-3">
-                      <label htmlFor="strgthValue" class="col-form-label">
+                      <label htmlFor="strengthValue" class="col-form-label">
                         Strength Value :
                       </label>
                     </div>
                     <div className="col-9">
                       <Field
                         className="form-control shadow-none"
-                        value={values?.strgthValue}
+                        value={values?.strengthValue}
                         type="text"
                         placeholder="e.g 250, 500, 125/5"
-                        id="strgthValue"
-                        name="strgthValue"
+                        id="strengthValue"
+                        name="strengthValue"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
                       />
-                      {errors.strgthValue && touched.strgthValue ? (
+                      {errors.strengthValue && touched.strengthValue ? (
                         <div className="text-danger float-end">
-                          {errors.strgthValue}
+                          {errors.strengthValue}
                         </div>
                       ) : null}
                     </div>
@@ -187,22 +271,24 @@ const EditDrugModal = ({ openEditDrugModal, handleEditDrugModal }) => {
 
                   <div className="row mb-2">
                     <div className="col-3">
-                      <label htmlFor="strgthUnit" class="col-form-label">
+                      <label htmlFor="strengthUnit" class="col-form-label">
                         Strength Unit :
                       </label>
                     </div>
                     <div className="col-9">
                       <Field
                         className="form-control shadow-none"
-                        value={values?.strgthUnit}
+                        value={values?.strengthUnit}
                         type="text"
                         placeholder="e.g mg mg/ml"
-                        id="strgthUnit"
-                        name="strgthUnit"
+                        id="strengthUnit"
+                        name="strengthUnit"
+                        onChange={handleChange}
+                        onBlur={handleBlur}
                       />
-                      {errors.strgthUnit && touched.strgthUnit ? (
+                      {errors.strengthUnit && touched.strengthUnit ? (
                         <div className="text-danger float-end">
-                          {errors.strgthUnit}
+                          {errors.strengthUnit}
                         </div>
                       ) : null}
                     </div>
@@ -210,24 +296,33 @@ const EditDrugModal = ({ openEditDrugModal, handleEditDrugModal }) => {
 
                   <div className="row mb-2">
                     <div className="col-3">
-                      <label htmlFor="mfgName" class="col-form-label">
+                      <label htmlFor="manufactureId" class="col-form-label">
                         Manufacture Name :
                       </label>
                     </div>
                     <div className="col-9">
                       <CustomSelect
-                        value={values?.mfgName}
-                        id="mfgName"
-                        name="mfgName"
-                        options={[]}
-                        onBlur={setFieldTouched}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
+                        id="manufactureId"
+                        name="manufactureId"
+                        defaultValue={manufactureList?.find(
+                          (c) => c.value === values?.manufactureId
+                        )}
+                        value={manufactureList?.find(
+                          (c) => c.value === values?.manufactureId
+                        )}
+                        onChange={(val) => {
+                          setFieldValue("manufactureId", val.value);
                         }}
+                        options={
+                          manufactureList && manufactureList?.length > 0
+                            ? manufactureList
+                            : []
+                        }
+                        onBlur={setFieldTouched}
                       />
-                      {errors.mfgName && touched.mfgName ? (
+                      {errors.manufactureId && touched.manufactureId ? (
                         <div className="text-danger float-end">
-                          {errors.mfgName}
+                          {errors.manufactureId}
                         </div>
                       ) : null}
                     </div>
@@ -235,24 +330,31 @@ const EditDrugModal = ({ openEditDrugModal, handleEditDrugModal }) => {
 
                   <div className="row mb-2">
                     <div className="col-3">
-                      <label htmlFor="clsName" class="col-form-label">
+                      <label htmlFor="drugClassId" class="col-form-label">
                         Class Name :
                       </label>
                     </div>
                     <div className="col-9">
                       <CustomSelect
-                        value={values?.clsName}
-                        name="clsName"
-                        id="clsName"
-                        onBlur={setFieldTouched}
-                        options={[]}
-                        onChange={(choice) => {
-                          console.log(choice?.value);
+                        name="drugClassId"
+                        id="drugClassId"
+                        defaultValue={classList?.find(
+                          (c) => c.value === values?.drugClassId
+                        )}
+                        value={classList?.find(
+                          (c) => c.value === values?.drugClassId
+                        )}
+                        onChange={(val) => {
+                          setFieldValue("drugClassId", val.value);
                         }}
+                        options={
+                          classList && classList?.length > 0 ? classList : []
+                        }
+                        onBlur={setFieldTouched}
                       />
-                      {errors.clsName && touched.clsName ? (
+                      {errors.drugClassId && touched.drugClassId ? (
                         <div className="text-danger float-end">
-                          {errors.clsName}
+                          {errors.drugClassId}
                         </div>
                       ) : null}
                     </div>
@@ -263,16 +365,13 @@ const EditDrugModal = ({ openEditDrugModal, handleEditDrugModal }) => {
                       <div className="d-flex justify-content-center">
                         <Basicbutton
                           icon={
-                            <FontAwesomeIcon
-                              icon={faFloppyDisk}
-                              className="me-1"
-                            />
+                            <FontAwesomeIcon icon={faXmark} className="me-1" />
                           }
-                          type="submit"
+                          type="button"
                           buttonText="Cancel"
-                          className="secondary"
+                          className="danger rounded-0 me-2"
                           outlineType={true}
-                          disabled={isSubmitting}
+                          onClick={() => handleEditDrugModal()}
                         />
                         <Basicbutton
                           icon={
@@ -283,9 +382,9 @@ const EditDrugModal = ({ openEditDrugModal, handleEditDrugModal }) => {
                           }
                           type="submit"
                           buttonText="Update"
-                          className="success"
+                          className="success rounded-0"
                           outlineType={true}
-                          disabled={isSubmitting}
+                          disabled={!isValid}
                         />
                       </div>
                     </div>

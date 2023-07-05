@@ -1,5 +1,6 @@
-import { call, put, takeEvery } from "redux-saga/effects";
+import { call, put, take, takeEvery } from "redux-saga/effects";
 import {
+  createNewBudgetDeskResponse,
   createNewBudgetInterfaceResponse,
   createNewDrugResponse,
   createProgramResponse,
@@ -7,6 +8,7 @@ import {
   createStoreResponse,
   createUserResponse,
   deleteProgramResponse,
+  getBudgetDetalsResponse,
   getBudgetIterfaceListResponse,
   getDrugDeksListResponse,
   getEdlMappingListResponse,
@@ -23,11 +25,28 @@ import {
   postProgrmFundingResponse,
   roleDeleteResponse,
   updateProgramResponse,
+  editFundingSourceResponse,
+  getActivityByRoleIdResp,
+  userDeleteResponse,
+  getFundingSourceByPrgrmNameResponse,
+  getDrugListByStoreTypeResponse,
+  deleteDrugResponse,
+  editDrugResponse,
+  updateFundingRecordResponse,
+  deleteFundingRecordResp,
+  createFundingSourceResponse,
+  editStoreRecordResponse,
+  deleteStoreRecordResponse,
+  editRoleResponse,
+  createEdlMappingResponse,
+  createEdlMapingResponse,
+  createProgramFundingResponse,
 } from "./action";
 import { Service } from "../../config/commonFetch";
 
 import {
   CREATE_NEW_BUDGET,
+  CREATE_NEW_BUDGET_DESK,
   CREATE_NEW_DRUG,
   CREATE_NEW_FUNDING,
   CREATE_PROGRAM,
@@ -36,6 +55,7 @@ import {
   CREATE_USER,
   DELETE_PROGRAM,
   DELETE_ROLE,
+  GET_BUDGET_DETAILS,
   GET_BUDGET_INTERFACE_LIST,
   GET_DRUG_DESK_LIST,
   GET_EDL_MAPPING,
@@ -52,6 +72,21 @@ import {
   POST_PROGRAM_FUND_MAPPING,
   ROLE_DELETED_SUCCESSFULL,
   UPDATE_PROGRAM,
+  EDIT_NEW_FUNDING,
+  EDIT_NEW_FUNDING_RESPONSE,
+  GET_ACTIVITY_LIST_BY_ROLE_ID,
+  DELETE_USER,
+  GET_FUNDING_SOURCE_BY_PORGRM_NAME,
+  GET_DRUG_LIST_BY_STORE_TYPE,
+  DELETE_DRUG,
+  EDIT_DRUG,
+  UPDATE_FUNDING_RECORD,
+  DELETE_FUNDING_RECORD,
+  EDIT_STORE_RECORD,
+  DELETE_STORE_RECORD,
+  EDIT_ROLE,
+  CREATE_EDL_MAPPING,
+  CREATE_PROGRAM_FUNDING,
 } from "./actionTypes";
 import * as CONSTANTS from "../../common/constant/constants";
 
@@ -59,15 +94,31 @@ function* deleteRoleById({ payload: roleId }) {
   console.log("RoleId", roleId);
   try {
     const response = yield call(
-      Service.commonFetch,
-      `issue/issueList/${roleId}`,
-      null
+      Service.commonPost,
+      CONSTANTS.DELETE_ROLE,
+      roleId
     );
     console.log("Response", response);
     yield put(roleDeleteResponse(response));
   } catch (error) {
     console.log("Error", error);
     put(roleDeleteResponse(error));
+  }
+}
+
+function* deleteUserById({ payload: userId }) {
+  console.log("userId", userId);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.DELETE_USER,
+      userId
+    );
+    console.log("Response", response);
+    yield put(userDeleteResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(userDeleteResponse(error));
   }
 }
 
@@ -223,6 +274,24 @@ function* getBudgetInterfaceList({ payload: pageDetails }) {
   }
 }
 
+function* getBudgetDetails({ payload: details }) {
+  console.log("details", details);
+  try {
+    const response = yield call(
+      Service.commonFetch,
+      CONSTANTS.GET_BUDGET_DETAILS,
+      {
+        params: details,
+      }
+    );
+    console.log("Response", response);
+    yield put(getBudgetDetalsResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(getBudgetDetalsResponse(error));
+  }
+}
+
 function* getDrugDeskList({ payload: pageDetails }) {
   console.log("pageDetails", pageDetails);
   try {
@@ -259,6 +328,22 @@ function* getEdlMappingList({ payload: pageDetails }) {
   }
 }
 
+function* createEdlMapping({ payload: edlDetails }) {
+  console.log("edlDetails", edlDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.CREATE_EDL_MAPPING,
+      edlDetails
+    );
+    console.log("Response", response);
+    yield put(createEdlMapingResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(createEdlMapingResponse(error));
+  }
+}
+
 function* getProgrameFundingSourceList({ payload: pageDetails }) {
   console.log("pageDetails", pageDetails);
   try {
@@ -274,6 +359,58 @@ function* getProgrameFundingSourceList({ payload: pageDetails }) {
   } catch (error) {
     console.log("Error", error);
     put(getProgrameFundingSourceListResponse(error));
+  }
+}
+
+function* getFundingSourceListByProgrmName({ payload: progrmName }) {
+  console.log("progrmName", progrmName);
+  try {
+    const response = yield call(
+      Service.commonFetch,
+      CONSTANTS.GET_FUNDING_SRC_BY_PROGRM_NAME,
+      {
+        params: progrmName,
+      }
+    );
+    console.log("Response", response);
+    yield put(getFundingSourceByPrgrmNameResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(getFundingSourceByPrgrmNameResponse(error));
+  }
+}
+
+function* createProgramFunding({ payload: programFundingDetails }) {
+  console.log("programFundingDetails", programFundingDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.CREATE_PROGRAMME_FUNDING,
+      programFundingDetails
+    );
+    console.log("Response", response);
+    yield put(createProgramFundingResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(createProgramFundingResponse(error));
+  }
+}
+
+function* getDrugListByStoreType({ payload: storeType }) {
+  console.log("storeType", storeType);
+  try {
+    const response = yield call(
+      Service.commonFetch,
+      CONSTANTS.GET_DRUG_LIST_BY_STORE_TYPE,
+      {
+        params: storeType,
+      }
+    );
+    console.log("Response", response);
+    yield put(getDrugListByStoreTypeResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(getDrugListByStoreTypeResponse(error));
   }
 }
 
@@ -327,6 +464,37 @@ function* createStore({ payload: storeDetails }) {
   }
 }
 
+function* editStoreRecord({ payload: storeDetails }) {
+  console.log("storeDetails", storeDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.EDIT_STORE_RECORD,
+      storeDetails
+    );
+    console.log("Response", response);
+    yield put(editStoreRecordResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(editStoreRecordResponse(error));
+  }
+}
+
+function* deleteStoreRecord({ payload: storeId }) {
+  console.log("storeId", storeId);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.DELETE_STORE_RECORD,
+      storeId
+    );
+    console.log("Response", response);
+    yield put(deleteStoreRecordResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(deleteStoreRecordResponse(error));
+  }
+}
 function* createProgram({ payload: programDetails }) {
   console.log("programDetails", programDetails);
   try {
@@ -391,6 +559,40 @@ function* createRole({ payload: roleDetails }) {
   }
 }
 
+function* editRole({ payload: roleDetails }) {
+  console.log("roleDetails", roleDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.UPDATE_ROLE,
+      roleDetails
+    );
+    console.log("Response", response);
+    yield put(editRoleResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(editRoleResponse(error));
+  }
+}
+
+function* getActivityListByType({ payload: roleId }) {
+  console.log("roleDetails", roleId);
+  try {
+    const response = yield call(
+      Service.commonFetch,
+      CONSTANTS.GET_ACTIVITLY_LIST_BY_CODE,
+      {
+        params: roleId,
+      }
+    );
+    console.log("Response", response);
+    yield put(getActivityByRoleIdResp(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(getActivityByRoleIdResp(error));
+  }
+}
+
 function* postProgramFunding({ payload: prgmFundingDetails }) {
   console.log("prgmFundingDetails", prgmFundingDetails);
   try {
@@ -440,7 +642,7 @@ function* createNewBudgetInterface({ payload: budgetDetails }) {
 }
 
 function* createNewFundingSource({ payload: fundingSrcDetails }) {
-  console.log("budgetDetails", fundingSrcDetails);
+  console.log("fundingSrcDetails", fundingSrcDetails);
   try {
     const response = yield call(
       Service.commonPost,
@@ -448,14 +650,111 @@ function* createNewFundingSource({ payload: fundingSrcDetails }) {
       fundingSrcDetails
     );
     console.log("Response", response);
-    yield put(createNewBudgetInterfaceResponse(response));
+    yield put(createFundingSourceResponse(response));
   } catch (error) {
     console.log("Error", error);
-    put(createNewBudgetInterfaceResponse(error));
+    put(createFundingSourceResponse(error));
+  }
+}
+
+function* updateFundingRcrd({ payload: fundingRecrdDetails }) {
+  console.log("fundingRecrdDetails", fundingRecrdDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.UPDATE_FUNDING_RECORD,
+      fundingRecrdDetails
+    );
+    console.log("Response", response);
+    yield put(updateFundingRecordResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(updateFundingRecordResponse(error));
+  }
+}
+
+function* deleteFundingRcrd({ payload: fundingRecrdDetails }) {
+  console.log("fundingRecrdDetails", fundingRecrdDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.DELETE_FUNDING_RECORD,
+      fundingRecrdDetails
+    );
+    console.log("Response", response);
+    yield put(deleteFundingRecordResp(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(deleteFundingRecordResp(error));
+  }
+}
+
+function* createNewBudgetDesk({ payload: budgetDetails }) {
+  console.log("budgetDetails", budgetDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.CREATE_NEW_BUDGET_DESK,
+      budgetDetails
+    );
+    console.log("Response", response);
+    yield put(createNewBudgetDeskResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(createNewBudgetDeskResponse(error));
+  }
+}
+
+function* editNewFundingSource({ payload: editFundingSrcResp }) {
+  console.log("budgetDetails", editFundingSrcResp);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.UPDATE_FUNDING,
+      editFundingSrcResp
+    );
+    console.log("Response", response);
+    yield put(editFundingSourceResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(editFundingSourceResponse(error));
+  }
+}
+
+function* deleteDrug({ payload: drugId }) {
+  console.log("drugId", drugId);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.DELETE_DRUG,
+      drugId
+    );
+    console.log("Response", response);
+    yield put(deleteDrugResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(deleteDrugResponse(error));
+  }
+}
+
+function* editDrug({ payload: drugDetails }) {
+  console.log("drugDetails", drugDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.EDIT_DRUG,
+      drugDetails
+    );
+    console.log("Response", response);
+    yield put(editDrugResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(editDrugResponse(error));
   }
 }
 function* AdminSaga() {
   yield takeEvery(DELETE_ROLE, deleteRoleById);
+  yield takeEvery(DELETE_USER, deleteUserById);
   yield takeEvery(GET_USER_LIST, getUserList);
   yield takeEvery(GET_ROLE_LIST, getRoleList);
   yield takeEvery(GET_PROGRAM_DESK_LIST, getProgramDeskList);
@@ -468,6 +767,13 @@ function* AdminSaga() {
   yield takeEvery(GET_DRUG_DESK_LIST, getDrugDeskList);
   yield takeEvery(GET_EDL_MAPPING, getEdlMappingList);
   yield takeEvery(GET_PROGRAM_FUNDING_SOURCE, getProgrameFundingSourceList);
+  yield takeEvery(GET_BUDGET_DETAILS, getBudgetDetails);
+  yield takeEvery(GET_ACTIVITY_LIST_BY_ROLE_ID, getActivityListByType);
+  yield takeEvery(
+    GET_FUNDING_SOURCE_BY_PORGRM_NAME,
+    getFundingSourceListByProgrmName
+  );
+  yield takeEvery(GET_DRUG_LIST_BY_STORE_TYPE, getDrugListByStoreType);
   // POST
 
   yield takeEvery(CREATE_USER, createUser);
@@ -475,11 +781,22 @@ function* AdminSaga() {
   yield takeEvery(CREATE_STORE, createStore);
   yield takeEvery(CREATE_PROGRAM, createProgram);
   yield takeEvery(CREATE_ROLE, createRole);
+  yield takeEvery(EDIT_ROLE, editRole);
   yield takeEvery(POST_PROGRAM_FUND_MAPPING, postProgramFunding);
   yield takeEvery(POST_EDL_MAPPING, postEDLMapping);
   yield takeEvery(CREATE_NEW_BUDGET, createNewBudgetInterface);
   yield takeEvery(CREATE_NEW_FUNDING, createNewFundingSource);
+  yield takeEvery(EDIT_NEW_FUNDING, editNewFundingSource);
   yield takeEvery(UPDATE_PROGRAM, updateProgram);
   yield takeEvery(DELETE_PROGRAM, deleteProgram);
+  yield takeEvery(CREATE_NEW_BUDGET_DESK, createNewBudgetDesk);
+  yield takeEvery(DELETE_DRUG, deleteDrug);
+  yield takeEvery(EDIT_DRUG, editDrug);
+  yield takeEvery(UPDATE_FUNDING_RECORD, updateFundingRcrd);
+  yield takeEvery(DELETE_FUNDING_RECORD, deleteFundingRcrd);
+  yield takeEvery(EDIT_STORE_RECORD, editStoreRecord);
+  yield takeEvery(DELETE_STORE_RECORD, deleteStoreRecord);
+  yield takeEvery(CREATE_EDL_MAPPING, createEdlMapping);
+  yield takeEvery(CREATE_PROGRAM_FUNDING, createProgramFunding);
 }
 export default AdminSaga;

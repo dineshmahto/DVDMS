@@ -10,10 +10,11 @@ import { useDispatch, useSelector } from "react-redux";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import { getRateContractDeskList } from "../../../store/admin/action";
 import moment from "moment";
-import { Spinner } from "react-bootstrap";
 import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
 import StyledTableRow from "../../../components/tables/datatable/customTableRow";
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
+import TablePagination from "../../../components/tables/datatable/tablepagination";
+import EmptyRow from "../../../components/tables/datatable/emptyRow";
 const AcceptChallan = () => {
   const dispatch = useDispatch();
   const rateContractListResponse = useSelector(
@@ -39,7 +40,7 @@ const AcceptChallan = () => {
       sortable: true,
     },
     {
-      id: "challanNo",
+      id: "tenderNo",
       name: "CHALLAN NUMBER",
       sortable: true,
     },
@@ -51,7 +52,7 @@ const AcceptChallan = () => {
     },
 
     {
-      id: "supName",
+      id: "supplierName",
       name: "SUPPLIER NAME",
       sortable: true,
     },
@@ -203,8 +204,16 @@ const AcceptChallan = () => {
                     );
                   })
                 )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
           </div>
         </div>
       </div>

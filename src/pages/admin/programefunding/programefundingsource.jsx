@@ -6,8 +6,16 @@ import { Paper } from "@mui/material";
 import Basicbutton from "../../../components/button/basicbutton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFloppyDisk, faXmark } from "@fortawesome/free-solid-svg-icons";
-import API from "../../../config/config";
-
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getProgrameFundingSourceList,
+  getProgrameFundingSourceListResponse,
+  getFundingSourceByPrgrmName,
+  getFundingSourceByPrgrmNameResponse,
+  createProgramFunding,
+  createProgramFundingResponse,
+} from "../../../store/admin/action";
+import toastMessage from "../../../common/toastmessage/toastmessage";
 const ProgrameFundingSource = () => {
   const [tempArray, setTempArray] = useState([]);
   const [rightTempArray, setRightTempArray] = useState([]);
@@ -17,35 +25,116 @@ const ProgrameFundingSource = () => {
   const [selectItemActiveIndices, setSelectedItemActiveIndices] = useState([]);
   const [copyData, setCopyData] = useState([]);
   const [transferableRoleList, setTransferableRoleList] = useState([]);
+  const [programList, setProgramList] = useState([]);
+  const finincialYear = [{ value: "2021-2022", label: "2021-22" }];
+  const [programId, setProgramId] = useState("");
+  const [year, setyear] = useState("");
 
-  const fetchApi = async (signal) => {
-    await API.get("", { signal })
-      .then((response) => {
-        console.log("response", response);
-      })
-      .catch((error) => {
-        if (error.name === "AbortError") {
-          console.log("Request canceled", error.message);
-        } else {
-          if (error.response) {
-            console.log("Response", error.response);
-          } else if (error.request) {
-            console.log("Error Request", error.request);
-          } else {
-            console.log("Error", error.message);
-          }
-        }
-      });
-  };
+  const getProgranFundRes = useSelector(
+    (state) => state?.admin?.programFundingSourceResponse
+  );
+  const fundingSrcListByProgrmName = useSelector(
+    (state) => state?.admin?.fundingSourceListByPrgrmResponse
+  );
+  const createProgrmFundingResponse = useSelector(
+    (state) => state?.admin?.createProgramFundingResponse
+  );
+
+  console.log("fundingSrcListByProgrmName", fundingSrcListByProgrmName);
+  console.log("createProgrmFundingResponse", createProgrmFundingResponse);
+  const dispatch = useDispatch();
 
   useEffect(() => {
-    let isMounted = true;
-    const controller = new AbortController();
-    const signal = controller.signal;
-    fetchApi(signal);
+    if (getProgranFundRes && getProgranFundRes?.status === 200) {
+      setProgramList(getProgranFundRes.data.programmeList);
+      setSelectedItem([]);
+      setRightTempArray([]);
+      setFirstClick(false);
+      setSelectedItemActiveIndices([]);
+      setTempArray([]);
+      setActiveIndicies(getProgranFundRes?.data?.sourceList?.map(() => false));
+      setTransferableRoleList(getProgranFundRes?.data?.sourceList);
+      setCopyData(getProgranFundRes?.data?.sourceList);
+      dispatch(getProgrameFundingSourceListResponse(""));
+    } else if (getProgranFundRes && getProgranFundRes?.status === 500) {
+      dispatch(getProgrameFundingSourceListResponse(""));
+      toastMessage("Programme Funding", "Something went wrong", "");
+    }
+  }, [getProgranFundRes]);
+
+  useEffect(() => {
+    if (
+      fundingSrcListByProgrmName &&
+      fundingSrcListByProgrmName?.status === 200
+    ) {
+    } else if (
+      fundingSrcListByProgrmName &&
+      fundingSrcListByProgrmName?.status === 500
+    ) {
+      dispatch(getFundingSourceByPrgrmNameResponse(""));
+      toastMessage("Programme Funding", "Something went wrong", "");
+    }
+  }, [fundingSrcListByProgrmName]);
+
+  useEffect(() => {
+    if (
+      fundingSrcListByProgrmName &&
+      fundingSrcListByProgrmName?.status === 200
+    ) {
+      setFirstClick(true);
+      setTempArray(fundingSrcListByProgrmName?.data);
+      setSelectedItemActiveIndices(
+        fundingSrcListByProgrmName?.data?.map(() => true)
+      );
+      setSelectedItem(fundingSrcListByProgrmName?.data);
+      const leftElelemt = [...copyData].filter((elem) => {
+        return !fundingSrcListByProgrmName?.data?.find((ele) => {
+          return ele.id === elem.id;
+        });
+      });
+      setActiveIndicies(leftElelemt?.map(() => false));
+      setTransferableRoleList(leftElelemt);
+      setCopyData(copyData);
+    }
+  }, [fundingSrcListByProgrmName]);
+
+  useEffect(() => {
+    if (
+      createProgrmFundingResponse &&
+      createProgrmFundingResponse?.status === 201
+    ) {
+      if (createProgrmFundingResponse?.data?.status === 1) {
+        dispatch(getProgrameFundingSourceList());
+        toastMessage(
+          "Programme Funding Desk",
+          createProgrmFundingResponse?.data?.message
+        );
+
+        dispatch(createProgramFundingResponse(""));
+      } else if (createProgrmFundingResponse?.data?.status === 0) {
+        toastMessage(
+          "Programme Funding Desk",
+          createProgrmFundingResponse?.data?.message
+        );
+        dispatch(createProgramFundingResponse(""));
+      }
+    } else if (
+      createProgrmFundingResponse &&
+      createProgrmFundingResponse?.status === 500
+    ) {
+      dispatch(createProgramFundingResponse(""));
+      toastMessage("Programme Funding Desk", "Something went wrong", "");
+    }
+  }, [createProgrmFundingResponse]);
+
+  useEffect(() => {
+    let isApiSubcribed = true;
+    if (isApiSubcribed) {
+      dispatch(getProgrameFundingSourceList());
+    }
     return () => {
-      isMounted = false;
-      isMounted && controller.abort();
+      isApiSubcribed = false;
+      dispatch(getProgrameFundingSourceListResponse(""));
     };
   }, []);
 
@@ -160,34 +249,28 @@ const ProgrameFundingSource = () => {
     const allACtiveClasses = selectItemActiveIndices.every((e) => e === true);
     if (rightTempArray.length > 0) {
       setFirstClick(true);
-      console.log("selectedItem", selectedItem);
       const cloneData = [...selectedItem];
       const rightDispalyList = cloneData.filter((elem) => {
         return !rightTempArray.find((ele) => {
           return ele.id === elem.id;
         });
       });
-      console.log("Right Display List", rightDispalyList);
       setSelectedItemActiveIndices(rightDispalyList?.map(() => true));
       const reverseBackElements = cloneData.filter((elem) => {
         return rightTempArray.find((ele) => {
           return ele.id === elem.id;
         });
       });
-      console.log("ReverseBackElements", reverseBackElements);
       const updateTempArray = tempArray.filter((elem) => {
         return !reverseBackElements.find((ele) => {
           return ele.id === elem.id;
         });
       });
-      console.log("TempArray", updateTempArray);
       setTempArray(updateTempArray);
-      console.log("copiedData", data);
       const storeIntoOne = [...data];
       reverseBackElements.map((elem) => {
         storeIntoOne.push(elem);
       });
-      console.log("storeIntoOne", storeIntoOne);
       setData(storeIntoOne);
       setSelectedItem(rightDispalyList);
       setRightTempArray([]);
@@ -235,8 +318,6 @@ const ProgrameFundingSource = () => {
     activeIndicies
   ) => {
     const cloneData = [...copyiedData];
-    console.log("cloneData", cloneData);
-
     setSelectedItemActiveIndices([]);
     setData(cloneData);
     setRightTempArray([]);
@@ -259,7 +340,17 @@ const ProgrameFundingSource = () => {
                 <div className="row">
                   <div className="col-4">Programme Name</div>
                   <div className="col-8">
-                    <CustomSelect options={[]} />
+                    <CustomSelect
+                      options={programList}
+                      onChange={(val) => {
+                        setProgramId(val?.value);
+                        dispatch(
+                          getFundingSourceByPrgrmName({
+                            programId: val?.value,
+                          })
+                        );
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -269,7 +360,12 @@ const ProgrameFundingSource = () => {
                 <div className="row">
                   <div className="col-4">Financial Year</div>
                   <div className="col-8">
-                    <CustomSelect options={[]} />
+                    <CustomSelect
+                      options={finincialYear}
+                      onChange={(val) => {
+                        setyear(val?.value);
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -299,6 +395,7 @@ const ProgrameFundingSource = () => {
                         tempArray,
                         setTempArray,
                         transferableRoleList,
+
                         setTransferableRoleList,
                         setSelectedItem,
                         setRightTempArray,
@@ -361,6 +458,31 @@ const ProgrameFundingSource = () => {
                             className="me-2"
                           />
                         }
+                        onClick={() => {
+                          if (selectedItem && selectedItem?.length === 0) {
+                            toastMessage(
+                              "PROGRAMME FUNDING",
+                              "please map the Funding Source list"
+                            );
+                          } else {
+                            const cloneData = [...selectedItem];
+                            let programIds = [];
+                            cloneData &&
+                              cloneData.map(({ id }) => {
+                                let ele = {};
+                                ele["id"] = id;
+                                programIds.push(ele);
+                                return id;
+                              });
+                            dispatch(
+                              createProgramFunding({
+                                programmeId: programId,
+                                financialYear: year,
+                                list: programIds,
+                              })
+                            );
+                          }
+                        }}
                       />
                     </div>
                     <div className="ms-1">

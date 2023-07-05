@@ -7,8 +7,11 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   createFundingSource,
   createFundingSourceResponse,
+  getFundingSourceList,
 } from "../../../store/admin/action";
 import toastMessage from "../../../common/toastmessage/toastmessage";
+import moment from "moment";
+import dayjs from "dayjs";
 
 const CreateUserModalForm = ({
   openNewFundinngModal,
@@ -24,6 +27,9 @@ const CreateUserModalForm = ({
     code: Yup.string().required("Code is Required"),
     effectiveDate: Yup.string().required("Effective Date is Required"),
   });
+  const formatDate = (date) => {
+    return dayjs(date).format("MM/DD/YYYY");
+  };
   const fundingFields = [
     {
       type: "text",
@@ -50,12 +56,19 @@ const CreateUserModalForm = ({
     },
   ];
   const handleSubmit = (values) => {
-    dispatch(createFundingSource(values));
+    dispatch(
+      createFundingSource({
+        ...values,
+        effectiveDate: formatDate(values?.effectiveDate),
+      })
+    );
   };
   useEffect(() => {
     if (createFundingSrcResp && createFundingSrcResp?.status === 201) {
       toastMessage("Create New Funding", "Successfully Created");
+      handleNewFundingModal();
       dispatch(createFundingSourceResponse(""));
+      dispatch(getFundingSourceList());
     } else if (createFundingSrcResp && createFundingSrcResp?.status === 500) {
       toastMessage("Create New Funding", "Something went wrong");
       dispatch(createFundingSourceResponse(""));
@@ -71,7 +84,7 @@ const CreateUserModalForm = ({
         }}
         isStatic={false}
         scrollable={true}
-        isCenterAlign={false}
+        isCenterAlign={true}
         fullScreen={false}
         size="lg"
         key="create_new_funding"
@@ -86,6 +99,7 @@ const CreateUserModalForm = ({
           inputs={fundingFields}
           handleSubmit={handleSubmit}
           buttonText="Add Funding"
+          handleCancel={handleNewFundingModal}
         />
       </BasicModal>
     </>

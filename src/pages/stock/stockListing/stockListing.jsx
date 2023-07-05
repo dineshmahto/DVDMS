@@ -1,15 +1,12 @@
 import React, { useState, useMemo, useEffect, lazy, Suspense } from "react";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
-import { TableBody, TableCell } from "@mui/material";
-import { makeStyles } from "@mui/styles";
+import { TableBody } from "@mui/material";
 import { Paper } from "@mui/material";
 import moment from "moment";
 import { Spinner } from "react-bootstrap";
-import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
 import { faPenToSquare } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import CustomTableCell from "../../../components/tables/datatable/customTableRow";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -21,6 +18,13 @@ import StyledTableRow from "../../../components/tables/datatable/customTableRow"
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 import Checkbox from "../../../components/checkbox/checkbox";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import {
+  NETWORK_STATUS_CODE,
+  SORTINGORDER,
+} from "../../../common/constant/constant";
+import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
+import handleSortingFunc from "../../../components/tables/datatable/sortable";
+import dayjs from "dayjs";
 const EditStockListModal = lazy(() => import("./editstocklistmodal"));
 
 const StockListing = () => {
@@ -28,11 +32,10 @@ const StockListing = () => {
   const stockDeskListingResponse = useSelector(
     (state) => state?.stock?.stockDeskListResponse
   );
+  console.log("stockDeskListingResponse", stockDeskListingResponse);
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
-  const [totalPages, setTotalPages] = useState(0);
   const [tableData, setTableData] = useState([]);
-  const [sortedData, handleSorting] = useSortableTable(tableData);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
@@ -120,20 +123,23 @@ const StockListing = () => {
   }, [controller]);
 
   useEffect(() => {
-    if (stockDeskListingResponse && stockDeskListingResponse?.status === 200) {
+    if (
+      stockDeskListingResponse &&
+      stockDeskListingResponse?.status === NETWORK_STATUS_CODE.SUCCESS
+    ) {
       setTotalRows(stockDeskListingResponse?.data?.pageList?.totalElements);
       setTableData(stockDeskListingResponse?.data?.pageList?.content);
       setLoading(false);
     } else if (
       stockDeskListingResponse &&
-      stockDeskListingResponse?.status == 400
+      stockDeskListingResponse?.status == NETWORK_STATUS_CODE.BAD_REQUEST
     ) {
       setLoading(false);
       toastMessage("Stock Listing", "", "error");
       dispatch(getStockDeskListResponse(""));
     } else if (
       stockDeskListingResponse &&
-      stockDeskListingResponse?.status === 500
+      stockDeskListingResponse?.status === NETWORK_STATUS_CODE.INTERNAL_ERROR
     ) {
       setLoading(false);
       toastMessage(
@@ -145,20 +151,7 @@ const StockListing = () => {
     }
   }, [stockDeskListingResponse]);
 
-  const getDaysDiffernce = (expDate) => {
-    var date1 = new Date(expDate);
-    var date2 = new Date();
-
-    var Difference_In_Time = date2.getTime() - date1.getTime();
-
-    // To calculate the no. of days between two dates
-    var Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
-
-    return Math.floor(Difference_In_Days);
-  };
-
   const handlePageChange = (newPage) => {
-    console.log("newPage", newPage);
     setLoading(true);
     setController({
       ...controller,
@@ -174,19 +167,26 @@ const StockListing = () => {
   };
   const handleSortingChange = (accessor) => {
     const sortOrder =
-      accessor === sortField && order === "asc" ? "desc" : "asc";
+      accessor === sortField && order === SORTINGORDER.ASC
+        ? SORTINGORDER.DESC
+        : SORTINGORDER.ASC;
     setSortField(accessor);
     setOrder(sortOrder);
-    handleSorting(accessor, sortOrder);
-    setTableData(sortedData);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
   const handleCheckboxChange = (e) => {
-    console.log("checked", e.target.checked ? 1 : 0);
     setController({
       ...controller,
       check: e.target.checked ? 1 : 0,
     });
   };
+  const handleEditStockListModal = () => {
+    setShowStockEditListModal(false);
+  };
+  const formatDate = (date) => {
+    return dayjs(date).format("MM/DD/YYYY");
+  };
+
   return (
     <>
       <div className="row mt-2">
@@ -221,20 +221,13 @@ const StockListing = () => {
             >
               <TableBody>
                 {loading ? (
-                  <StyledTableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </StyledTableRow>
+                  <TableRowLaoder />
                 ) : (
                   tableData &&
                   tableData.length > 0 &&
                   tableData.map((data, index) => {
-                    const noOfDaysToExp = getDaysDiffernce(
-                      moment(data?.expDate).format("MM/DD/YYYY")
-                    );
                     return (
-                      <StyledTableRow key={data.id}>
+                      <StyledTableRow key={index}>
                         <StyledTableCell padding="none">
                           {data?.storeName}
                         </StyledTableCell>
@@ -248,20 +241,20 @@ const StockListing = () => {
                           {data?.batchNo}
                         </StyledTableCell>
                         <StyledTableCell padding="none">
-                          {moment(data?.expDate).format("DD/MM/YYYY")}
+                          {formatDate(data?.expDate)}
                         </StyledTableCell>
 
                         <StyledTableCell padding="none">
-                          {moment(data?.manufactureDate).format("DD/MM/YYYY")}
+                          {formatDate(data?.manufactureDate)}
                         </StyledTableCell>
                         <StyledTableCell padding="none">
-                          {noOfDaysToExp < 0 ? (
-                            <span class="badge rounded-pill bg-danger text-dark">
-                              Days {noOfDaysToExp}
+                          {data?.dayToExpire < 0 ? (
+                            <span className="badge rounded-pill bg-danger text-dark">
+                              Days {data?.dayToExpire}
                             </span>
                           ) : (
-                            <span class="badge rounded-pill bg-warning text-dark">
-                              Days {noOfDaysToExp}
+                            <span className="badge rounded-pill bg-warning text-dark">
+                              Days {data?.dayToExpire}
                             </span>
                           )}
                           {data?.status === 10
@@ -277,11 +270,11 @@ const StockListing = () => {
 
                         <StyledTableCell padding="none">
                           {data?.availableQty < 100 ? (
-                            <span class="badge rounded-pill bg-danger pe-2 ps-2">
+                            <span className="badge rounded-pill bg-danger pe-2 ps-2">
                               {data?.availableQty}
                             </span>
                           ) : (
-                            <span class="badge rounded-pill bg-primary pe-2 ps-2">
+                            <span className="badge rounded-pill bg-primary pe-2 ps-2">
                               {data?.availableQty}
                             </span>
                           )}
@@ -295,7 +288,6 @@ const StockListing = () => {
                             className="text-decoration-underline ms-1"
                             style={{ fontSize: "0.8rem", cursor: "pointer" }}
                             onClick={() => {
-                              console.log("clicked");
                               setShowStockEditListModal(true);
                               setModalData(data);
                             }}
@@ -327,7 +319,7 @@ const StockListing = () => {
         <EditStockListModal
           data={modalData}
           openEditStockListModal={showStockEditListModal}
-          handleEditStockListModal={setShowStockEditListModal}
+          handleEditStockListModal={handleEditStockListModal}
         />
       </Suspense>
     </>

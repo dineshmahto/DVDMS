@@ -1,5 +1,7 @@
 import {
   CREATE_NEW_BUDGET,
+  CREATE_NEW_BUDGET_DESK,
+  CREATE_NEW_BUDGET_DESK_RESPONSE,
   CREATE_NEW_BUDGET_RESPONSE,
   CREATE_NEW_DRUG,
   CREATE_NEW_DRUG_RESPONSE,
@@ -16,6 +18,8 @@ import {
   DELETE_PROGRAM,
   DELETE_PROGRAM_RESPONSE,
   DELETE_ROLE,
+  GET_BUDGET_DETAILS,
+  GET_BUDGET_DETAILS_RESPONSE,
   GET_BUDGET_INTERFACE_LIST,
   GET_BUDGET_INTERFACE_LIST_RESPONSE,
   GET_DRUG_DESK_LIST,
@@ -47,6 +51,34 @@ import {
   ROLE_DELETED_SUCCESSFULL,
   UPDATE_PROGRAM,
   UPDATE_PROGRAM_RESPONSE,
+  EDIT_NEW_FUNDING,
+  EDIT_NEW_FUNDING_RESPONSE,
+  GET_ACTIVITY_LIST_BY_ROLE_ID,
+  GET_ACTIVITY_LIST_BY_ROLE_ID_RESPONSE,
+  DELETE_USER,
+  DELETE_USER_RESPONSE,
+  GET_DRUG_LIST_BY_STORE_TYPE,
+  GET_DRUG_LIST_BY_STORE_TYPE_RESPONSE,
+  DELETE_DRUG,
+  DELETE_DRUG_RESPONSE,
+  EDIT_DRUG,
+  EDIT_DRUG_RESPONSE,
+  UPDATE_FUNDING_RECORD,
+  UPDATE_FUNDING_RECORD_RSPONSE,
+  DELETE_FUNDING_RECORD,
+  DELETE_FUNDING_RECORD_RESPONSE,
+  EDIT_STORE_RECORD,
+  EDIT_STORE_RECORD_RESPONSE,
+  DELETE_STORE_RECORD,
+  DELETE_STORE_RECORD_RESPONSE,
+  EDIT_ROLE,
+  EDIT_ROLE_RESPONSE,
+  CREATE_EDL_MAPPING,
+  CREATE_EDL_MAPPING_RESPONSE,
+  GET_FUNDING_SOURCE_BY_PORGRM_NAME,
+  GET_FUNDING_SOURCE_BY_PORGRM_NAME_RESPONSE,
+  CREATE_PROGRAM_FUNDING,
+  CREATE_PROGRAM_FUNDING_RESPONSE,
 } from "./actionTypes";
 import {} from "./actionTypes";
 
@@ -60,6 +92,19 @@ export const roleDeleteResponse = (issueList) => {
   return {
     type: ROLE_DELETED_SUCCESSFULL,
     payload: issueList,
+  };
+};
+
+export const deleteUser = (userId) => {
+  return {
+    type: DELETE_USER,
+    payload: userId,
+  };
+};
+export const userDeleteResponse = (userDelteResp) => {
+  return {
+    type: DELETE_USER_RESPONSE,
+    payload: userDelteResp,
   };
 };
 
@@ -195,6 +240,32 @@ export const getBudgetIterfaceListResponse = (budgetInterfaceListResponse) => {
   };
 };
 
+export const getBudgetDetals = (details) => {
+  return {
+    type: GET_BUDGET_DETAILS,
+    payload: details,
+  };
+};
+export const getBudgetDetalsResponse = (budgetDetailsResp) => {
+  return {
+    type: GET_BUDGET_DETAILS_RESPONSE,
+    payload: budgetDetailsResp,
+  };
+};
+
+export const createNewBudgetDesk = (budgetDetails) => {
+  return {
+    type: CREATE_NEW_BUDGET_DESK,
+    payload: budgetDetails,
+  };
+};
+export const createNewBudgetDeskResponse = (createBudgetDeskResp) => {
+  return {
+    type: CREATE_NEW_BUDGET_DESK_RESPONSE,
+    payload: createBudgetDeskResp,
+  };
+};
+
 export const getEdlMappingList = (pageDetails) => {
   return {
     type: GET_EDL_MAPPING,
@@ -205,6 +276,19 @@ export const getEdlMappingListResponse = (edlMappingListResponse) => {
   return {
     type: GET_EDL_MAPPING_RESPONSE,
     payload: edlMappingListResponse,
+  };
+};
+
+export const createEdlMapping = (edlDetails) => {
+  return {
+    type: CREATE_EDL_MAPPING,
+    payload: edlDetails,
+  };
+};
+export const createEdlMapingResponse = (createEdlMapResponse) => {
+  return {
+    type: CREATE_EDL_MAPPING_RESPONSE,
+    payload: createEdlMapResponse,
   };
 };
 
@@ -220,6 +304,47 @@ export const getProgrameFundingSourceListResponse = (
   return {
     type: GET_PROGRAM_FUNDING_SOURCE_RESPONSE,
     payload: programFundingSourceListResponse,
+  };
+};
+
+export const getFundingSourceByPrgrmName = (progrmName) => {
+  return {
+    type: GET_FUNDING_SOURCE_BY_PORGRM_NAME,
+    payload: progrmName,
+  };
+};
+export const getFundingSourceByPrgrmNameResponse = (
+  fundingSourceListByPrgrmResp
+) => {
+  return {
+    type: GET_FUNDING_SOURCE_BY_PORGRM_NAME_RESPONSE,
+    payload: fundingSourceListByPrgrmResp,
+  };
+};
+
+export const createProgramFunding = (programFundingDetails) => {
+  return {
+    type: CREATE_PROGRAM_FUNDING,
+    payload: programFundingDetails,
+  };
+};
+export const createProgramFundingResponse = (crateProgramFundingResp) => {
+  return {
+    type: CREATE_PROGRAM_FUNDING_RESPONSE,
+    payload: crateProgramFundingResp,
+  };
+};
+
+export const getDrugListByStoreType = (storeType) => {
+  return {
+    type: GET_DRUG_LIST_BY_STORE_TYPE,
+    payload: storeType,
+  };
+};
+export const getDrugListByStoreTypeResponse = (drugListByStoreTypeResp) => {
+  return {
+    type: GET_DRUG_LIST_BY_STORE_TYPE_RESPONSE,
+    payload: drugListByStoreTypeResp,
   };
 };
 
@@ -267,10 +392,44 @@ export const createStoreResponse = (createStoreResp) => {
   };
 };
 
+export const editStoreRecord = (storeDetails) => {
+  return {
+    type: EDIT_STORE_RECORD,
+    payload: storeDetails,
+  };
+};
+
+export const editStoreRecordResponse = (createStoreRecordResp) => {
+  return {
+    type: EDIT_STORE_RECORD_RESPONSE,
+    payload: createStoreRecordResp,
+  };
+};
+
+export const deleteStoreRecord = (storeId) => {
+  return {
+    type: DELETE_STORE_RECORD,
+    payload: storeId,
+  };
+};
+
+export const deleteStoreRecordResponse = (deleteStoreRecordResp) => {
+  return {
+    type: DELETE_STORE_RECORD_RESPONSE,
+    payload: deleteStoreRecordResp,
+  };
+};
+
 export const createProgram = (programDetails) => {
   return {
     type: CREATE_PROGRAM,
     payload: programDetails,
+  };
+};
+export const createProgramResponse = (createPrgmResp) => {
+  return {
+    type: CREATE_PORGRAM_RESPONSE,
+    payload: createPrgmResp,
   };
 };
 
@@ -301,13 +460,6 @@ export const deleteProgramResponse = (deleteProgrmResponse) => {
     payload: deleteProgrmResponse,
   };
 };
-export const createProgramResponse = (createPrgmResp) => {
-  return {
-    type: CREATE_PORGRAM_RESPONSE,
-    payload: createPrgmResp,
-  };
-};
-
 export const createRole = (roleDetails) => {
   return {
     type: CREATE_ROLE,
@@ -321,6 +473,34 @@ export const createRoleResponse = (createRoleRsp) => {
     payload: createRoleRsp,
   };
 };
+
+export const editRole = (roleDetails) => {
+  return {
+    type: EDIT_ROLE,
+    payload: roleDetails,
+  };
+};
+
+export const editRoleResponse = (editRoleRsp) => {
+  return {
+    type: EDIT_ROLE_RESPONSE,
+    payload: editRoleRsp,
+  };
+};
+
+export const getActivityByRoleId = (roleId) => {
+  return {
+    type: GET_ACTIVITY_LIST_BY_ROLE_ID,
+    payload: roleId,
+  };
+};
+export const getActivityByRoleIdResp = (activityListByRoleIdResp) => {
+  return {
+    type: GET_ACTIVITY_LIST_BY_ROLE_ID_RESPONSE,
+    payload: activityListByRoleIdResp,
+  };
+};
+
 export const postProgrmFunding = (prgmFundingDetails) => {
   return {
     type: POST_PROGRAM_FUND_MAPPING,
@@ -371,5 +551,72 @@ export const createFundingSourceResponse = (createFundingSrcResp) => {
   return {
     type: CREATE_NEW_FUNDING_RESPONSE,
     payload: createFundingSrcResp,
+  };
+};
+
+export const editFundingSource = (fundingSrDetails) => {
+  return {
+    type: EDIT_NEW_FUNDING,
+    payload: fundingSrDetails,
+  };
+};
+export const editFundingSourceResponse = (editFundingSrcResp) => {
+  return {
+    type: EDIT_NEW_FUNDING_RESPONSE,
+    payload: editFundingSrcResp,
+  };
+};
+
+export const deleteDrug = (drugId) => {
+  return {
+    type: DELETE_DRUG,
+    payload: drugId,
+  };
+};
+export const deleteDrugResponse = (deleteDrugResp) => {
+  return {
+    type: DELETE_DRUG_RESPONSE,
+    payload: deleteDrugResp,
+  };
+};
+
+export const editDrug = (drugDetails) => {
+  return {
+    type: EDIT_DRUG,
+    payload: drugDetails,
+  };
+};
+export const editDrugResponse = (editDrugResp) => {
+  return {
+    type: EDIT_DRUG_RESPONSE,
+    payload: editDrugResp,
+  };
+};
+
+export const updateFundingRecord = (fundingRecrdDetails) => {
+  return {
+    type: UPDATE_FUNDING_RECORD,
+    payload: fundingRecrdDetails,
+  };
+};
+
+export const updateFundingRecordResponse = (updatefundingRecrdResp) => {
+  return {
+    type: UPDATE_FUNDING_RECORD_RSPONSE,
+    payload: updatefundingRecrdResp,
+  };
+};
+
+export const deleteFundingRecord = (fundingRecrdDetails) => {
+  return {
+    type: DELETE_FUNDING_RECORD,
+    payload: fundingRecrdDetails,
+  };
+};
+
+export const deleteFundingRecordResp = (deletefundingRecrdResp) => {
+  return {
+    type: DELETE_FUNDING_RECORD_RESPONSE,
+    payload: deletefundingRecrdResp,
   };
 };

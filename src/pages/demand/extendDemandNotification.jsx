@@ -28,7 +28,7 @@ import {
   updateNotification,
   updateNotificationResponse,
 } from "../../store/demand/action";
-
+import dayjs from "dayjs";
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -60,7 +60,7 @@ const ExtendDemandNotification = () => {
   const [order, setOrder] = useState("asc");
   const [loading, setLoading] = useState(false);
 
-  const [lastDate, setLastDate] = useState("");
+  const [lastDate, setLastDate] = useState(null);
   const [show, setShow] = useState(false);
   const [previewList, setPreviewList] = useState([]);
   const [modalTitle, setModalTitle] = useState("");
@@ -107,7 +107,9 @@ const ExtendDemandNotification = () => {
       setTableData([state]);
     }
   }, [state]);
-
+  const formatDate = (date) => {
+    return dayjs(date).format("MM/DD/YYYY");
+  };
   const handleSubmit = () => {
     if (lastDate === "") {
       toastMessage(
@@ -119,7 +121,7 @@ const ExtendDemandNotification = () => {
       dispatch(
         updateNotification({
           id: state?.id,
-          lastDate: moment(lastDate).format("l"),
+          lastDate: formatDate(lastDate),
         })
       );
     }

@@ -204,7 +204,7 @@ const ReturnDesk = () => {
           <div className="row align-items-center">
             <div className="col-auto">
               <div>
-                <Link to={"/openIssueToThirdparty"}>
+                <Link to={""}>
                   <Basicbutton
                     type="button"
                     buttonText="3rd Party Return"

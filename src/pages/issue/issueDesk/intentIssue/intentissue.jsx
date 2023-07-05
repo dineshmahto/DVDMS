@@ -3,7 +3,6 @@ import HorizonatalLine from "../../../../components/horizontalLine/horizonatalLi
 import TableComponent from "../../../../components/tables/datatable/tableComponent";
 import { TableBody, TableRow, TableCell } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import moment from "moment";
 import {
   faChevronDown,
   faFilePdf,
@@ -15,7 +14,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CustomSelect from "../../../../components/select/customSelect";
 import Basicbutton from "../../../../components/button/basicbutton";
 import SearchField from "../../../../components/search/search";
-import { Link } from "react-router-dom";
 import { Paper } from "@mui/material";
 import handleSortingFunc from "../../../../components/tables/datatable/sortable";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,14 +27,15 @@ import Typography from "@mui/material/Typography";
 import StyledTableRow from "../../../../components/tables/datatable/customTableRow";
 import StyledTableCell from "../../../../components/tables/datatable/customTableCell";
 import TablePagination from "../../../../components/tables/datatable/tablepagination";
-import { Spinner } from "react-bootstrap";
 import {
   getIntentIssueList,
   getIntentIssueListResponse,
 } from "../../../../store/issue/action";
 import Checkbox from "@mui/material/Checkbox";
 import { useNavigate } from "react-router-dom";
-
+import TableRowLaoder from "../../../../components/tables/datatable/tableRowLaoder";
+import EmptyRow from "../../../../components/tables/datatable/emptyRow";
+const IntentIssueConfirmModal = lazy(() => import("./intentissueconfirmmodal"));
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -60,12 +59,14 @@ const IntentIssue = () => {
   const [totalRows, setTotalRows] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [tableData, setTableData] = useState([]);
+  const [filterData, setFilterData] = useState([]);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
+    status: 99,
   });
   const [loading, setLoading] = useState(false);
-  const [showStockEditListModal, setShowStockEditListModal] = useState(false);
+  const [showIntentIssueModal, setShowIntentIssueModal] = useState(false);
   const [modalData, setModalData] = useState("");
   const [open, setOpen] = useState([]);
   const [selected, setSelected] = useState([]);
@@ -93,9 +94,14 @@ const IntentIssue = () => {
       name: "FROM STORE",
       sortable: true,
     },
+    // {
+    //   id: "remarks",
+    //   name: "REMARKS",
+    //   sortable: true,
+    // },
     {
-      id: "remarks",
-      name: "REMARKS",
+      id: "status",
+      name: "STATUS",
       sortable: true,
     },
   ]);
@@ -132,6 +138,7 @@ const IntentIssue = () => {
           getIntentIssueList({
             pageNumber: controller.page,
             pageSize: controller.rowsPerPage,
+            status: controller.status,
           })
         );
       }, 1000);
@@ -145,6 +152,7 @@ const IntentIssue = () => {
 
   useEffect(() => {
     if (intentIssueListResponse && intentIssueListResponse?.status === 200) {
+      setFilterData(intentIssueListResponse?.data?.pageList?.content);
       setTableData(intentIssueListResponse?.data?.pageList?.content);
       setTotalRows(intentIssueListResponse?.data?.pageList?.totalElements);
       setLoading(false);
@@ -178,9 +186,63 @@ const IntentIssue = () => {
       openCopy.shift();
       openCopy.push(index);
       setSelected(openCopy);
+      setShowIntentIssueModal(true);
     }
   };
+  const handleStatusChange = (selectedOption) => {
+    setController({
+      ...controller,
+      status: selectedOption?.value,
+    });
+  };
 
+  const recursiveSearch = (arr, target) => {
+    for (let i = 0; i < arr.length; i++) {
+      if (arr[i].id === target.id) {
+        return arr[i];
+      }
+      if (arr[i].children) {
+        const result = recursiveSearch(arr[i].children, target);
+        if (result) {
+          return result;
+        }
+      }
+    }
+    return null;
+  };
+
+  // function _find(collection, value) {
+  //   const filteredData = [...collection]?.filter((item) => {
+  //     if (
+  //       Object.values(item)
+  //         .join("")
+  //         .toLowerCase()
+  //         .includes(value?.toLowerCase())
+  //     ) {
+  //       return o;
+  //     }
+
+  //     if (Array.isArray(v)) {
+  //       const _o = _find(v, value);
+  //       if (_o) {
+  //         return _o;
+  //       }
+  //     }
+  //   });
+  // }
+
+  const handleRejectIntent = () => {
+    console.log("selected", selectedRow);
+  };
+
+  const handleIssueIntent = () => {
+    console.log("selected", selected[0]);
+    navigate("/openIssueIndent", { state: selected[0] });
+  };
+
+  const handleIntentIssueModal = () => {
+    setShowIntentIssueModal(false);
+  };
   return (
     <>
       <div className="row mt-2">
@@ -208,31 +270,36 @@ const IntentIssue = () => {
             <div className="col-auto">
               <CustomSelect
                 defaultValue={{
-                  value: "Approved",
-                  label: "Approved",
+                  value: 99,
+                  label: "All",
                 }}
                 options={[
                   {
-                    value: "Approved",
+                    value: 99,
+                    label: "All",
+                  },
+                  {
+                    value: 4,
                     label: "Approved",
                   },
                   {
-                    value: "Rejected",
+                    value: 7,
                     label: "Rejected",
                   },
                   {
-                    value: "Dispatched",
+                    value: 8,
                     label: "Dispatched",
                   },
                   {
-                    value: "Completed",
+                    value: 9,
                     label: "Completed",
                   },
                   {
-                    value: "Partly Issued",
+                    value: 20,
                     label: "Parttly Issued",
                   },
                 ]}
+                onChange={handleStatusChange}
               />
             </div>
           </div>
@@ -250,7 +317,9 @@ const IntentIssue = () => {
               iconPosition="end"
               iconName={faSearch}
               onChange={(e) => {
-                console.log(e);
+                console.log(e?.target?.value);
+                // console.log(recursiveSearch(filterData, e.target?.value));
+                // console.log(_find(filterData, e?.target?.value));
               }}
             />
           </div>
@@ -261,38 +330,29 @@ const IntentIssue = () => {
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page + 1}
-              count={totalPages}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
               paginationRequired={true}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
               handleSorting={handleSortingChange}
               checkBoxRequired={true}
             >
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </TableRow>
+                  <TableRowLaoder />
                 ) : (
                   tableData &&
                   tableData.length > 0 &&
                   tableData.map((data, index) => (
                     <>
-                      <StyledTableRow key={data.id}>
+                      <StyledTableRow key={data.request_id}>
                         <StyledTableCell>
                           <IconButton
                             aria-label="expand row"
                             size="small"
-                            onClick={() => handleCollapse(index)}
+                            onClick={() => handleCollapse(data?.request_id)}
                           >
                             <FontAwesomeIcon
                               icon={
-                                open.includes(index)
+                                open.includes(data?.request_id)
                                   ? faChevronUp
                                   : faChevronDown
                               }
@@ -301,11 +361,13 @@ const IntentIssue = () => {
                         </StyledTableCell>
                         <StyledTableCell padding="none">
                           <Checkbox
-                            onClick={(event) => handleClick(event, index, data)}
+                            onClick={(event) =>
+                              handleClick(event, data?.request_id, data)
+                            }
                             color="primary"
-                            checked={selected.includes(index)}
+                            checked={selected.includes(data?.request_id)}
                             inputProps={{
-                              "aria-labelledby": `enhanced-table-checkbox-${index}`,
+                              "aria-labelledby": `enhanced-table-checkbox-${data?.request_id}`,
                             }}
                           />
                         </StyledTableCell>
@@ -319,8 +381,11 @@ const IntentIssue = () => {
                         <StyledTableCell padding="none">
                           {data?.fromStore}
                         </StyledTableCell>
-                        <StyledTableCell padding="none">
+                        {/* <StyledTableCell padding="none">
                           {data?.remarks}
+                        </StyledTableCell> */}
+                        <StyledTableCell padding="none">
+                          {data?.status}
                         </StyledTableCell>
                       </StyledTableRow>
 
@@ -353,10 +418,10 @@ const IntentIssue = () => {
                                 <TableBody>
                                   {data?.transferDetail &&
                                     data?.transferDetail.length > 0 &&
-                                    data?.transferDetail.map((ele) => {
+                                    data?.transferDetail.map((ele, index) => {
                                       return (
                                         <>
-                                          <TableRow>
+                                          <TableRow key={index}>
                                             <TableCell
                                               padding="none"
                                               className={classes.tableCell}
@@ -389,6 +454,7 @@ const IntentIssue = () => {
                     </>
                   ))
                 )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
             <TablePagination
@@ -398,6 +464,15 @@ const IntentIssue = () => {
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
+
+            <Suspense>
+              <IntentIssueConfirmModal
+                showIntentIssueModal={showIntentIssueModal}
+                handleIntentIssueModal={handleIntentIssueModal}
+                handleIssueIntent={handleIssueIntent}
+                handleRejectIntent={handleRejectIntent}
+              />
+            </Suspense>
           </div>
         </div>
       </Paper>

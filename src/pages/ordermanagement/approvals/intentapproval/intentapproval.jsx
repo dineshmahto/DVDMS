@@ -66,7 +66,7 @@ const IntentApproval = () => {
       sortable: true,
     },
     {
-      id: "type",
+      id: "requestType",
       name: "REQUEST TYPE",
       sortable: true,
     },
@@ -340,7 +340,7 @@ const IntentApproval = () => {
                       {moment(data?.requesstDate).format("DD/MM/YYYY")}
                     </StyledTableCell>
                     <StyledTableCell padding="none">
-                      {data?.type}
+                      {data?.requestType}
                     </StyledTableCell>
 
                     <StyledTableCell padding="none">

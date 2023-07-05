@@ -3,6 +3,7 @@ import { Service } from "../../config/commonFetch";
 import * as CONSTANTS from "../../common/constant/constants";
 import {
   getAddMiscellanousListResponse,
+  getIntentDrugResponse,
   getIntentIssueListResponse,
   getIssueCampListResponse,
   getIssueDeskListResponse,
@@ -12,9 +13,11 @@ import {
   getReturnDeskListResponse,
   getSubStoreReturnListResponse,
   getThirdPartyReturnListResponse,
+  saveIssueToThirdPartyResponse,
 } from "./action";
 import {
   GET_ADD_MISCELLANOUS_LIST,
+  GET_INTENT_DRUG,
   GET_INTENT_ISSUE_LIST,
   GET_ISSUE_CAMP_LIST,
   GET_ISSUE_DESK_LIST,
@@ -24,6 +27,7 @@ import {
   GET_RETURN_DESK_LIST,
   GET_SUB_STORE_RETURN_LIST,
   GET_THIRD_PARTY_RETURN,
+  SAVE_ISSUE_TO_THIRD_PARTY,
 } from "./actionTypes";
 
 function* getIssueDeskList({ payload: pageDetails }) {
@@ -205,6 +209,40 @@ function* getAddMiscellanousList({ payload: pageDetails }) {
     put(getAddMiscellanousListResponse(error));
   }
 }
+
+function* saveIssueToThirdPartyDetails({ payload: saveThirdPartyDetails }) {
+  console.log("saveThirdPartyDetails", saveThirdPartyDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.SAVE_ISSUE_TO_THIRD_PARTY,
+      saveThirdPartyDetails
+    );
+    console.log("Response", response);
+    yield put(saveIssueToThirdPartyResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(saveIssueToThirdPartyResponse(error));
+  }
+}
+
+function* getIntentDrug({ payload: intentNo }) {
+  console.log("intentNo", intentNo);
+  try {
+    const response = yield call(
+      Service.commonFetch,
+      CONSTANTS.GET_INTENT_DRUG_BY_INTENTNO,
+      {
+        params: intentNo,
+      }
+    );
+    console.log("Response", response);
+    yield put(getIntentDrugResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(getIntentDrugResponse(error));
+  }
+}
 function* IssueReturnSaga() {
   yield takeEvery(GET_ISSUE_DESK_LIST, getIssueDeskList);
   yield takeEvery(GET_RETURN_DESK_LIST, getReturnDeskList);
@@ -216,5 +254,9 @@ function* IssueReturnSaga() {
   yield takeEvery(GET_SUB_STORE_RETURN_LIST, getSubStoreReturnList);
   yield takeEvery(GET_MISCELLANOUS_STCK_CONSMP_LIST, getMiscellanousConsmpList);
   yield takeEvery(GET_ADD_MISCELLANOUS_LIST, getAddMiscellanousList);
+  yield takeEvery(GET_INTENT_DRUG, getIntentDrug);
+
+  // POST
+  yield takeEvery(SAVE_ISSUE_TO_THIRD_PARTY, saveIssueToThirdPartyDetails);
 }
 export default IssueReturnSaga;

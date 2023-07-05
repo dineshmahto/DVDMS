@@ -1,6 +1,8 @@
 import {
   GET_ADD_MISCELLANOUS_LIST,
   GET_ADD_MISCELLANOUS_LIST_RSPONSE,
+  GET_INTENT_DRUG,
+  GET_INTENT_DRUG_RESPONSE,
   GET_INTENT_ISSUE_LIST,
   GET_INTENT_ISSUE_LIST_RESPONSE,
   GET_ISSUE_CAMP_LIST,
@@ -19,6 +21,8 @@ import {
   GET_SUB_STORE_RETURN_LIST_RESPONSE,
   GET_THIRD_PARTY_RETURN,
   GET_THIRD_PARTY_RETURN_RESPONSE,
+  SAVE_ISSUE_TO_THIRD_PARTY,
+  SAVE_ISSUE_TO_THIRD_PARTY_RESPONSE,
 } from "./actionTypes";
 
 const initialState = {
@@ -140,6 +144,29 @@ const issueReturn = (state = initialState, action) => {
       state = {
         ...state,
         addMisListResp: action?.payload,
+      };
+      break;
+
+    case SAVE_ISSUE_TO_THIRD_PARTY:
+      state = {
+        ...state,
+      };
+      break;
+    case SAVE_ISSUE_TO_THIRD_PARTY_RESPONSE:
+      state = {
+        ...state,
+        saveIssueToThirdPartyResp: action?.payload,
+      };
+
+    case GET_INTENT_DRUG:
+      state = {
+        ...state,
+      };
+      break;
+    case GET_INTENT_DRUG_RESPONSE:
+      state = {
+        ...state,
+        intentDrugResponse: action?.payload,
       };
       break;
     default:

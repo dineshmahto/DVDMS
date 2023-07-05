@@ -77,7 +77,7 @@ const LoginForm = () => {
     if (loginResponse && loginResponse?.status === 200) {
       console.log("loginResponse", loginResponse);
       tokenhandle.storeRefreshToken(loginResponse?.data?.refresh_token);
-      tokenhandle.storetoken(loginResponse?.data.access_token);
+      tokenhandle.storetoken(loginResponse?.data?.access_token);
       tokenhandle.storeProfileDetails(loginResponse?.data?.displayName);
       setLoading(false);
       dispatch(closeLoginModal());

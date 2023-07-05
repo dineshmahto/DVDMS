@@ -7,6 +7,8 @@ import SearchField from "../../../components/search/search";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { makeStyles } from "@mui/styles";
 import {
+  deleteFundingRecord,
+  deleteFundingRecordResp,
   getFundingSourceList,
   getFundingSourceListResponse,
 } from "../../../store/admin/action";
@@ -20,13 +22,20 @@ import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder"
 import StyledTableRow from "../../../components/tables/datatable/customTableRow";
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import searchFunc from "../../../components/tables/searchFunc";
+import handleSortingFunc from "../../../components/tables/datatable/sortable";
 const AddNewFundingModal = lazy(() => import("./addnewfundingmodal"));
-
+const EditFundingModal = lazy(() => import("./editfunding"));
+const AlertDialog = lazy(() => import("../../../components/dialog/dialog"));
 const FundingDesk = () => {
   const dispatch = useDispatch();
   const fundingSourceListResponse = useSelector(
     (state) => state?.admin?.fundingSourceListResponse
   );
+  const deleteFundingResp = useSelector(
+    (state) => state?.admin?.deleteFundingRcrdResp
+  );
+  console.log("deleteFundingResp", deleteFundingResp);
   console.log("fundingSourceListResponse", fundingSourceListResponse);
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
@@ -40,6 +49,12 @@ const FundingDesk = () => {
   });
   const [loading, setLoading] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editData, setEditData] = useState({});
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteId, setDeleteId] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+  const [filterData, setFilterData] = useState([]);
   const columns = useMemo(() => [
     {
       id: "name",
@@ -84,9 +99,13 @@ const FundingDesk = () => {
       accessor === sortField && order === "asc" ? "desc" : "asc";
     setSortField(accessor);
     setOrder(sortOrder);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
   const handleNewFundingModal = () => {
     setShowCreateModal(false);
+  };
+  const handleEditFundingModal = () => {
+    setShowEditModal(false);
   };
 
   useEffect(() => {
@@ -117,6 +136,7 @@ const FundingDesk = () => {
       ) {
         setTotalRows(fundingSourceListResponse?.data?.pageList?.totalElements);
         setTableData(fundingSourceListResponse?.data?.pageList?.content);
+        setFilterData(fundingSourceListResponse?.data?.pageList?.content);
         dispatch(getFundingSourceListResponse(""));
       }
       setLoading(false);
@@ -148,6 +168,44 @@ const FundingDesk = () => {
     }
   }, [fundingSourceListResponse]);
 
+  useEffect(() => {
+    if (deleteFundingResp && deleteFundingResp?.status === 201) {
+      if (deleteFundingResp?.data?.status === 1) {
+        handleDeleteDialog();
+        toastMessage("Funding DESK", deleteFundingResp?.data?.message);
+        dispatch(deleteFundingRecordResp(""));
+        resetPageDetails();
+        dispatch(getFundingSourceList());
+      } else if (deleteFundingResp?.data?.status === 0) {
+        handleDeleteDialog();
+        toastMessage("Funding DESK", deleteFundingResp?.data?.message);
+        dispatch(deleteFundingRecordResp(""));
+      }
+    } else if (
+      (deleteFundingResp && deleteFundingResp?.status === 500) ||
+      deleteFundingResp?.status === 404
+    ) {
+      handleDeleteDialog();
+      deleteFundingRecordResp("");
+      toastMessage("DRUG DESK", "Something went wrong");
+    }
+  }, [deleteFundingResp]);
+
+  const handleDeleteDialog = () => {
+    setDeleteId("");
+    setShowDeleteDialog(false);
+  };
+  const handleDeleteFunding = () => {
+    dispatch(deleteFundingRecord({ id: deleteId }));
+  };
+
+  const resetPageDetails = () => {
+    setController({
+      rowsPerPage: 10,
+      page: 0,
+    });
+  };
+
   return (
     <>
       <div className="row mt-2">
@@ -158,7 +216,7 @@ const FundingDesk = () => {
 
       <Paper>
         <div className="row ">
-          <div className="d-flex flex-row justify-content-end">
+          <div className="d-flex flex-row justify-content-between">
             <Basicbutton
               buttonText="Add New Funding"
               className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
@@ -166,20 +224,24 @@ const FundingDesk = () => {
                 setShowCreateModal(true);
               }}
             />
-          </div>
-        </div>
-        <div className="row mb-1">
-          <div className="d-flex justify-content-end">
             <SearchField
               className="me-1 "
               iconPosition="end"
-              iconName={faSearch}
               onChange={(e) => {
-                console.log(e);
+                if (e.target?.value != "") {
+                  setSearchValue(e?.target?.value);
+                  setLoading(true);
+                  setTableData(searchFunc(filterData, e.target?.value));
+                  setLoading(false);
+                } else {
+                  setTableData(filterData);
+                  setSearchValue("");
+                }
               }}
             />
           </div>
         </div>
+
         <div className="row">
           <div className="col-12">
             <TableComponent
@@ -214,6 +276,10 @@ const FundingDesk = () => {
                                     fontSize: "0.7rem",
                                     cursor: "pointer",
                                   }}
+                                  onClick={() => {
+                                    setShowEditModal(true);
+                                    setEditData(data);
+                                  }}
                                 >
                                   <FontAwesomeIcon
                                     icon={faPenToSquare}
@@ -227,6 +293,10 @@ const FundingDesk = () => {
                                   style={{
                                     fontSize: "0.7rem",
                                     cursor: "pointer",
+                                  }}
+                                  onClick={() => {
+                                    setDeleteId(data?.id);
+                                    setShowDeleteDialog(true);
                                   }}
                                 >
                                   <FontAwesomeIcon
@@ -250,7 +320,11 @@ const FundingDesk = () => {
                   })
                 )}
 
-                <EmptyRow loading={loading} tableData={tableData} />
+                <EmptyRow
+                  loading={loading}
+                  tableData={tableData}
+                  searchValue={searchValue}
+                />
               </TableBody>
             </TableComponent>
             <TablePagination
@@ -269,6 +343,33 @@ const FundingDesk = () => {
           openNewFundinngModal={showCreateModal}
           handleNewFundingModal={handleNewFundingModal}
         />
+      </Suspense>
+
+      <Suspense>
+        <EditFundingModal
+          openNewFundingModal={showEditModal}
+          handleEditFundingModal={handleEditFundingModal}
+          resetPageDetails={resetPageDetails}
+          editdata={editData}
+        />
+      </Suspense>
+
+      <Suspense>
+        <AlertDialog
+          open={showDeleteDialog}
+          handleClose={handleDeleteDialog}
+          description="You are about to delete one record, this procedure is irreversible.
+Do you want to proceed?"
+        >
+          <Basicbutton
+            buttonText="Disagree"
+            onClick={() => {
+              setDeleteId("");
+              setShowDeleteDialog(false);
+            }}
+          />
+          <Basicbutton buttonText="Agree" onClick={handleDeleteFunding} />
+        </AlertDialog>
       </Suspense>
     </>
   );

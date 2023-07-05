@@ -10,8 +10,12 @@ import Basicbutton from "../../../components/button/basicbutton";
 import { useDispatch, useSelector } from "react-redux";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import CustDatepicker from "../../../components/datepicker/custDatepicker";
-import { updateProgram } from "../../../store/admin/action";
-import moment from "moment";
+import {
+  getProgramDeskList,
+  updateProgram,
+  updateProgramResponse,
+} from "../../../store/admin/action";
+import dayjs from "dayjs";
 const EditProgramDeskForm = ({
   openEditProgrmModal,
   handleCloseEditProgrmModal,
@@ -33,7 +37,6 @@ const EditProgramDeskForm = ({
   const [copyData, setCopyData] = useState([]);
   const [transferableRoleList, setTransferableRoleList] = useState([]);
 
-  console.log("editData", editData);
   const dropDownList = [
     { label: "Active", value: "1" },
     { label: "InActive", value: "0" },
@@ -87,19 +90,18 @@ const EditProgramDeskForm = ({
 
   useEffect(() => {
     if (editData && editData?.drugList) {
-      console.log("Enters");
+      console.log("Enters", editData?.drugList);
       setFirstClick(true);
       setTempArray(editData?.drugList);
       setSelectedItemActiveIndices(editData?.drugList.map(() => true));
       setSelectedItem(editData?.drugList);
-      setActiveIndicies(editData?.drugList.map(() => false));
-      setTransferableRoleList(
-        totalDrugList.filter((elem) => {
-          return !editData?.drugList?.find((ele) => {
-            return ele.id === elem.id;
-          });
-        })
-      );
+      const leftElelemt = totalDrugList.filter((elem) => {
+        return !editData?.drugList?.find((ele) => {
+          return ele.id === elem.id;
+        });
+      });
+      setActiveIndicies(leftElelemt?.map(() => false));
+      setTransferableRoleList(leftElelemt);
       setCopyData(totalDrugList);
     }
 
@@ -112,9 +114,19 @@ const EditProgramDeskForm = ({
 
   useEffect(() => {
     if (updateProgramResp && updateProgramResp?.status === 201) {
-      toastMessage("Edit Program", "Updated successfully");
+      if (updateProgramResp?.data?.status === 1) {
+        handleCloseEditProgrmModal();
+        toastMessage("Program Desk", updateProgramResp?.data?.message);
+        dispatch(getProgramDeskList());
+        dispatch(updateProgramResponse(""));
+      } else if (updateProgramResp?.data?.status === 0) {
+        toastMessage("Program Desk", updateProgramResp?.data?.message);
+        dispatch(updateProgramResponse(""));
+      }
     } else if (updateProgramResp && updateProgramResp?.status === 500) {
-      toastMessage("Edit Program", "Something went wrong", "error");
+      handleCloseEditProgrmModal();
+      dispatch(updateProgramResponse(""));
+      toastMessage("Program Desk", "Something went wrong", "error");
     }
   }, [updateProgramResp]);
 
@@ -317,6 +329,10 @@ const EditProgramDeskForm = ({
     setActiveIndicies(activeIndicies.map((bool) => false));
   };
 
+  const formatDate = (date) => {
+    return dayjs(date).format("MM/DD/YYYY");
+  };
+
   return (
     <>
       <BasicModal
@@ -344,24 +360,22 @@ const EditProgramDeskForm = ({
           }}
           validationSchema={editProgramSchema}
           onSubmit={async (values) => {
-            console.log("Values", values);
-            values["startDate"] = moment(values?.startDate).format(
-              "DD/MM/YYYY"
-            );
-            values["endDate"] = moment(values?.endDate).format("DD/MM/YYYY");
+            values["startDate"] = formatDate(values?.startDate);
+            values["endDate"] = formatDate(values?.endDate);
             values["id"] = editData?.id;
             if (selectedItem && selectedItem?.length === 0) {
               toastMessage("CREATE ROLE", "please map the role list");
             } else {
               const cloneData = [...selectedItem];
-              const final =
-                cloneData &&
-                cloneData.map((ele) => {
-                  delete ele["name"];
-                  return ele;
+              let programId = [];
+              cloneData &&
+                cloneData.map(({ id }) => {
+                  let ele = {};
+                  ele["id"] = id;
+                  programId.push(ele);
+                  return id;
                 });
-              console.log("final", final);
-              dispatch(updateProgram({ ...values, list: final }));
+              dispatch(updateProgram({ ...values, list: programId }));
             }
           }}
         >
@@ -496,7 +510,71 @@ const EditProgramDeskForm = ({
                     }
                   )}
 
-                  <div className="row m-1"></div>
+                  <div className="row m-1">
+                    <TransferComponent
+                      apiData={transferableRoleList}
+                      activeIndicies={activeIndicies}
+                      handleMoveSelectedItemToLeft={() => {
+                        handleMoveSelectedItemToLeft(
+                          selectItemActiveIndices,
+                          rightTempArray,
+                          setFirstClick,
+                          selectedItem,
+                          setSelectedItemActiveIndices,
+                          tempArray,
+                          setTempArray,
+                          transferableRoleList,
+                          setTransferableRoleList,
+                          setSelectedItem,
+                          setRightTempArray,
+                          setActiveIndicies,
+                          activeIndicies,
+                          copyData
+                        );
+                      }}
+                      handleMoveSelectedItemToRight={() => {
+                        handleMoveSelectedItemToRight(
+                          tempArray,
+                          setFirstClick,
+                          copyData,
+                          setSelectedItemActiveIndices,
+                          setRightTempArray,
+                          setActiveIndicies,
+                          activeIndicies,
+                          setSelectedItem,
+                          setTransferableRoleList
+                        );
+                      }}
+                      handleShiftAllElementToRight={() => {
+                        handleShiftAllElementToRight(
+                          copyData,
+                          setFirstClick,
+                          setSelectedItemActiveIndices,
+                          setSelectedItem,
+                          setRightTempArray,
+                          setTempArray,
+                          setTransferableRoleList
+                        );
+                      }}
+                      handleShiftAllElementToLeft={() => {
+                        handleShiftAllElementToLeft(
+                          copyData,
+                          setSelectedItemActiveIndices,
+                          setTransferableRoleList,
+                          setRightTempArray,
+                          setTempArray,
+                          setSelectedItem,
+                          setActiveIndicies,
+                          activeIndicies
+                        );
+                      }}
+                      handleLeftListItemClick={handleLeftListItemClick}
+                      handleRightListItemClick={handleRightListItemClick}
+                      selectedItem={selectedItem}
+                      selectItemActiveIndices={selectItemActiveIndices}
+                    />
+                  </div>
+
                   <div className="row mt-1  mb-2">
                     <div className="col-12">
                       <div className="d-flex justify-content-center">
@@ -509,7 +587,7 @@ const EditProgramDeskForm = ({
                           }
                           type="submit"
                           buttonText="Save"
-                          className="primary"
+                          className="success primary rounded-0"
                           outlineType={true}
                         />
                       </div>
@@ -520,68 +598,6 @@ const EditProgramDeskForm = ({
             </Form>
           )}
         </Formik>
-        <TransferComponent
-          apiData={transferableRoleList}
-          activeIndicies={activeIndicies}
-          handleMoveSelectedItemToLeft={() => {
-            handleMoveSelectedItemToLeft(
-              selectItemActiveIndices,
-              rightTempArray,
-              setFirstClick,
-              selectedItem,
-              setSelectedItemActiveIndices,
-              tempArray,
-              setTempArray,
-              transferableRoleList,
-              setTransferableRoleList,
-              setSelectedItem,
-              setRightTempArray,
-              setActiveIndicies,
-              activeIndicies,
-              copyData
-            );
-          }}
-          handleMoveSelectedItemToRight={() => {
-            handleMoveSelectedItemToRight(
-              tempArray,
-              setFirstClick,
-              copyData,
-              setSelectedItemActiveIndices,
-              setRightTempArray,
-              setActiveIndicies,
-              activeIndicies,
-              setSelectedItem,
-              setTransferableRoleList
-            );
-          }}
-          handleShiftAllElementToRight={() => {
-            handleShiftAllElementToRight(
-              copyData,
-              setFirstClick,
-              setSelectedItemActiveIndices,
-              setSelectedItem,
-              setRightTempArray,
-              setTempArray,
-              setTransferableRoleList
-            );
-          }}
-          handleShiftAllElementToLeft={() => {
-            handleShiftAllElementToLeft(
-              copyData,
-              setSelectedItemActiveIndices,
-              setTransferableRoleList,
-              setRightTempArray,
-              setTempArray,
-              setSelectedItem,
-              setActiveIndicies,
-              activeIndicies
-            );
-          }}
-          handleLeftListItemClick={handleLeftListItemClick}
-          handleRightListItemClick={handleRightListItemClick}
-          selectedItem={selectedItem}
-          selectItemActiveIndices={selectItemActiveIndices}
-        />
       </BasicModal>
     </>
   );

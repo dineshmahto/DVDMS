@@ -18,6 +18,7 @@ const CreateStoreModalForm = ({
   storeList,
   storeTypeList,
 }) => {
+  console.log("list", storeList, storeTypeList);
   const dispatch = useDispatch();
   const createStoreResp = useSelector((state) => state?.admin?.createStoreResp);
   console.log("createStoreResp", createStoreResp);
@@ -37,7 +38,7 @@ const CreateStoreModalForm = ({
     contactNo: Yup.number().required("Contact No is Required"),
     longitude: Yup.number().required("Longitude is Required"),
     latitude: Yup.number().required("latitude is Required"),
-    ninNo: Yup.number().required("NIN Number is Required"),
+    ninNo: Yup.string().required("NIN Number is Required"),
   });
 
   const addStoreField = [
@@ -53,7 +54,7 @@ const CreateStoreModalForm = ({
       name: "storeTypeId",
       placeholder: "Full Name",
       value: "",
-      option: storeList,
+      option: storeTypeList,
       label: "Store Type",
     },
     {
@@ -61,7 +62,7 @@ const CreateStoreModalForm = ({
       name: "toStoreId",
 
       value: "",
-      option: storeTypeList,
+      option: storeList,
       label: "Parent Store Name",
     },
     {
@@ -134,7 +135,7 @@ const CreateStoreModalForm = ({
       label: "Latitude",
     },
     {
-      type: "number",
+      type: "text",
       name: "ninNo",
       placeholder: "Enter NIN Number",
 

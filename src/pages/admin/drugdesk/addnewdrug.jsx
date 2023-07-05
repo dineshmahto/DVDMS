@@ -156,6 +156,7 @@ const AddNewDrug = ({
           inputs={addDrugField}
           handleSubmit={handleSubmit}
           buttonText="Add Drug"
+          handleCancel={handleOpenAddDrugModal}
         />
       </BasicModal>
     </>

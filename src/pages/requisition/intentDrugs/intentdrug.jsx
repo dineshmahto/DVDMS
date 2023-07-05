@@ -6,7 +6,6 @@ import { makeStyles } from "@mui/styles";
 import moment from "moment";
 import {
   faChevronDown,
-  faFilePdf,
   faSearch,
   faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
@@ -31,6 +30,7 @@ import {
   getIntentDrugListResponse,
 } from "../../../store/requisition/action";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import searchFunc from "../../../components/tables/searchFunc";
 
 const useStyles = makeStyles({
   tableCell: {
@@ -53,6 +53,8 @@ const IntentDrug = () => {
   const [order, setOrder] = useState("asc");
   const [totalRows, setTotalRows] = useState(0);
   const [tableData, setTableData] = useState([]);
+  const [filterData, setFilterData] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
@@ -138,6 +140,7 @@ const IntentDrug = () => {
   useEffect(() => {
     if (intentDrugsListResp && intentDrugsListResp?.status === 200) {
       setTableData(intentDrugsListResp?.data?.pageList?.content);
+      setFilterData(intentDrugsListResp?.data?.pageList?.content);
       setTotalRows(intentDrugsListResp?.data?.pageList?.totalElements);
       setLoading(false);
     }
@@ -168,11 +171,11 @@ const IntentDrug = () => {
     <>
       <div className="row mt-2">
         <div className="d-flex justify-content-start">
-          <p className="fs-6">INTENT OF DRUGSs</p>
+          <p className="fs-6">INTENT OF DRUGS</p>
         </div>
       </div>
       <div className="row d-flex justify-content-start mb-2">
-        <div className="col-6">
+        <div className="col-12">
           <div className="row align-items-center">
             <div className="col-auto">
               <label>Store Name</label>
@@ -253,7 +256,13 @@ const IntentDrug = () => {
               iconPosition="end"
               iconName={faSearch}
               onChange={(e) => {
-                console.log(e);
+                if (e.target?.value != "") {
+                  setSearchValue(e?.target?.value);
+                  setTableData(searchFunc(filterData, e.target?.value));
+                } else {
+                  setTableData(filterData);
+                  setSearchValue("");
+                }
               }}
             />
           </div>

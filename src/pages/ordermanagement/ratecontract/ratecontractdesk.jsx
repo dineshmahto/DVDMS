@@ -19,6 +19,7 @@ import StyledTableRow from "../../../components/tables/datatable/customTableRow"
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
+import searchFunc from "../../../components/tables/searchFunc";
 const DrugListModal = lazy(() => import("./druglistmodal"));
 const RateContractDesk = () => {
   const dispatch = useDispatch();
@@ -27,7 +28,6 @@ const RateContractDesk = () => {
   );
   console.log("rateContractListResponse", rateContractListResponse);
   const [tableData, setTableData] = useState([]);
-  const [sortedData, handleSorting] = useSortableTable();
   const [totalRows, setTotalRows] = useState(0);
   const [controller, setController] = useState({
     page: 0,
@@ -139,7 +139,6 @@ const RateContractDesk = () => {
       }
 
       setLoading(false);
-      dispatch(getRateContractDeskListResponse(""));
     } else if (
       rateContractListResponse &&
       rateContractListResponse?.status == 400
@@ -172,7 +171,20 @@ const RateContractDesk = () => {
                 iconPosition="end"
                 iconName={faSearch}
                 onChange={(e) => {
-                  console.log(e);
+                  if (e.target?.value != "") {
+                    console.log(e.target?.value);
+
+                    setTableData(
+                      searchFunc(
+                        rateContractListResponse?.data?.pageList?.content,
+                        e.target?.value
+                      )
+                    );
+                  } else {
+                    setTableData(
+                      rateContractListResponse?.data?.pageList?.content
+                    );
+                  }
                 }}
               />
             </div>

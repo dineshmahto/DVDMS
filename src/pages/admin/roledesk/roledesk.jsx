@@ -1,4 +1,11 @@
-import React, { useState, useMemo, useEffect, lazy, Suspense } from "react";
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  lazy,
+  Suspense,
+  useTransition,
+} from "react";
 import { Paper } from "@mui/material";
 import { TableBody } from "@mui/material";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
@@ -17,6 +24,7 @@ import {
   deleteRole,
   getRoleList,
   getRoleListResponse,
+  roleDeleteResponse,
 } from "../../../store/admin/action";
 import { useSelector } from "react-redux";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
@@ -25,21 +33,26 @@ import StyledTableRow from "../../../components/tables/datatable/customTableRow"
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
 import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
-
+import searchFunc from "../../../components/tables/searchFunc";
 const CreateRoleModalForm = lazy(() => import("./createrolemodalform"));
 const EditRoleModal = lazy(() => import("./editrolemodalform"));
 const RoleActivityListModal = lazy(() => import("./roleactivitylistmodal"));
-
+const AlertDialog = lazy(() => import("../../../components/dialog/dialog"));
 const RoleDesk = () => {
   const roleListResponse = useSelector((state) => state.admin.roleListResponse);
+  const deleteRoleResponse = useSelector(
+    (state) => state?.admin?.deleteResponse
+  );
   console.log("roleListResponse", roleListResponse);
+  console.log("deleteRoleResponse", deleteRoleResponse);
   const dispatch = useDispatch();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
   const [tableData, setTableData] = useState([]);
-
+  const [filterData, setFilterData] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
@@ -50,7 +63,9 @@ const RoleDesk = () => {
   const [activityList, setActivityList] = useState([]);
   const [dropDownList, setDropDownList] = useState([]);
   const [showActivityModal, setShowActivityModal] = useState(false);
-
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteId, setDeleteId] = useState("");
+  const [modalHeaderData, setModalHeaderData] = useState({});
   const [data, setData] = useState([]);
   const columns = useMemo(() => [
     {
@@ -79,8 +94,13 @@ const RoleDesk = () => {
   // edit role modal state
   const [showEditModal, setShowEditModal] = useState(false);
   const [totalRoleList, setTotalRoleList] = useState([]);
+  const [roleList, setRoleList] = useState([]);
   const [currentRoleList, setCurrentRoleList] = useState([]);
   const [availableRoleList, setAvailableRoleList] = useState([]);
+
+  const [, startTransition] = useTransition();
+
+  const [load, setLoad] = useState(false);
 
   const handlePageChange = (newPage) => {
     console.log("newPage", newPage);
@@ -137,6 +157,7 @@ const RoleDesk = () => {
         setTotalPages(roleListResponse?.data?.pageList?.totalPages);
         setTotalRows(roleListResponse?.data?.pageList?.totalElements);
         setTableData(roleListResponse?.data?.pageList?.content);
+        setFilterData(roleListResponse?.data?.pageList?.content);
       }
       setLoading(false);
       dispatch(getRoleListResponse(""));
@@ -159,16 +180,53 @@ const RoleDesk = () => {
     }
   }, [roleListResponse]);
 
+  useEffect(() => {
+    if (deleteRoleResponse && deleteRoleResponse?.status === 201) {
+      if (deleteRoleResponse?.data?.status === 1) {
+        setShowDeleteDialog(false);
+        toastMessage("ROLE DESK", deleteRoleResponse?.data?.message);
+        dispatch(
+          getRoleList({
+            pageNumber: controller.page,
+            pageSize: controller.rowsPerPage,
+          })
+        );
+        dispatch(roleDeleteResponse(""));
+      }
+    } else if (deleteRoleResponse && deleteRoleResponse?.status === 500) {
+      setShowDeleteDialog(false);
+      toastMessage(
+        "ROLE DESK",
+        "Something went wrong to delete the record Please try again"
+      );
+    }
+  }, [deleteRoleResponse]);
+
   const handleCloseCreateRoleModal = () => {
     setShowModal(false);
   };
   const handleCloseEditRoleModal = () => {
+    setCurrentRoleList([]);
+    setAvailableRoleList([]);
     setShowEditModal(false);
   };
   const handleActivityShowModal = () => {
     setShowActivityModal(false);
   };
 
+  const handleDeleteDialog = () => {
+    setDeleteId("");
+    setShowDeleteDialog(false);
+  };
+  const handleDeleteRole = () => {
+    dispatch(deleteRole({ id: deleteId }));
+  };
+  const resetPageDetails = () => {
+    setController({
+      page: 0,
+      rowsPerPage: 10,
+    });
+  };
   return (
     <>
       <div className="row mt-2">
@@ -187,16 +245,23 @@ const RoleDesk = () => {
             outlineType={true}
             className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
             onClick={() => {
-              dispatch(deleteRole(1));
-              // setDropDownList(activityList);
-              setShowModal(true);
+              startTransition(() => {
+                setShowModal(true);
+              });
             }}
           />
           <SearchField
             className="me-1 "
             iconPosition="end"
+            disabled={tableData.length === 0 ? true : false}
             onChange={(e) => {
-              console.log(e);
+              if (e.target?.value != "") {
+                setSearchValue(e?.target?.value);
+                setTableData(searchFunc(filterData, e.target?.value));
+              } else {
+                setTableData(filterData);
+                setSearchValue("");
+              }
             }}
           />
         </div>
@@ -237,7 +302,6 @@ const RoleDesk = () => {
                               <span
                                 className="text-decoration-underline me-2"
                                 onClick={() => {
-                                  console.log("clicked");
                                   setActivityList(data?.activityList);
                                   setShowActivityModal(true);
                                 }}
@@ -263,6 +327,7 @@ const RoleDesk = () => {
                             className="text-decoration-underline ms-1"
                             style={{ fontSize: "0.8rem", cursor: "pointer" }}
                             onClick={() => {
+                              setModalHeaderData(data);
                               let list = [];
                               data?.activityList.forEach((element) => {
                                 let ele = {};
@@ -295,6 +360,10 @@ const RoleDesk = () => {
                           <span
                             className="text-decoration-underline"
                             style={{ fontSize: "0.8rem", cursor: "pointer" }}
+                            onClick={() => {
+                              setDeleteId(data?.id);
+                              setShowDeleteDialog(true);
+                            }}
                           >
                             <FontAwesomeIcon
                               icon={faTrash}
@@ -307,7 +376,11 @@ const RoleDesk = () => {
                     );
                   })
                 )}
-                <EmptyRow loading={loading} tableData={tableData} />
+                <EmptyRow
+                  loading={loading}
+                  tableData={tableData}
+                  searchValue={searchValue}
+                />
               </TableBody>
             </TableComponent>
             <TablePagination
@@ -320,28 +393,57 @@ const RoleDesk = () => {
           </div>
         </div>
       </Paper>
-      <Suspense>
-        <CreateRoleModalForm
-          openCreateRoleModal={showModal}
-          handleCloseCreateRoleModal={handleCloseCreateRoleModal}
-          data={data}
-          activityList={activityList}
-        />
-      </Suspense>
-      <Suspense>
-        <EditRoleModal
-          openEditRoleModal={showEditModal}
-          handleCloseEditRoleModal={handleCloseEditRoleModal}
-          data={data}
-        />
-      </Suspense>
-      <Suspense>
-        <RoleActivityListModal
-          showActivityModal={showActivityModal}
-          handleActivityShowModal={handleActivityShowModal}
-          activityList={activityList}
-        />
-      </Suspense>
+      {showModal && (
+        <Suspense>
+          <CreateRoleModalForm
+            openCreateRoleModal={showModal}
+            handleCloseCreateRoleModal={handleCloseCreateRoleModal}
+            data={data}
+            activityList={activityList}
+          />
+        </Suspense>
+      )}
+
+      {showEditModal && (
+        <Suspense>
+          <EditRoleModal
+            openEditRoleModal={showEditModal}
+            handleCloseEditRoleModal={handleCloseEditRoleModal}
+            currentRoleList={currentRoleList}
+            availableRoleList={availableRoleList}
+            totalActivitList={totalRoleList}
+            modalHeaderData={modalHeaderData}
+            resetPageDetails={resetPageDetails}
+          />
+        </Suspense>
+      )}
+
+      {showActivityModal && (
+        <Suspense>
+          <RoleActivityListModal
+            showActivityModal={showActivityModal}
+            handleActivityShowModal={handleActivityShowModal}
+            activityList={activityList}
+          />
+        </Suspense>
+      )}
+
+      {showDeleteDialog && (
+        <Suspense>
+          <AlertDialog
+            open={showDeleteDialog}
+            handleClose={handleDeleteDialog}
+            description="You are about to delete one record, this procedure is irreversible.
+Do you want to proceed?"
+          >
+            <Basicbutton
+              buttonText="Disagree"
+              onClick={() => setShowDeleteDialog(false)}
+            />
+            <Basicbutton buttonText="Agree" onClick={handleDeleteRole} />
+          </AlertDialog>
+        </Suspense>
+      )}
     </>
   );
 };

@@ -7,65 +7,119 @@ import { faFloppyDisk, faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Paper } from "@mui/material";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import { useSelector, useDispatch } from "react-redux";
-import { getEdlMappingList } from "../../../store/admin/action";
+import {
+  createEdlMapingResponse,
+  createEdlMapping,
+  getDrugListByStoreType,
+  getEdlMappingList,
+} from "../../../store/admin/action";
+import toastMessage from "../../../common/toastmessage/toastmessage";
 const StoreTypeDrugMapping = () => {
   const [storeTypeDropDownList, setStoreTypeDropDownList] = useState([]);
   const dispatch = useDispatch();
   const edlMappingListResponse = useSelector(
     (state) => state?.admin?.edlMappingListResponse
   );
+  const drugListByStoreType = useSelector(
+    (state) => state?.admin?.drugListByStoreTypeResponse
+  );
+  const createEdlMappingResponse = useSelector(
+    (state) => state?.admin?.createEdlMapResp
+  );
+  console.log("createEdlMappingResponse", createEdlMappingResponse);
 
-  // programme state variable
-  const [programmeTempArray, setProgrammeTempArray] = useState([]);
-  const [rightProgrammeTempArray, setRightProgrammeTempArray] = useState([]);
-  const [programmeData, setprogrammeData] = useState([]);
-  const [selectedProgrammeItem, setSelectedProgrammeItem] = useState([]);
-  const [programmeActiveIndicies, setProgrammeActiveIndicies] = useState([]);
-  const [programmeFirstClick, setProgrammeFirstClick] = useState(false);
-  const [
-    selectProgrammeItemActiveIndices,
-    setSelectedProgrammeItemActiveIndices,
-  ] = useState();
-  const [copyProgrmmeData, setCopyprogrmmeData] = useState([]);
+  const [tempArray, setTempArray] = useState([]);
+  const [rightTempArray, setRightTempArray] = useState([]);
+  const [selectItemActiveIndices, setSelectedItemActiveIndices] = useState([]);
+  const [selectedItem, setSelectedItem] = useState([]);
+  const [activeIndicies, setActiveIndicies] = useState([]);
+  const [firstClick, setFirstClick] = useState(false);
+  const [copyData, setCopyData] = useState([]);
+  const [transferableRoleList, setTransferableRoleList] = useState([]);
 
+  const [storeTypeId, setStoreTypeId] = useState("");
   useEffect(() => {
     if (edlMappingListResponse && edlMappingListResponse?.status === 200) {
       setStoreTypeDropDownList(edlMappingListResponse?.data?.storeTypeList);
-      setprogrammeData(edlMappingListResponse?.data?.drugList);
-      setCopyprogrmmeData(edlMappingListResponse?.data?.drugList);
-      setProgrammeActiveIndicies(
+      setTransferableRoleList(edlMappingListResponse?.data?.drugList);
+      setCopyData(edlMappingListResponse?.data?.drugList);
+      setActiveIndicies(
         edlMappingListResponse?.data?.drugList.map((bool, j) => false)
       );
     }
   }, [edlMappingListResponse]);
 
   useEffect(() => {
+    if (drugListByStoreType && drugListByStoreType?.status === 200) {
+      setFirstClick(true);
+      setTempArray(drugListByStoreType?.data);
+      setSelectedItemActiveIndices(drugListByStoreType?.data?.map(() => true));
+      setSelectedItem(drugListByStoreType?.data);
+      const leftElelemt = [...copyData].filter((elem) => {
+        return !drugListByStoreType?.data?.find((ele) => {
+          return ele.id === elem.id;
+        });
+      });
+      setActiveIndicies(leftElelemt?.map(() => false));
+      setTransferableRoleList(leftElelemt);
+      setCopyData(copyData);
+    }
+  }, [drugListByStoreType]);
+
+  useEffect(() => {
+    if (createEdlMappingResponse && createEdlMappingResponse?.status === 201) {
+      if (createEdlMappingResponse?.data?.status === 1) {
+        toastMessage("EDL MAPPING", createEdlMappingResponse?.data?.message);
+
+        dispatch(createEdlMapingResponse(""));
+      } else if (createEdlMappingResponse?.data?.status === 0) {
+        toastMessage("EDL MAPPING", createEdlMappingResponse?.data?.message);
+        dispatch(createEdlMapingResponse(""));
+      }
+    } else if (
+      createEdlMappingResponse &&
+      createEdlMappingResponse?.status === 500
+    ) {
+      dispatch(createEdlMapingResponse(""));
+      toastMessage("EDL MAPPING", "Something went wrong", "");
+    } else if (
+      createEdlMappingResponse &&
+      createEdlMappingResponse?.status === 400
+    ) {
+      dispatch(createEdlMapingResponse(""));
+      toastMessage(
+        "EDL MAPPING",
+        createEdlMappingResponse?.data?.message,
+        "error"
+      );
+    }
+  }, [createEdlMappingResponse]);
+
+  useEffect(() => {
     dispatch(getEdlMappingList());
   }, []);
 
   const handleRightListItemClick = (e, id, element, index) => {
-    const elementExist = rightProgrammeTempArray?.filter((item) => {
+    const elementExist = rightTempArray?.filter((item) => {
       return item.id === id;
     });
     if (elementExist.length === 0) {
-      setRightProgrammeTempArray([...rightProgrammeTempArray, element]);
+      setRightTempArray([...rightTempArray, element]);
     } else {
-      for (let [i, item] of rightProgrammeTempArray.entries()) {
+      for (let [i, item] of rightTempArray.entries()) {
         if (item.id === id) {
-          rightProgrammeTempArray.splice(i, 1);
+          rightTempArray.splice(i, 1);
         }
       }
     }
 
-    if (programmeFirstClick) {
-      setSelectedProgrammeItemActiveIndices(
-        selectProgrammeItemActiveIndices.map((bool, j) =>
-          j === index ? true : false
-        )
+    if (firstClick) {
+      setSelectedItemActiveIndices(
+        selectItemActiveIndices.map((bool, j) => (j === index ? true : false))
       );
-      setProgrammeFirstClick(false);
+      setFirstClick(false);
     } else {
-      const t = [...selectProgrammeItemActiveIndices];
+      const t = [...selectItemActiveIndices];
       const ut = t.map((elem, i) => {
         if (i === index) {
           if (elem) {
@@ -77,30 +131,30 @@ const StoreTypeDrugMapping = () => {
           return elem;
         }
       });
-      setSelectedProgrammeItemActiveIndices(ut);
+      setSelectedItemActiveIndices(ut);
     }
   };
 
   const handleLeftListItemClick = (e, id, element, index) => {
-    const elementExist = programmeTempArray?.filter((item) => {
+    const elementExist = tempArray?.filter((item) => {
       return item.id === id;
     });
     if (elementExist.length === 0) {
-      setProgrammeTempArray([...programmeTempArray, element]);
+      setTempArray([...tempArray, element]);
     } else {
-      for (let [i, item] of programmeTempArray?.entries()) {
+      for (let [i, item] of tempArray?.entries()) {
         if (item.id === id) {
-          programmeTempArray.splice(i, 1);
+          tempArray.splice(i, 1);
         }
       }
     }
-    if (!programmeActiveIndicies.at(index)) {
-      setProgrammeActiveIndicies(
-        programmeActiveIndicies.map((bool, j) => (j === index ? true : bool))
+    if (!activeIndicies.at(index)) {
+      setActiveIndicies(
+        activeIndicies.map((bool, j) => (j === index ? true : bool))
       );
     } else {
-      setProgrammeActiveIndicies(
-        programmeActiveIndicies.map((bool, j) => (j === index ? false : bool))
+      setActiveIndicies(
+        activeIndicies.map((bool, j) => (j === index ? false : bool))
       );
     }
   };
@@ -247,7 +301,17 @@ const StoreTypeDrugMapping = () => {
                 <div className="row">
                   <div className="col-4">STORE TYPE</div>
                   <div className="col-8">
-                    <CustomSelect options={storeTypeDropDownList} />
+                    <CustomSelect
+                      options={storeTypeDropDownList}
+                      onChange={(val) => {
+                        setStoreTypeId(val?.value);
+                        dispatch(
+                          getDrugListByStoreType({
+                            storeTypeId: val?.value,
+                          })
+                        );
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -266,66 +330,67 @@ const StoreTypeDrugMapping = () => {
                 </div>
                 <div className="row">
                   <TransferComponent
-                    apiData={programmeData}
-                    activeIndicies={programmeActiveIndicies}
+                    apiData={transferableRoleList}
+                    activeIndicies={activeIndicies}
                     handleMoveSelectedItemToLeft={() => {
                       handleMoveSelectedItemToLeft(
-                        selectProgrammeItemActiveIndices,
-                        rightProgrammeTempArray,
-                        setProgrammeFirstClick,
-                        selectedProgrammeItem,
-                        setSelectedProgrammeItemActiveIndices,
-                        programmeTempArray,
-                        setProgrammeTempArray,
-                        programmeData,
-                        setprogrammeData,
-                        setSelectedProgrammeItem,
-                        setRightProgrammeTempArray,
-                        setProgrammeActiveIndicies,
-                        programmeActiveIndicies,
-                        copyProgrmmeData
+                        selectItemActiveIndices,
+                        rightTempArray,
+                        setFirstClick,
+                        selectedItem,
+                        setSelectedItemActiveIndices,
+                        tempArray,
+                        setTempArray,
+                        transferableRoleList,
+
+                        setTransferableRoleList,
+                        setSelectedItem,
+                        setRightTempArray,
+                        setActiveIndicies,
+                        activeIndicies,
+                        copyData
                       );
                     }}
                     handleMoveSelectedItemToRight={() => {
                       handleMoveSelectedItemToRight(
-                        programmeTempArray,
-                        setProgrammeFirstClick,
-                        copyProgrmmeData,
-                        setSelectedProgrammeItemActiveIndices,
-                        setRightProgrammeTempArray,
-                        setProgrammeActiveIndicies,
-                        programmeActiveIndicies,
-                        setSelectedProgrammeItem,
-                        setprogrammeData
+                        tempArray,
+                        setFirstClick,
+                        copyData,
+                        setSelectedItemActiveIndices,
+                        setRightTempArray,
+                        setActiveIndicies,
+                        activeIndicies,
+                        setSelectedItem,
+                        setTransferableRoleList
                       );
                     }}
                     handleShiftAllElementToRight={() => {
                       handleShiftAllElementToRight(
-                        copyProgrmmeData,
-                        setProgrammeFirstClick,
-                        setSelectedProgrammeItemActiveIndices,
-                        setSelectedProgrammeItem,
-                        setRightProgrammeTempArray,
-                        setProgrammeTempArray,
-                        setprogrammeData
+                        copyData,
+                        setFirstClick,
+                        setSelectedItemActiveIndices,
+                        setSelectedItem,
+                        setRightTempArray,
+                        setTempArray,
+                        setTransferableRoleList
                       );
                     }}
                     handleShiftAllElementToLeft={() => {
                       handleShiftAllElementToLeft(
-                        copyProgrmmeData,
-                        setSelectedProgrammeItemActiveIndices,
-                        setprogrammeData,
-                        setRightProgrammeTempArray,
-                        setProgrammeTempArray,
-                        setSelectedProgrammeItem,
-                        setProgrammeActiveIndicies,
-                        programmeActiveIndicies
+                        copyData,
+                        setSelectedItemActiveIndices,
+                        setTransferableRoleList,
+                        setRightTempArray,
+                        setTempArray,
+                        setSelectedItem,
+                        setActiveIndicies,
+                        activeIndicies
                       );
                     }}
                     handleLeftListItemClick={handleLeftListItemClick}
                     handleRightListItemClick={handleRightListItemClick}
-                    selectedItem={selectedProgrammeItem}
-                    selectItemActiveIndices={selectProgrammeItemActiveIndices}
+                    selectedItem={selectedItem}
+                    selectItemActiveIndices={selectItemActiveIndices}
                   />
                 </div>
                 <div className="row mt-2 mb-2">
@@ -333,23 +398,46 @@ const StoreTypeDrugMapping = () => {
                     <div className="me-1">
                       <Basicbutton
                         buttonText="Save"
-                        className="btn btn-success"
+                        className="btn btn-success rounded-0"
+                        outlineType={true}
                         icon={
                           <FontAwesomeIcon
                             icon={faFloppyDisk}
                             className="me-2"
                           />
                         }
-                        onClick={console.log(
-                          "selectedItem",
-                          selectedProgrammeItem
-                        )}
+                        onClick={() => {
+                          if (selectedItem && selectedItem?.length === 0) {
+                            toastMessage(
+                              "CREATE ROLE",
+                              "please map the role list"
+                            );
+                          } else {
+                            const cloneData = [...selectedItem];
+                            console.log("cloneData", cloneData);
+                            let programId = [];
+                            cloneData &&
+                              cloneData.map(({ id }) => {
+                                let ele = {};
+                                ele["id"] = id;
+                                programId.push(ele);
+                                return id;
+                              });
+                            console.log("programId", programId);
+                            dispatch(
+                              createEdlMapping({
+                                storetype_id: storeTypeId,
+                                list: programId,
+                              })
+                            );
+                          }
+                        }}
                       />
                     </div>
                     <div className="ms-1">
                       <Basicbutton
                         buttonText="Cancel"
-                        className="btn btn-danger"
+                        className="btn btn-danger rounded-0"
                         icon={
                           <FontAwesomeIcon icon={faXmark} className="me-2" />
                         }

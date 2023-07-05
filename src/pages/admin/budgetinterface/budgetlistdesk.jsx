@@ -4,8 +4,6 @@ import { TableBody } from "@mui/material";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import Basicbutton from "../../../components/button/basicbutton";
 import SearchField from "../../../components/search/search";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
-import { makeStyles } from "@mui/styles";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getBudgetIterfaceList,
@@ -18,33 +16,30 @@ import StyledTableRow from "../../../components/tables/datatable/customTableRow"
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
 import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
-const useStyles = makeStyles({
-  tableCell: {
-    padding: "10px !important",
-    fontSize: "0.8rem !important",
-  },
-  lineHeight: {
-    lineHeight: "3",
-  },
-});
+import { useNavigate } from "react-router-dom";
+import searchFunc from "../../../components/tables/searchFunc";
+
 const BudgetListDesk = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const budgetInterfaceListResponse = useSelector(
     (state) => state?.admin?.budgetInterfaceListResponse
   );
   console.log("budgetInterfaceListResponse", budgetInterfaceListResponse);
-  const classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
-  const [totalPages, setTotalPages] = useState(0);
   const [totalRows, setTotalRows] = useState(0);
   const [tableData, setTableData] = useState([]);
-  console.log(typeof tableData, tableData.length);
+  const [storeList, setStoreList] = useState([]);
+  const [programmeList, setProgrammeList] = useState([]);
+  const [sourceList, setSourceList] = useState([]);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
   });
   const [loading, setLoading] = useState(false);
+  const [filterData, setFilterData] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
   const columns = useMemo(() => [
     {
       id: "programmeName",
@@ -131,6 +126,10 @@ const BudgetListDesk = () => {
           budgetInterfaceListResponse?.data?.pageList?.totalElements
         );
         setTableData(budgetInterfaceListResponse?.data?.pageList?.content);
+        setFilterData(budgetInterfaceListResponse?.data?.pageList?.content);
+        setStoreList(budgetInterfaceListResponse?.data?.addListStore);
+        setSourceList(budgetInterfaceListResponse?.data?.fundingSourceList);
+        setProgrammeList(budgetInterfaceListResponse?.data?.programmeList);
       }
 
       setLoading(false);
@@ -169,14 +168,29 @@ const BudgetListDesk = () => {
           <Basicbutton
             buttonText="Allocate New Budget"
             className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
-            onClick={() => {}}
+            onClick={() => {
+              navigate("/openBudgetInterface", {
+                state: {
+                  storeList: storeList,
+                  programmeList: programmeList,
+                  sourceList: sourceList,
+                },
+              });
+            }}
           />
           <SearchField
             className="me-1 "
             iconPosition="end"
-            iconName={faSearch}
             onChange={(e) => {
-              console.log(e);
+              if (e.target?.value != "") {
+                setSearchValue(e?.target?.value);
+                setLoading(true);
+                setTableData(searchFunc(filterData, e.target?.value));
+                setLoading(false);
+              } else {
+                setTableData(filterData);
+                setSearchValue("");
+              }
             }}
           />
         </div>
@@ -214,7 +228,11 @@ const BudgetListDesk = () => {
                   })
                 )}
 
-                <EmptyRow loading={loading} tableData={tableData} />
+                <EmptyRow
+                  loading={loading}
+                  tableData={tableData}
+                  searchValue={searchValue}
+                />
               </TableBody>
             </TableComponent>
             <TablePagination

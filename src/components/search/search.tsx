@@ -25,6 +25,8 @@ interface searchProps {
   fullWidth: boolean | false;
   className?: string;
   input?: boolean | false;
+  onClick: () => void;
+  disabled: boolean | false;
 }
 const SearchField: React.FC<searchProps> = ({
   placeholder,
@@ -32,11 +34,14 @@ const SearchField: React.FC<searchProps> = ({
   onChange,
   iconPosition,
   className,
+  onClick,
+  disabled,
 }) => {
   const classes = useStyles();
   return (
     <TextField
       placeholder={placeholder}
+      disabled={disabled}
       className={`${classes.root} ${className}`}
       fullWidth={fullWidth}
       InputProps={{
@@ -51,4 +56,4 @@ const SearchField: React.FC<searchProps> = ({
   );
 };
 
-export default SearchField;
+export default React.memo(SearchField);

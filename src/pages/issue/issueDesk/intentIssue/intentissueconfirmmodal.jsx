@@ -2,15 +2,17 @@ import React from "react";
 import BasicModal from "../../../../components/modal/basicmodal";
 import Basicbutton from "../../../../components/button/basicbutton";
 const IntentIssueConfirmModal = ({
-  showIssueRejectModal,
-  handleIssueRejectModal,
+  showIntentIssueModal,
+  handleIntentIssueModal,
+  handleIssueIntent,
+  handleRejectIntent,
 }) => {
   return (
     <>
       <BasicModal
         title="Intent Issue/Reject Confirm"
-        show={showIssueRejectModal}
-        close={() => handleIssueRejectModal()}
+        show={showIntentIssueModal}
+        close={() => handleIntentIssueModal()}
         isStatic={false}
         scrollable={true}
         isCenterAlign={true}
@@ -30,6 +32,7 @@ const IntentIssueConfirmModal = ({
                 buttonText="ISSUE"
                 className="primary rounded-0 me-1"
                 outlineType={true}
+                onClick={handleIssueIntent}
               />
 
               <Basicbutton
@@ -37,13 +40,14 @@ const IntentIssueConfirmModal = ({
                 buttonText="REJECT"
                 className="danger rounded-0 me-1"
                 outlineType={true}
+                onClick={handleRejectIntent}
               />
               <Basicbutton
                 type="button"
                 buttonText="CANCEL"
                 className="secondary rounded-0"
                 outlineType={true}
-                onClick={handleIssueRejectModal}
+                onClick={handleIntentIssueModal}
               />
             </div>
           </div>
