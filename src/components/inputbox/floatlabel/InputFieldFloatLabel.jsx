@@ -10,7 +10,7 @@ const BasicField = (props) => {
         required
         onClick={props.onclick}
         onChange={props.onchange}
-        autoComplete={"off"}
+        autoComplete="new-password"
       />
     </div>
   );
@@ -26,7 +26,7 @@ const WithError = (props) => {
         required
         onClick={props.onclick}
         onChange={props.onchange}
-        autoComplete="off"
+        autoComplete="new-password"
       />
       <label className="form-label" htmlFor={props.id}>
         {props.placeholder}

@@ -24,7 +24,6 @@ const BasicButton: React.FC<buttonProps> = ({
   outlineType,
   icon,
 }) => {
-  console.log("Initial Render", buttonText);
   return (
     <button
       className={`btn btn-${outlineType ? "outline-" : ""}${className}`}

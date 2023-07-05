@@ -1,36 +1,23 @@
 import React from "react";
-interface inputProps {
-  id?: string;
+interface inputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   className?: string | "";
-  placeholder: string;
-  disabled?: boolean | false;
-  onChange?: () => void;
-  type: any | "text";
   floatingLabel?: boolean | false;
-  labelText?: string;
+  value?: string | "";
+  htmlFor: string | "";
+  labelText: string | "";
 }
 
-const BasicInput: React.FC<inputProps> = ({
-  id,
-  type,
-  className,
-  placeholder,
-  onChange,
-  disabled,
-  floatingLabel,
-}) => {
+const BasicInput = (props: inputProps) => {
+  const { className, floatingLabel, value, type, htmlFor, labelText } = props;
   return (
     <>
       <div className={`${floatingLabel ? "form-floating" : ""}`}>
         <input
-          type={type}
-          className={`form-control ${className}`}
-          id={id}
-          onChange={onChange}
-          disabled={disabled}
-          placeholder={placeholder}
+          className={`form-control shadow-none ${className}`}
+          value={value}
+          {...props}
         />
-        {floatingLabel && <label htmlFor={id}>{floatingLabel}</label>}
+        {floatingLabel ? <label htmlFor={htmlFor}>{labelText}</label> : null}
       </div>
     </>
   );

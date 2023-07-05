@@ -1,2 +1,6 @@
 export const SHOW_LOGIN_MODAL = "SHOW_LOGIN_MODAL";
 export const CLOSE_LOGIN_MODAL = "CLOSE_LOGIN_MODAL";
+export const LOGIN = "LOGIN";
+export const LOGIN_RESPONSE = "LOGIN_RESPONSE";
+export const LOGOUT = "LOGOUT";
+export const LOGOUT_RESPONSE = "LOGOUT_RESPONSE";

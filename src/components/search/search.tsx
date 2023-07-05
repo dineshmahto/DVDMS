@@ -2,6 +2,7 @@ import React from "react";
 import { TextField } from "@mui/material";
 import { InputAdornment } from "@mui/material";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { makeStyles } from "@mui/styles";
 export type position = "start" | "end";
 
@@ -24,26 +25,29 @@ interface searchProps {
   fullWidth: boolean | false;
   className?: string;
   input?: boolean | false;
+  onClick: () => void;
+  disabled: boolean | false;
 }
 const SearchField: React.FC<searchProps> = ({
   placeholder,
   fullWidth,
   onChange,
-  iconName,
   iconPosition,
   className,
-  input,
+  onClick,
+  disabled,
 }) => {
   const classes = useStyles();
   return (
     <TextField
       placeholder={placeholder}
+      disabled={disabled}
       className={`${classes.root} ${className}`}
       fullWidth={fullWidth}
       InputProps={{
         endAdornment: (
           <InputAdornment position={iconPosition}>
-            <FontAwesomeIcon icon={iconName} />
+            <FontAwesomeIcon icon={faSearch} />
           </InputAdornment>
         ),
       }}
@@ -52,4 +56,4 @@ const SearchField: React.FC<searchProps> = ({
   );
 };
 
-export default SearchField;
+export default React.memo(SearchField);

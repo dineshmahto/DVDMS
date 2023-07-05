@@ -64,7 +64,7 @@ const CommonTableBody: React.FC<commonTableBodyProps> = ({
                   return (
                     <TableCell
                       padding="none"
-                      style={{ padding: "4px", fontSize: "0.7rem" }}
+                      style={{ padding: "10px", fontSize: "0.8rem" }}
                       key={k}
                     >
                       {row[d.id]}
