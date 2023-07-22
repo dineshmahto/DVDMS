@@ -1,6 +1,8 @@
 import {
   CANCEL_NOTIFICATION,
   CANCEL_NOTIFICATION_RESPONSE,
+  FREEZE_NOTIFICATION,
+  FREEZE_NOTIFICATION_RESPONSE,
   GET_ALL_OPEN_NOTIFICATION_LIST,
   GET_ALL_OPEN_NOTIFICATION_LIST_RESPONSE,
   GET_ANNUAL_DEMAND_NOTIFICATION,
@@ -158,5 +160,19 @@ export const saveCompileDemandResp = (saveCompileDemdResp) => {
   return {
     type: SAVE_COMPILE_DEMAND_RESPONSE,
     payload: saveCompileDemdResp,
+  };
+};
+
+export const freezeNotification = (notificationId) => {
+  return {
+    type: FREEZE_NOTIFICATION,
+    payload: notificationId,
+  };
+};
+
+export const freezeNotificationResponse = (freezeNotResp) => {
+  return {
+    type: FREEZE_NOTIFICATION_RESPONSE,
+    payload: freezeNotResp,
   };
 };

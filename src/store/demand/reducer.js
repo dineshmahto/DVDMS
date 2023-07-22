@@ -19,6 +19,8 @@ import {
   GET_COMPILE_DEMAND_REPONSE,
   SAVE_COMPILE_DEMAND,
   SAVE_COMPILE_DEMAND_RESPONSE,
+  FREEZE_NOTIFICATION,
+  FREEZE_NOTIFICATION_RESPONSE,
 } from "./actionTypes";
 
 const initialState = {
@@ -143,6 +145,18 @@ const demand = (state = initialState, action) => {
       state = {
         ...state,
         saveCompileDmdResp: action?.payload,
+      };
+      break;
+
+    case FREEZE_NOTIFICATION:
+      state = {
+        ...state,
+      };
+      break;
+    case FREEZE_NOTIFICATION_RESPONSE:
+      state = {
+        ...state,
+        freezeNotResp: action?.payload,
       };
       break;
 

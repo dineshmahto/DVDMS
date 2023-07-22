@@ -92,6 +92,9 @@ export const GET_ANNUAL_DEMAND_LIST = "Notification/generateAnnualDemand";
 export const GET_COMPILE_DEMAND_LIST = "Notification/getCompileDemand";
 export const SAVE_GENERATE_ANNUAL_DEMAND =
   "Notification/saveGenerateAnnualDemand";
+export const SAVE_COMPILE_DEAMND_REQUEST =
+  "Notification/saveCompileDemandRequest";
+export const FREEZE_NOTIFICATION_ENDPOINT = "Notification/freezeNotification";
 export const SAVE_COMPILE_DEMAND = "Notification/";
 export const DELETE_NOTIFICATION = "Notification/notificationDelete";
 export const UPDATE_NOTIFICATION = "Notification/notificationUpdate";
@@ -117,6 +120,21 @@ export const CREATE_DRUG_MANUFACTURE = "post/createDrugManufacture";
 
 export const DELETE_DRUG_MANUFACTURE = "post/deleteManufacture";
 export const GET_CENTRAL_PURCHASE = "pagination/getCentralPurchaseList";
+export const GET_ANNUAL_DEMAND_DETAIL_BY_ID = "order/getApprovalSubStoreLevel";
+export const POST_ANNUAL_DEMAND_APPROVAL = "order/annualDemandApproval";
+export const GET_RATE_CONTRACT_INFO = "order/getRateContactInfo";
+export const GET_RATE_CONTRACT_INFO_BY_ID = "order/getRateContactInfoById";
+export const GET_RATE_CONTRACT_INACTIVE = "order/getRateContactInActive";
+export const RENEW_RATE_CONTRACT = "order/getRateContactRenew";
+export const CREATE_RATE_CONTRACT = "order/createRateContract";
+export const GET_FREEZE_NOTIFICATION_DETAILS =
+  "order/getFreezeNotificationDetail";
+export const CREATE_PO = "order/createPurchaseOrder";
+export const CREATE_LOCAL_PO = "order/createLocalPurchaseOrder";
+export const GET_PURCHASE_ORDER_PROCESS_ORDER_INFO =
+  "order/getPurchaseOrderProcessInfo";
+export const GET_LOCAL_PURCHASE_ORDER_INFO = "order/getLocalPurchaseOrderInfo";
+export const CANCEL_PO = "order/getCancelPurchaseOrderInfo";
 // end of Order Management Module
 
 //Issue Desk Module

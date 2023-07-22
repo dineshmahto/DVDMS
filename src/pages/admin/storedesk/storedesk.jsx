@@ -272,7 +272,7 @@ const StoreDesk = () => {
           <Basicbutton
             buttonText="Add New Store"
             outlineType={true}
-            className="btn btn-primary rounded-0 mb-2 me-1 mt-2 ms-1"
+            className="btn btn-outline-primary rounded-0 mb-2 me-1 mt-2 ms-1 shadow-sm rounded"
             onClick={() => {
               setShowAddModal(true);
             }}
@@ -293,7 +293,7 @@ const StoreDesk = () => {
           />
         </div>
       </div>
-      <Paper>
+      <Paper elevation={3} className="mb-2">
         <div className="row">
           <div className="col-12">
             <TableComponent
@@ -301,6 +301,7 @@ const StoreDesk = () => {
               sortField={sortField}
               order={order}
               handleSorting={handleSortingChange}
+              caption="Store List"
             >
               <TableBody>
                 {loading ? (
@@ -390,44 +391,53 @@ const StoreDesk = () => {
             />
           </div>
         </div>
-        <Suspense>
-          <CreateStoreModal
-            openCreateStoreModal={showAddModal}
-            handleCloseCreateStoreModal={handleCloseCreateStoreModal}
-            storeList={storeList}
-            storeTypeList={storeTypeList}
-            districtList={districtList}
-            ownerList={ownerList}
-            blockList={blockList}
-          />
-        </Suspense>
-        <Suspense>
-          <EditStoreModal
-            openEditStoreModal={showEditModal}
-            handleCloseEditStoreModal={handleCloseEditStoreModal}
-            storeList={storeList}
-            storeTypeList={storeTypeList}
-            districtList={districtList}
-            ownerList={ownerList}
-            blockList={blockList}
-            editData={editData}
-            resetPageDetails={resetPageDetails}
-          />
-        </Suspense>
-        <Suspense>
-          <AlertDialog
-            open={showDeleteDialog}
-            handleClose={handleDeleteDialog}
-            description="You are about to delete one record, this procedure is irreversible.
-Do you want to proceed?"
-          >
-            <Basicbutton
-              buttonText="Disagree"
-              onClick={() => setShowDeleteDialog(false)}
+
+        {showAddModal && (
+          <Suspense>
+            <CreateStoreModal
+              openCreateStoreModal={showAddModal}
+              handleCloseCreateStoreModal={handleCloseCreateStoreModal}
+              storeList={storeList}
+              storeTypeList={storeTypeList}
+              districtList={districtList}
+              ownerList={ownerList}
+              blockList={blockList}
             />
-            <Basicbutton buttonText="Agree" onClick={handleDeleteStore} />
-          </AlertDialog>
-        </Suspense>
+          </Suspense>
+        )}
+
+        {showEditModal && (
+          <Suspense>
+            <EditStoreModal
+              openEditStoreModal={showEditModal}
+              handleCloseEditStoreModal={handleCloseEditStoreModal}
+              storeList={storeList}
+              storeTypeList={storeTypeList}
+              districtList={districtList}
+              ownerList={ownerList}
+              blockList={blockList}
+              editData={editData}
+              resetPageDetails={resetPageDetails}
+            />
+          </Suspense>
+        )}
+
+        {showDeleteDialog && (
+          <Suspense>
+            <AlertDialog
+              open={showDeleteDialog}
+              handleClose={handleDeleteDialog}
+              description="You are about to delete one record, this procedure is irreversible.
+Do you want to proceed?"
+            >
+              <Basicbutton
+                buttonText="Disagree"
+                onClick={() => setShowDeleteDialog(false)}
+              />
+              <Basicbutton buttonText="Agree" onClick={handleDeleteStore} />
+            </AlertDialog>
+          </Suspense>
+        )}
       </Paper>
     </>
   );

@@ -6,10 +6,18 @@ import { Link } from "react-router-dom";
 import tokenhandle from "../../common/tokenhandle/tokenhandle";
 import { useDispatch, useSelector } from "react-redux";
 import { showLoader, hideLoader } from "../../store/loader/actions";
-import { loginResponse, logout } from "../../store/login/actions";
+import {
+  loginResponse,
+  logout,
+  logoutResponse,
+} from "../../store/login/actions";
 import toastMessage from "../../common/toastmessage/toastmessage";
 import CheckBox from "../../components/switch/switchcheckbox";
 import { handledarkMode } from "../../store/darkmode/action";
+import {
+  NETWORK_STATUS_CODE,
+  SERVER_STATUS_CODE,
+} from "../../common/constant/constant";
 const Navbar = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -19,15 +27,23 @@ const Navbar = () => {
   console.log("logout Response", logOutResponse);
   useEffect(() => {
     if (logOutResponse && logOutResponse.status === 200) {
+      if (logOutResponse?.data?.status === SERVER_STATUS_CODE?.SUCCESS) {
+        tokenhandle.clearToken();
+        toastMessage("LOGOUT", logOutResponse?.data?.message, "success");
+        dispatch(logoutResponse(""));
+        //dispatch(hideLoader());
+        navigate("/");
+      } else if (logOutResponse?.data?.status === SERVER_STATUS_CODE?.FAILED) {
+        toastMessage("LOGOUT", logOutResponse?.data?.message, "error");
+        dispatch(logOutResponse(""));
+      }
+    } else if (
+      logOutResponse &&
+      logOutResponse?.status === NETWORK_STATUS_CODE.INTERNAL_ERROR
+    ) {
       dispatch(hideLoader());
-      tokenhandle.clearToken();
-
-      // dispatch(loginResponse(""));
-      // navigate("/");
-    } else if (logOutResponse && logOutResponse?.status === 500) {
-      dispatch(hideLoader());
+      toastMessage("LOGOUT", logOutResponse?.data?.message, "error");
       dispatch(loginResponse(""));
-      toastMessage("LOGOUT", "Something went wrong", "error");
     }
   }, [logOutResponse]);
   return (
@@ -106,15 +122,14 @@ const Navbar = () => {
               <li>
                 <Link
                   className="dropdown-item"
-                  to={"/"}
                   onClick={() => {
-                    dispatch(showLoader());
                     const details = JSON.parse(tokenhandle.getProfileDetail());
                     dispatch(
                       logout({
                         username: details?.userName,
                       })
                     );
+                    // dispatch(showLoader());
                   }}
                 >
                   <FontAwesomeIcon icon={faRightFromBracket} />

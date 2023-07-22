@@ -1,3 +1,4 @@
+import { GET_LOCAL_PURCHASE_ORDER_INFO } from "../../common/constant/constants";
 import {
   GET_APPROVAL_DESK_LIST,
   GET_APPROVAL_DESK_LIST_RESPONSE,
@@ -17,6 +18,35 @@ import {
   CREATE_MANUFACTURING_RESPONSE,
   EDIT_MANUFACTURING,
   EDIT_MANUFACTURING_RESPONSE,
+  GET_ANNUAL_DEMAND_BY_NOTIFICATION_ID,
+  GET_ANNUAL_DEMAND_BY_NOTIFICATION_ID_RESPONSE,
+  APPROVE_ANNUAL_DEMAND,
+  APPROVE_ANNUAL_DEMAND_RESPONSE,
+  GET_NEW_RATE_CONTRACT_LIST,
+  GET_NEW_RATE_CONTRACT_LIST_RESPONSE,
+  ADD_NEW_CONTRACT_RATE,
+  ADD_NEW_CONTRACT_RATE_RESPONSE,
+  RENEW_RATE_CONTRACT,
+  RENEW_RATE_CONTRACT_RESPONSE,
+  INACTIVE_RATE_CONTRACT,
+  POST_RENEW_RATE_CONTRACT,
+  POST_RENEW_RATE_CONTRACT_RESPONSE,
+  INACTIVE_RATE_CONTRACT_RESPONSE,
+  GET_FREEZE_NOTI_DETAILS_RESPONSE,
+  GET_FREEZE_NOTI_DETAILS,
+  CREATE_PO,
+  CREATE_PO_RESPONSE,
+  PROCESS_PO,
+  GET_PROCESS_ORDER_PROCESS_INFO,
+  GET_PROCESS_ORDER_PROCESS_INFO_RESPONSE,
+  PROCESS_LOCAL_PO,
+  PROCESS_LOCAL_PO_RESPOSNE,
+  GET_LOCAL_PO_INFO_RESPOSNE,
+  GET_LOCAL_PO_INFO,
+  CREATE_LOCAL_PO,
+  CREATE_LOCAL_PO_RESPONSE,
+  CANCEL_PO_RESPONSE,
+  CANCEL_PO,
 } from "./actionTypes";
 
 export const getManufactureDeskList = (pageDetails) => {
@@ -149,5 +179,200 @@ export const getCentralpurchaseListResponse = (centralPurchaseListResponse) => {
   return {
     type: GET_CENTRAL_PURCHASE_LIST_RESPONSE,
     payload: centralPurchaseListResponse,
+  };
+};
+
+export const getAnnualDemandByNotifId = (notificationId) => {
+  return {
+    type: GET_ANNUAL_DEMAND_BY_NOTIFICATION_ID,
+    payload: notificationId,
+  };
+};
+
+export const getAnnualDemandByNotifIdResp = (annualDemandListByIdResp) => {
+  return {
+    type: GET_ANNUAL_DEMAND_BY_NOTIFICATION_ID_RESPONSE,
+    payload: annualDemandListByIdResp,
+  };
+};
+
+export const approveAnnualDemand = (approvalDetails) => {
+  return {
+    type: APPROVE_ANNUAL_DEMAND,
+    payload: approvalDetails,
+  };
+};
+
+export const approveAnnualDemandResponse = (annualDemandApprovalResp) => {
+  return {
+    type: APPROVE_ANNUAL_DEMAND_RESPONSE,
+    payload: annualDemandApprovalResp,
+  };
+};
+
+export const getNewRateContractList = (pageDetails) => {
+  return {
+    type: GET_NEW_RATE_CONTRACT_LIST,
+    payload: pageDetails,
+  };
+};
+
+export const getNewRateContractListResp = (newRateContractListResp) => {
+  return {
+    type: GET_NEW_RATE_CONTRACT_LIST_RESPONSE,
+    payload: newRateContractListResp,
+  };
+};
+
+export const addNewContractRate = (addDetails) => {
+  return {
+    type: ADD_NEW_CONTRACT_RATE,
+    payload: addDetails,
+  };
+};
+
+export const addNewContractRateResponse = (addNewContractRateResp) => {
+  return {
+    type: ADD_NEW_CONTRACT_RATE_RESPONSE,
+    payload: addNewContractRateResp,
+  };
+};
+
+export const renewRateContract = (id) => {
+  return {
+    type: RENEW_RATE_CONTRACT,
+    payload: id,
+  };
+};
+
+export const renewRateContractResponse = (renewRateContrtResp) => {
+  return {
+    type: RENEW_RATE_CONTRACT_RESPONSE,
+    payload: renewRateContrtResp,
+  };
+};
+
+export const inactiveRateContract = (id) => {
+  return {
+    type: INACTIVE_RATE_CONTRACT,
+    payload: id,
+  };
+};
+
+export const inactiveRateContractResponse = (inactiveRateContrctResp) => {
+  return {
+    type: INACTIVE_RATE_CONTRACT_RESPONSE,
+    payload: inactiveRateContrctResp,
+  };
+};
+
+export const postRenewRateContract = (id) => {
+  return {
+    type: POST_RENEW_RATE_CONTRACT,
+    payload: id,
+  };
+};
+
+export const postRenewRateContractResponse = (postRenewRateContractResp) => {
+  return {
+    type: POST_RENEW_RATE_CONTRACT_RESPONSE,
+    payload: postRenewRateContractResp,
+  };
+};
+
+export const getFreezeNotiDetails = (id) => {
+  return {
+    type: GET_FREEZE_NOTI_DETAILS,
+    payload: id,
+  };
+};
+
+export const getFreezeNotiDetailsResponse = (freezeNotiDetailsResp) => {
+  return {
+    type: GET_FREEZE_NOTI_DETAILS_RESPONSE,
+    payload: freezeNotiDetailsResp,
+  };
+};
+
+export const createPO = (poDetails) => {
+  return {
+    type: CREATE_PO,
+    payload: poDetails,
+  };
+};
+
+export const createPoResponse = (createPoResp) => {
+  return {
+    type: CREATE_PO_RESPONSE,
+    payload: createPoResp,
+  };
+};
+
+export const processPO = (id) => {
+  return {
+    type: PROCESS_PO,
+    payload: id,
+  };
+};
+
+export const processPOResponse = (processPoResp) => {
+  return {
+    type: CREATE_PO_RESPONSE,
+    payload: processPoResp,
+  };
+};
+
+export const getPrcessOrderInfo = (processDetail) => {
+  return {
+    type: GET_PROCESS_ORDER_PROCESS_INFO,
+    payload: processDetail,
+  };
+};
+
+export const getProcessOrderInfoResponse = (processOrderInfoResp) => {
+  return {
+    type: GET_PROCESS_ORDER_PROCESS_INFO_RESPONSE,
+    payload: processOrderInfoResp,
+  };
+};
+
+export const getLocalPoInfo = () => {
+  return {
+    type: GET_LOCAL_PO_INFO,
+  };
+};
+
+export const getLocalPoInfoResponse = (processLocalPoResp) => {
+  return {
+    type: GET_LOCAL_PO_INFO_RESPOSNE,
+    payload: processLocalPoResp,
+  };
+};
+
+export const createLocalPo = (details) => {
+  return {
+    type: CREATE_LOCAL_PO,
+    payload: details,
+  };
+};
+
+export const createLocalPoResponse = (createLocalPoResponse) => {
+  return {
+    type: CREATE_LOCAL_PO_RESPONSE,
+    payload: createLocalPoResponse,
+  };
+};
+
+export const cancelPo = (poId) => {
+  return {
+    type: CANCEL_PO,
+    payload: poId,
+  };
+};
+
+export const cancelPoResponse = (cancelPoResp) => {
+  return {
+    type: CANCEL_PO_RESPONSE,
+    payload: cancelPoResp,
   };
 };

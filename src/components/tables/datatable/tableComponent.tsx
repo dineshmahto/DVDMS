@@ -1,6 +1,5 @@
 import React, { ReactNode, memo } from "react";
 import {
-  Paper,
   TableContainer,
   Table,
   TableHead,
@@ -15,15 +14,7 @@ import {
   faArrowDownWideShort,
 } from "@fortawesome/free-solid-svg-icons";
 import Box from "@mui/material/Box";
-import { makeStyles } from "@mui/styles";
 
-const useStyles = makeStyles({
-  root: {
-    "& p": {
-      margin: "0px !important",
-    },
-  },
-});
 interface tableProps {
   caption?: string;
   columns: [];
@@ -127,9 +118,9 @@ const TableComponent: React.FC<tableProps> = ({
                       padding="none"
                       style={{
                         backgroundColor: colouredHeader
-                          ? "black"
+                          ? "#ffffff"
                           : "transparent",
-                        color: colouredHeader ? "white" : "black",
+                        color: colouredHeader ? "black" : "black",
                         padding: "10px",
                         fontSize: "0.7rem",
                         textAlign: "center",

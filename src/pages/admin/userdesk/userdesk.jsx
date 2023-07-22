@@ -308,7 +308,7 @@ const UserDesk = () => {
           <Basicbutton
             buttonText="Add New User"
             outlineType={true}
-            className="btn btn-outline-primary btn-sm rounded-0 mb-2 me-1 mt-2"
+            className="btn btn-outline-primary btn-md rounded-0 mb-2 me-1 mt-2 shadow-sm rounded"
             onClick={() => {
               setDropDownRoleList(roleList);
               setDropDownStoreList(storeList);
@@ -335,7 +335,7 @@ const UserDesk = () => {
         </div>
       </div>
 
-      <Paper>
+      <Paper elevation={3}>
         <div className="row">
           <div className="col-12">
             <TableComponent
@@ -444,43 +444,53 @@ const UserDesk = () => {
           </div>
         </div>
       </Paper>
-      <Suspense>
-        <CreateUserModalForm
-          openCreateuserModal={showAddModal}
-          handleCloseCreateUserModal={handleCloseCreateUserModal}
-          roleList={roleList}
-          storeList={storeList}
-        />
-      </Suspense>
-      <Suspense>
-        <EditUserModalForm
-          openEdituserModal={showEditModal}
-          handleCloseEditUserModal={handleCloseEditUserModal}
-          editData={editData}
-          roleList={roleList}
-          storeList={storeList}
-        />
-      </Suspense>
-      <Suspense>
-        <UserActivityListModal
-          showActivityModal={showActivityModal}
-          handleCloseActivityListModal={handleCloseActivityListModal}
-        />
-      </Suspense>
-
-      <Suspense>
-        <AlertDialog
-          open={showDeleteDialog}
-          handleClose={handleDeleteDialog}
-          description={DELETE_MESSAGE_DESCRIPTION}
-        >
-          <Basicbutton
-            buttonText="Disagree"
-            onClick={() => setShowDeleteDialog(false)}
+      {showAddModal && (
+        <Suspense>
+          <CreateUserModalForm
+            openCreateuserModal={showAddModal}
+            handleCloseCreateUserModal={handleCloseCreateUserModal}
+            roleList={roleList}
+            storeList={storeList}
           />
-          <Basicbutton buttonText="Agree" onClick={handleDeleteUser} />
-        </AlertDialog>
-      </Suspense>
+        </Suspense>
+      )}
+
+      {showEditModal && (
+        <Suspense>
+          <EditUserModalForm
+            openEdituserModal={showEditModal}
+            handleCloseEditUserModal={handleCloseEditUserModal}
+            editData={editData}
+            roleList={roleList}
+            storeList={storeList}
+          />
+        </Suspense>
+      )}
+
+      {showActivityModal && (
+        <Suspense>
+          <UserActivityListModal
+            showActivityModal={showActivityModal}
+            handleCloseActivityListModal={handleCloseActivityListModal}
+          />
+        </Suspense>
+      )}
+
+      {showDeleteDialog && (
+        <Suspense>
+          <AlertDialog
+            open={showDeleteDialog}
+            handleClose={handleDeleteDialog}
+            description={DELETE_MESSAGE_DESCRIPTION}
+          >
+            <Basicbutton
+              buttonText="Disagree"
+              onClick={() => setShowDeleteDialog(false)}
+            />
+            <Basicbutton buttonText="Agree" onClick={handleDeleteUser} />
+          </AlertDialog>
+        </Suspense>
+      )}
     </>
   );
 };

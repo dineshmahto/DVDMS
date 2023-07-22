@@ -10,7 +10,6 @@ import "react-toastify/dist/ReactToastify.css";
 
 //import IssueList from "./pages/issues/issueList";
 import Issue from "./pages/issues/issue";
-import TransferComponent from "./pages/drugList/transferComponent";
 
 import OpenIntentDesk from "./pages/openIntentDesk/intent";
 
@@ -137,6 +136,11 @@ const RateContractList = lazy(() =>
 const ApprovalDeskList = lazy(() =>
   import("./pages/ordermanagement/approvals/annualdemand/annulademand")
 );
+const OpenDemandApprovalForm = lazy(() =>
+  import(
+    "./pages/ordermanagement/approvals/annualdemand/openDemandApprovalForm"
+  )
+);
 const ApprovalPurchaseOrderList = lazy(() =>
   import("./pages/ordermanagement/approvals/purchaseorder/purchaseorder")
 );
@@ -152,6 +156,21 @@ const ApprovalTransferListHq = lazy(() =>
   )
 );
 
+const AddNewRateContract = lazy(() =>
+  import("./pages/ordermanagement/ratecontract/newRateContract")
+);
+const RenewRateContract = lazy(() =>
+  import("./pages/ordermanagement/ratecontract/renewRateContract")
+);
+const OpenNotificationDetails = lazy(() =>
+  import("./pages/ordermanagement/centralpurchase/createPo")
+);
+const GeneratePurchaseOrder = lazy(() =>
+  import("./pages/ordermanagement/centralpurchase/generatePurchaseOrder")
+);
+const LocalPoForm = lazy(() =>
+  import("./pages/ordermanagement/localpurchase/createPo")
+);
 // end of Order Management
 
 //Requistion Module Import
@@ -170,7 +189,7 @@ const ChallanList = lazy(() =>
 const ReceivedDrug = lazy(() =>
   import("./pages/receiving/receiveofdrugs/receiveofdrug")
 );
-const Test = lazy(() => import("./pages/drugList/test"));
+
 const DynamicRow = lazy(() => import("./pages/stock/stockEntry/stock"));
 function App() {
   return (
@@ -627,6 +646,10 @@ function App() {
                 element={<ApprovalIntentApprovalList />}
               />
               <Route
+                path="openDemandApprovalForm"
+                element={<OpenDemandApprovalForm />}
+              />
+              <Route
                 path="openTransferApprovalDesk"
                 element={<ApprovalTransferList />}
               />
@@ -636,6 +659,20 @@ function App() {
               />
               <Route path="openCentralPurchase" element={<CentralPurchase />} />
               <Route path="manufecturingList" element={<ManufacturerList />} />
+              <Route
+                path="openAddRateContract"
+                element={<AddNewRateContract />}
+              />
+              <Route path="openRateContract" element={<RenewRateContract />} />
+              <Route
+                path="openNotificationDetails"
+                element={<OpenNotificationDetails />}
+              />
+              <Route
+                path="generatePurchaseOrder"
+                element={<GeneratePurchaseOrder />}
+              />
+              <Route path="openLocalPOForm" element={<LocalPoForm />} />
               {/* End of Order Management Module */}
               {/* Requition Module */}
               <Route path="openIndentDesk" element={<IntentDrug />} />
@@ -660,8 +697,7 @@ function App() {
               {/* End of Report */}
               <Route path="openNotification" element={<OpenNotification />} />
               {/* <Route path="programmeList" element={<ProgramList />} /> */}
-              <Route path="TransferComponent" element={<TransferComponent />} />
-              <Route path="test" element={<Test />} />
+
               <Route path="stock" element={<DynamicRow />} />
             </Route>
           </Route>

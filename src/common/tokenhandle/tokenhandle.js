@@ -23,6 +23,7 @@ const getRefreshToken = () => {
 
 const clearToken = () => {
   sessionStorage.clear();
+  localStorage.clear();
   return true;
 };
 

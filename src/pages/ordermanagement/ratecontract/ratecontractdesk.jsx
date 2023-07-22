@@ -1,11 +1,9 @@
 import React, { useState, useMemo, useEffect, lazy, Suspense } from "react";
-import BasicButton from "../../../components/button/basicbutton";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import SearchField from "../../../components/search/search";
 import { faSearch } from "@fortawesome/free-solid-svg-icons";
 import { Paper, TableBody } from "@mui/material";
-import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
 import { useDispatch, useSelector } from "react-redux";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import {
@@ -20,13 +18,27 @@ import StyledTableCell from "../../../components/tables/datatable/customTableCel
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
 import searchFunc from "../../../components/tables/searchFunc";
+import Basicbutton from "../../../components/button/basicbutton";
+import { useNavigate } from "react-router-dom";
+import { inactiveRateContract } from "../../../store/ordermanagement/action";
+import AlertDialog from "../../../components/dialog/dialog";
+import {
+  DELETE_MESSAGE_DESCRIPTION,
+  NETWORK_STATUS_CODE,
+  SERVER_STATUS_CODE,
+} from "../../../common/constant/constant";
 const DrugListModal = lazy(() => import("./druglistmodal"));
 const RateContractDesk = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const rateContractListResponse = useSelector(
     (state) => state.admin.rateContractListResponse
   );
+  const inactiveRateContrctResp = useSelector(
+    (state) => state?.ordermanaagement?.inactiveRateContrctResp
+  );
   console.log("rateContractListResponse", rateContractListResponse);
+  console.log("inactiveRateContrctResp", inactiveRateContrctResp);
   const [tableData, setTableData] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [controller, setController] = useState({
@@ -38,6 +50,8 @@ const RateContractDesk = () => {
   const [loading, setLoading] = useState(true);
   const [showDrugList, setShowDrugList] = useState(false);
   const [modalData, setModalData] = useState([]);
+  const [showInactiveDialog, setShowInactiveDialog] = useState(false);
+  const [id, setId] = useState("");
   const columns = useMemo(() => [
     {
       id: "id",
@@ -87,13 +101,13 @@ const RateContractDesk = () => {
       sortable: false,
     },
   ]);
-  const handlePageChange = (event, newPage) => {
+  const handlePageChange = (newPage) => {
+    setLoading(true);
     setController({
       ...controller,
-      page: newPage,
+      page: newPage - 1,
     });
   };
-
   const handleChangeRowsPerPage = (e) => {
     setController({
       ...controller,
@@ -149,8 +163,48 @@ const RateContractDesk = () => {
     }
   }, [rateContractListResponse]);
 
+  useEffect(() => {
+    if (
+      inactiveRateContrctResp &&
+      inactiveRateContrctResp?.status ===
+        NETWORK_STATUS_CODE?.CREATED_SUCCESSFULLY
+    ) {
+      if (
+        inactiveRateContrctResp &&
+        inactiveRateContrctResp?.data?.status === SERVER_STATUS_CODE?.SUCCESS
+      ) {
+        setShowInactiveDialog(false);
+        toastMessage(
+          "RATE CONTRACT DESK",
+          inactiveRateContrctResp?.data?.message
+        );
+        dispatch(inactiveRateContrctResp(""));
+      } else if (
+        inactiveRateContrctResp &&
+        inactiveRateContrctResp?.data?.status === SERVER_STATUS_CODE?.FAILED
+      ) {
+        setShowInactiveDialog(false);
+        toastMessage(
+          "RATE CONTRACT DESK",
+          inactiveRateContrctResp?.data?.message
+        );
+        dispatch(inactiveRateContrctResp(""));
+      }
+    } else if (
+      rateContractListResponse &&
+      rateContractListResponse?.status == 400
+    ) {
+      dispatch(inactiveRateContrctResp(""));
+      toastMessage("Rate Contract Desk", "", "error");
+    }
+  }, [inactiveRateContrctResp]);
+
   const handleDrugListModal = () => {
     setShowDrugList(false);
+  };
+
+  const handleInactiveDialog = () => {
+    dispatch(inactiveRateContract({ id: id }));
   };
   return (
     <>
@@ -164,9 +218,16 @@ const RateContractDesk = () => {
         <div className="row mt-2">
           <HorizonatalLine text="Rate Contract Management Desk" />
         </div>
+
         <Paper>
           <div className="row mt-1 mb-2">
-            <div className="d-flex justify-content-end ">
+            <div className="d-flex justify-content-between ">
+              <Basicbutton
+                buttonText="Add New Contract"
+                className="btn btn-primary rounded-0"
+                outlineType={true}
+                onClick={() => navigate("/openAddRateContract")}
+              />
               <SearchField
                 iconPosition="end"
                 iconName={faSearch}
@@ -211,7 +272,7 @@ const RateContractDesk = () => {
                     tableData &&
                     tableData?.map((row, index) => {
                       return (
-                        <StyledTableRow>
+                        <StyledTableRow key={row?.id}>
                           {columns.map((d, k) => {
                             if (
                               d.id === "contactTo" ||
@@ -235,6 +296,28 @@ const RateContractDesk = () => {
                                   }}
                                 >
                                   VIEW DRUG LIST
+                                </StyledTableCell>
+                              );
+                            } else if (d.id === "action") {
+                              return (
+                                <StyledTableCell key={k}>
+                                  <Basicbutton
+                                    buttonText="Renew"
+                                    className="btn btn-sm btn-primary rounded-0 me-2"
+                                    onClick={() => {
+                                      navigate("/openRateContract", {
+                                        state: row?.id,
+                                      });
+                                    }}
+                                  />
+                                  <Basicbutton
+                                    buttonText="Inactive"
+                                    className="btn btn-sm btn-danger rounded-0"
+                                    onClick={() => {
+                                      setShowInactiveDialog(true);
+                                      setId(row?.id);
+                                    }}
+                                  />
                                 </StyledTableCell>
                               );
                             } else {
@@ -270,6 +353,27 @@ const RateContractDesk = () => {
           />
         </Suspense>
       </div>
+      {showInactiveDialog && (
+        <Suspense>
+          <AlertDialog
+            open={showInactiveDialog}
+            handleClose={() => {
+              setShowInactiveDialog(false);
+              setId("");
+            }}
+            description={DELETE_MESSAGE_DESCRIPTION}
+          >
+            <Basicbutton
+              buttonText="Disagree"
+              onClick={() => {
+                setShowInactiveDialog(false);
+                setId("");
+              }}
+            />
+            <Basicbutton buttonText="Agree" onClick={handleInactiveDialog} />
+          </AlertDialog>
+        </Suspense>
+      )}
     </>
   );
 };

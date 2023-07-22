@@ -1,5 +1,6 @@
 import React from "react";
 import Select, { components } from "react-select";
+export type menuPosition = "bottom" | "auto" | "top";
 interface defaultValue {
   value: string;
   label: string;
@@ -11,7 +12,16 @@ interface selectProps {
   id?: string;
   name: string;
   onBlur: (e: any) => void;
+  disabled: boolean | false;
+  menuPlacement?: menuPosition;
 }
+const customStyles = {
+  menu: (provided: any, state: any) => ({
+    ...provided,
+    zIndex: 10,
+  }),
+};
+
 const CustomSelect: React.FC<selectProps> = ({
   options,
 
@@ -20,6 +30,8 @@ const CustomSelect: React.FC<selectProps> = ({
   id,
   name,
   onBlur,
+  disabled,
+  menuPlacement,
 }) => {
   return (
     <div>
@@ -30,6 +42,10 @@ const CustomSelect: React.FC<selectProps> = ({
         onChange={onChange}
         name={name}
         onBlur={onBlur}
+        isDisabled={disabled}
+        styles={customStyles}
+        menuPlacement={menuPlacement}
+        menuPortalTarget={document.body}
       />
     </div>
   );

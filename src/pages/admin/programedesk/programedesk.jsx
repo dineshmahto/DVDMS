@@ -14,6 +14,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  deleteProgramResponse,
   deleteProgrm,
   getProgramDeskList,
   getProgramDeskListResponse,
@@ -27,6 +28,10 @@ import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder"
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
 import searchFunc from "../../../components/tables/searchFunc";
 import handleSortingFunc from "../../../components/tables/datatable/sortable";
+import {
+  NETWORK_STATUS_CODE,
+  SERVER_STATUS_CODE,
+} from "../../../common/constant/constant";
 const CreateProgramDeskForm = lazy(() => import("./createprogram"));
 const EditProgramDeskForm = lazy(() => import("./editprogram"));
 const AlertDialog = lazy(() => import("../../../components/dialog/dialog"));
@@ -206,10 +211,48 @@ const ProgrammeDesk = () => {
   };
 
   useEffect(() => {
-    if (deleteProgrmResponse && deleteProgrmResponse?.status === 200) {
-      toastMessage("DELETE PROGRAM", "Deleted Successfully");
-    } else if (deleteProgrmResponse && deleteProgrmResponse?.status === 500) {
-      toastMessage("DELETE PROGRAM", "Something went wrong");
+    if (
+      deleteProgrmResponse &&
+      deleteProgrmResponse?.status === NETWORK_STATUS_CODE?.CREATED_SUCCESSFULLY
+    ) {
+      if (deleteProgrmResponse?.data?.status === SERVER_STATUS_CODE?.SUCCESS) {
+        setShowDeleteDialog(false);
+        setController({
+          ...controller,
+          rowsPerPage: controller.rowsPerPage,
+          page: 0,
+        });
+        dispatch(
+          getProgramDeskList({
+            pageNumber: controller?.page,
+            pageSize: controller.rowsPerPage,
+          })
+        );
+        dispatch(deleteProgramResponse(""));
+        toastMessage(
+          "DELETE PROGRAM",
+          deleteProgrmResponse?.data?.message,
+          "success"
+        );
+      } else if (
+        deleteProgrmResponse?.data?.status === SERVER_STATUS_CODE?.FAILED
+      ) {
+        setShowDeleteDialog(false);
+
+        toastMessage(
+          "DELETE PROGRAM",
+          deleteProgrmResponse?.data?.message,
+          "error"
+        );
+        dispatch(deleteProgramResponse(""));
+      }
+    } else if (
+      deleteProgrmResponse &&
+      deleteProgrmResponse?.status === NETWORK_STATUS_CODE?.INTERNAL_ERROR
+    ) {
+      setShowDeleteDialog(false);
+      toastMessage("DELETE PROGRAM", "Something Went wrong", "error");
+      dispatch(deleteProgramResponse(""));
     }
   }, [deleteProgrmResponse]);
 
@@ -225,36 +268,36 @@ const ProgrammeDesk = () => {
       <div className="row mt-2">
         <HorizonatalLine text="Program Management Desk" />
       </div>
-      <Paper>
-        <div className="row ">
-          <div className="d-flex flex-row justify-content-between">
-            <Basicbutton
-              buttonText="Add New Program"
-              outlineType={true}
-              className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
-              onClick={() => {
-                setShowCreateProgrmModal(true);
-              }}
-            />
-            <SearchField
-              className="me-1 "
-              iconPosition="end"
-              iconName={faSearch}
-              onChange={(e) => {
-                if (e.target?.value != "") {
-                  console.log(e.target?.value);
-                  setSearchValue(e?.target?.value);
-                  console.log("filterData", filterData);
-                  setTableData(searchFunc(filterData, e.target?.value));
-                } else {
-                  setTableData(filterData);
-                  setSearchValue("");
-                }
-              }}
-            />
-          </div>
-        </div>
 
+      <div className="row ">
+        <div className="d-flex flex-row justify-content-between">
+          <Basicbutton
+            buttonText="Add New Program"
+            outlineType={true}
+            className="btn btn-outline-primary rounded-0 mb-2 me-1 mt-2  shadow-sm  rounded"
+            onClick={() => {
+              setShowCreateProgrmModal(true);
+            }}
+          />
+          <SearchField
+            className="me-1 "
+            iconPosition="end"
+            iconName={faSearch}
+            onChange={(e) => {
+              if (e.target?.value != "") {
+                console.log(e.target?.value);
+                setSearchValue(e?.target?.value);
+                console.log("filterData", filterData);
+                setTableData(searchFunc(filterData, e.target?.value));
+              } else {
+                setTableData(filterData);
+                setSearchValue("");
+              }
+            }}
+          />
+        </div>
+      </div>
+      <Paper elevation={3} className="mb-2">
         <div className="row">
           <div className="col-12">
             <TableComponent
@@ -263,6 +306,7 @@ const ProgrammeDesk = () => {
               order={order}
               handleSorting={handleSortingChange}
               checkBoxRequired={false}
+              caption="Programme List"
             >
               <TableBody>
                 {loading ? (
@@ -355,35 +399,43 @@ const ProgrammeDesk = () => {
         </div>
       </Paper>
 
-      <Suspense>
-        <CreateProgramDeskForm
-          openCreateProgrmModal={showCreatProgrmModal}
-          handleCloseCreateProgrmModal={handleCloseCreateProgrmModal}
-          totalDrugList={totalDrugList}
-        />
-      </Suspense>
-      <Suspense>
-        <EditProgramDeskForm
-          openEditProgrmModal={showEditProgrmModal}
-          handleCloseEditProgrmModal={handleCloseEditProgrmModal}
-          editData={editData}
-          totalDrugList={totalDrugList}
-        />
-      </Suspense>
-      <Suspense>
-        <AlertDialog
-          open={showDeleteDialog}
-          handleClose={handleDeleteDialog}
-          description="You are about to delete one record, this procedure is irreversible.
-Do you want to proceed?"
-        >
-          <Basicbutton
-            buttonText="Disagree"
-            onClick={() => setShowDeleteDialog(false)}
+      {showCreatProgrmModal && (
+        <Suspense>
+          <CreateProgramDeskForm
+            openCreateProgrmModal={showCreatProgrmModal}
+            handleCloseCreateProgrmModal={handleCloseCreateProgrmModal}
+            totalDrugList={totalDrugList}
           />
-          <Basicbutton buttonText="Agree" onClick={handleDeleteProgram} />
-        </AlertDialog>
-      </Suspense>
+        </Suspense>
+      )}
+
+      {showEditProgrmModal && (
+        <Suspense>
+          <EditProgramDeskForm
+            openEditProgrmModal={showEditProgrmModal}
+            handleCloseEditProgrmModal={handleCloseEditProgrmModal}
+            editData={editData}
+            totalDrugList={totalDrugList}
+          />
+        </Suspense>
+      )}
+
+      {showDeleteDialog && (
+        <Suspense>
+          <AlertDialog
+            open={showDeleteDialog}
+            handleClose={handleDeleteDialog}
+            description="You are about to delete one record, this procedure is irreversible.
+Do you want to proceed?"
+          >
+            <Basicbutton
+              buttonText="Disagree"
+              onClick={() => setShowDeleteDialog(false)}
+            />
+            <Basicbutton buttonText="Agree" onClick={handleDeleteProgram} />
+          </AlertDialog>
+        </Suspense>
+      )}
     </>
   );
 };

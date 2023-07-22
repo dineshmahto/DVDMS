@@ -90,10 +90,10 @@ const TransferComponent: React.FC<transferComponentProps> = ({
             </ul>
           </div>
 
-          <div className="col-1 d-flex flex-column justify-content-center">
+          <div className="col-1 d-flex flex-column justify-content-center align-items-center">
             <button
               type="button"
-              className="btn btn-secondary btn-sm mb-1"
+              className="btn btn-secondary btn-sm mb-1 p-3"
               onClick={handleMoveSelectedItemToRight}
               style={{
                 cursor: isDisabled ? "not-allowed !important" : "pointer",
@@ -107,7 +107,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
             </button>
             <button
               type="button"
-              className="btn btn-secondary btn-sm mb-1"
+              className="btn btn-secondary btn-sm mb-1 p-3"
               onClick={handleMoveSelectedItemToLeft}
               disabled={isDisabled}
               style={{
@@ -122,6 +122,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
               onClick={handleShiftAllElementToRight}
               disabled={isDisabled}
               style={{
+                padding: "0.85rem",
                 cursor: isDisabled ? "not-allowed" : "pointer",
               }}
             >
@@ -132,6 +133,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
               className="btn btn-secondary btn-sm mb-1"
               onClick={handleShiftAllElementToLeft}
               style={{
+                padding: "0.85rem",
                 cursor: isDisabled ? "not-allowed" : "pointer",
               }}
               disabled={isDisabled}

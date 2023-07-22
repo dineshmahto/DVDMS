@@ -326,20 +326,23 @@ const ManufacturerList = () => {
           </div>
         </div>
       </Paper>
-
-      <Suspense>
-        <AddNewManufacturing
-          openAddMfgModal={showAddModal}
-          handleCloseAddMfgModal={handleCloseAddMfgModal}
-        />
-      </Suspense>
-      <Suspense>
-        <EditManufacturing
-          openEditMfgModal={showEditModal}
-          handleCloseEditMfgModal={handleCloseEditMfgModal}
-          editData={editData}
-        />
-      </Suspense>
+      {showAddModal && (
+        <Suspense>
+          <AddNewManufacturing
+            openAddMfgModal={showAddModal}
+            handleCloseAddMfgModal={handleCloseAddMfgModal}
+          />
+        </Suspense>
+      )}
+      {showEditModal && (
+        <Suspense>
+          <EditManufacturing
+            openEditMfgModal={showEditModal}
+            handleCloseEditMfgModal={handleCloseEditMfgModal}
+            editData={editData}
+          />
+        </Suspense>
+      )}
     </>
   );
 };

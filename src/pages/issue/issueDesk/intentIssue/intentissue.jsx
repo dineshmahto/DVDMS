@@ -160,6 +160,7 @@ const IntentIssue = () => {
   }, [intentIssueListResponse]);
 
   const handleCollapse = (clickedIndex) => {
+    console.log("clickedIndex", clickedIndex);
     if (open.includes(clickedIndex)) {
       const openCopy = open.filter((element) => {
         return element !== clickedIndex;
@@ -331,7 +332,6 @@ const IntentIssue = () => {
               columns={columns}
               sortField={sortField}
               order={order}
-              paginationRequired={true}
               handleSorting={handleSortingChange}
               checkBoxRequired={true}
             >
@@ -395,7 +395,7 @@ const IntentIssue = () => {
                           colSpan={6}
                         >
                           <Collapse
-                            in={open.includes(index)}
+                            in={open.includes(data?.request_id)}
                             timeout="auto"
                             unmountOnExit
                           >
@@ -421,27 +421,18 @@ const IntentIssue = () => {
                                     data?.transferDetail.map((ele, index) => {
                                       return (
                                         <>
-                                          <TableRow key={index}>
-                                            <TableCell
-                                              padding="none"
-                                              className={classes.tableCell}
-                                            >
+                                          <StyledTableRow key={index}>
+                                            <StyledTableCell padding="none">
                                               {ele?.programName}
-                                            </TableCell>
-                                            <TableCell
-                                              padding="none"
-                                              className={classes.tableCell}
-                                            >
+                                            </StyledTableCell>
+                                            <StyledTableCell padding="none">
                                               {ele?.drugName}
-                                            </TableCell>
+                                            </StyledTableCell>
 
-                                            <TableCell
-                                              padding="none"
-                                              className={classes.tableCell}
-                                            >
+                                            <StyledTableCell padding="none">
                                               {ele?.requestQty}
-                                            </TableCell>
-                                          </TableRow>
+                                            </StyledTableCell>
+                                          </StyledTableRow>
                                         </>
                                       );
                                     })}

@@ -228,6 +228,7 @@ const Stock = () => {
         sx={{
           pl: { sm: 2 },
           pr: { xs: 1, sm: 1 },
+          zIndex: 2,
         }}
       >
         <Typography
@@ -377,8 +378,6 @@ const Stock = () => {
             <div className="col-12">
               <TableComponent
                 columns={columns}
-                overFlow={true}
-                stickyHeader={true}
                 customWidth="max-content"
                 tableTitle="Stock Entry Desk"
                 toolbarRequired={true}

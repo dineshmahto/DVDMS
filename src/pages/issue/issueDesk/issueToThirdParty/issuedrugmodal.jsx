@@ -160,6 +160,7 @@ const IssueDrugModal = ({
               buttonText="ADD DRUG(S)"
               className="warning rounded-0 me-1"
               onClick={() => {
+                console.log("updatedDrugList", updatedDrugDetail);
                 handleIssueDrugList(updatedDrugDetail);
                 handleAddDrugModal();
               }}

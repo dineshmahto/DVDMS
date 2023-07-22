@@ -23,6 +23,7 @@ import {
   NETWORK_STATUS_CODE,
   SERVER_STATUS_CODE,
 } from "../../common/constant/constant";
+import dayjs from "dayjs";
 
 const useStyles = makeStyles({
   root: {
@@ -555,6 +556,10 @@ const OpenNotification = () => {
     });
     dispatch(getDrugListByProgramId({ programId: list.toString() }));
   };
+
+  const formatDate = (date) => {
+    return dayjs(date).format("MM/DD/YYYY");
+  };
   return (
     <>
       <Paper className="p-2 mt-2">
@@ -952,7 +957,7 @@ const OpenNotification = () => {
 
                   console.log("data", data);
                   const reqData = data;
-                  reqData.lastDate = moment(data?.lastDate).format("l");
+                  reqData.lastDate = formatDate(data?.lastDate);
                   reqData.program = selectedProgrammeItem;
                   reqData.drugList = selectedDrugItem;
                   console.log("Request Data", reqData);

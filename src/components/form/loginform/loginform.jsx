@@ -9,15 +9,20 @@ import { useNavigate } from "react-router-dom";
 import Canvas from "../../canvas/Canvas";
 import { Spinner } from "react-bootstrap";
 import { useDispatch } from "react-redux";
-import { closeLoginModal, login } from "../../../store/login/actions";
+import {
+  closeLoginModal,
+  login,
+  loginResponse,
+} from "../../../store/login/actions";
 import { useSelector } from "react-redux";
 import tokenhandle from "../../../common/tokenhandle/tokenhandle";
+import { NETWORK_STATUS_CODE } from "../../../common/constant/constant";
 const LoginForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const loginResponse = useSelector((state) => state.login.loginResponse);
-  console.log("loginReposne", loginResponse);
+  const loginRespons = useSelector((state) => state.login.loginResponse);
+  console.log("loginReposne", loginRespons);
   const [userData, setUSerData] = useState({
     username: "",
     password: "",
@@ -45,48 +50,67 @@ const LoginForm = () => {
 
   const loginAction = async (e) => {
     e.preventDefault();
-    if (isValid) {
-      if (userData.captcha != captchaValue.join("")) {
-        toastMessage("Cpatcha Error", "Please enter valid Captcha", "error");
-        createCaptcha();
-        setUSerData({ ...userData, captcha: "" });
-        setValid(false);
-      } else {
-        setLoading(true);
-        setTimeout(() => {
-          setLoading(false);
-        }, 5000);
-        dispatch(login(userData));
-        // let loginResp = await loginservice(CONSTANTS.LOGIN, userData);
-        // if (loginResp.status === 200) {
-        //   setLoading(false);
-        //   console.log("loginResp", loginResp.status);
-        //   dispatch(closeLoginModal());
-        //   navigate("/dashboard");
-        // } else if (loginResp.response.status === 400) {
-        //   setLoading(false);
-        //   toastMessage("Login Error", "Please enter valid ID", "error");
-        // }
-      }
-    } else {
-      toastMessage("Please ", "Work in progress...", "");
-    }
+    // if (isValid) {
+    // if (userData.captcha != captchaValue.join("")) {
+    //   toastMessage("Cpatcha Error", "Please enter valid Captcha", "error");
+    //   createCaptcha();
+    //   setUSerData({ ...userData, captcha: "" });
+    //   setValid(false);
+    // }
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+    dispatch(login(userData));
+    // let loginResp = await loginservice(CONSTANTS.LOGIN, userData);
+    // if (loginResp.status === 200) {
+    //   setLoading(false);
+    //   console.log("loginResp", loginResp.status);
+    //   dispatch(closeLoginModal());
+    //   navigate("/dashboard");
+    // } else if (loginResp.response.status === 400) {
+    //   setLoading(false);
+    //   toastMessage("Login Error", "Please enter valid ID", "error");
+    // }
+    // } else {
+    //   toastMessage("Please ", "Work in progress...", "");
+    // }
   };
 
   useEffect(() => {
-    if (loginResponse && loginResponse?.status === 200) {
-      console.log("loginResponse", loginResponse);
-      tokenhandle.storeRefreshToken(loginResponse?.data?.refresh_token);
-      tokenhandle.storetoken(loginResponse?.data?.access_token);
-      tokenhandle.storeProfileDetails(loginResponse?.data?.displayName);
+    if (loginRespons && loginRespons?.status === 200) {
+      console.log("loginResponse", loginRespons);
+      toastMessage("LOGIN", "Logged In successfully", "success");
+      tokenhandle.storeRefreshToken(loginRespons?.data?.refresh_token);
+      tokenhandle.storetoken(loginRespons?.data?.access_token);
+      tokenhandle.storeProfileDetails(loginRespons?.data?.displayName);
       setLoading(false);
+      dispatch(loginResponse(""));
       dispatch(closeLoginModal());
       navigate("/stockListing");
-    } else if (loginResponse && loginResponse?.status == 400) {
+    } else if (
+      loginRespons &&
+      loginRespons?.status == NETWORK_STATUS_CODE.BAD_REQUEST
+    ) {
       setLoading(false);
-      toastMessage("Login Error", "Please enter valid ID", "error");
+      toastMessage("Login Error", loginRespons?.data?.message, "error");
+      dispatch(loginResponse(""));
+    } else if (
+      loginRespons &&
+      loginRespons?.status == NETWORK_STATUS_CODE.UNAUTHORIZED_ACCESS
+    ) {
+      setLoading(false);
+      toastMessage("Login Error", loginRespons?.data?.message, "error");
+      dispatch(loginResponse(""));
+    } else if (
+      loginRespons &&
+      loginRespons?.status == NETWORK_STATUS_CODE.INTERNAL_ERROR
+    ) {
+      setLoading(false);
+      toastMessage("Login Error", loginRespons?.data?.message, "error");
+      dispatch(loginResponse(""));
     }
-  }, [loginResponse]);
+  }, [loginRespons]);
 
   const createCaptcha = () => {
     console.log("Recalled");
@@ -191,7 +215,7 @@ const LoginForm = () => {
           </div>
           <div className="d-flex justify-content-between">
             <BasicButton
-              disabled={isLoading ? isLoading : !isValid}
+              //disabled={isLoading ? isLoading : !isValid}
               className="primary rounded-0"
               buttonText="Login"
               type="submit"

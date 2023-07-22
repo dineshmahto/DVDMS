@@ -4,7 +4,7 @@ import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine"
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import SearchField from "../../../components/search/search";
 import { faSearch, faAdd } from "@fortawesome/free-solid-svg-icons";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { TableBody, TableRow, TableCell, Paper } from "@mui/material";
 import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
 import { useDispatch, useSelector } from "react-redux";
 import toastMessage from "../../../common/toastmessage/toastmessage";
@@ -164,58 +164,60 @@ const AcceptChallan = () => {
             />
           </div>
         </div>
-        <div className="row">
-          <div className="col-12">
-            <TableComponent
-              columns={columns}
-              sortField={sortField}
-              order={order}
-              handleSorting={handleSortingChange}
-            >
-              <TableBody>
-                {loading ? (
-                  <TableRowLaoder />
-                ) : (
-                  tableData &&
-                  tableData?.map((row, index) => {
-                    return (
-                      <StyledTableRow key={index}>
-                        {columns.map((d, k) => {
-                          if (
-                            d.id === "contactTo" ||
-                            d.id === "contactFrom" ||
-                            d.id === "contactDate" ||
-                            d.id === "tenderDate"
-                          ) {
-                            return (
-                              <StyledTableCell key={k} padding="none">
-                                {moment(row[d.id]).format("DD/MM/YYYY")}
-                              </StyledTableCell>
-                            );
-                          } else {
-                            return (
-                              <StyledTableCell key={k} padding="none">
-                                {row[d.id]}
-                              </StyledTableCell>
-                            );
-                          }
-                        })}
-                      </StyledTableRow>
-                    );
-                  })
-                )}
-                <EmptyRow loading={loading} tableData={tableData} />
-              </TableBody>
-            </TableComponent>
-            <TablePagination
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller?.rowsPerPage}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
+        <Paper elevation={3} className="mb-2">
+          <div className="row">
+            <div className="col-12">
+              <TableComponent
+                columns={columns}
+                sortField={sortField}
+                order={order}
+                handleSorting={handleSortingChange}
+              >
+                <TableBody>
+                  {loading ? (
+                    <TableRowLaoder />
+                  ) : (
+                    tableData &&
+                    tableData?.map((row, index) => {
+                      return (
+                        <StyledTableRow key={index}>
+                          {columns.map((d, k) => {
+                            if (
+                              d.id === "contactTo" ||
+                              d.id === "contactFrom" ||
+                              d.id === "contactDate" ||
+                              d.id === "tenderDate"
+                            ) {
+                              return (
+                                <StyledTableCell key={k} padding="none">
+                                  {moment(row[d.id]).format("DD/MM/YYYY")}
+                                </StyledTableCell>
+                              );
+                            } else {
+                              return (
+                                <StyledTableCell key={k} padding="none">
+                                  {row[d.id]}
+                                </StyledTableCell>
+                              );
+                            }
+                          })}
+                        </StyledTableRow>
+                      );
+                    })
+                  )}
+                  <EmptyRow loading={loading} tableData={tableData} />
+                </TableBody>
+              </TableComponent>
+              <TablePagination
+                page={controller.page + 1}
+                count={totalRows}
+                rowsPerPage={controller?.rowsPerPage}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </div>
           </div>
-        </div>
+        </Paper>
       </div>
     </>
   );

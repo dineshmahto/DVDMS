@@ -11,6 +11,8 @@ interface dialogProps {
   description?: string;
   children?: React.ReactNode;
   handleClose: () => void;
+  background?: boolean | false;
+  colorCode?: string;
 }
 const AlertDialog: React.FC<dialogProps> = ({
   open,
@@ -18,6 +20,8 @@ const AlertDialog: React.FC<dialogProps> = ({
   dialogTitle,
   description,
   children,
+  background,
+  colorCode,
 }) => {
   return (
     <div>
@@ -26,10 +30,23 @@ const AlertDialog: React.FC<dialogProps> = ({
         onClose={handleClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
+        PaperProps={{
+          style: {
+            backgroundColor: background ? colorCode : "",
+          },
+        }}
       >
-        <DialogTitle id="alert-dialog-title">{dialogTitle}</DialogTitle>
+        <DialogTitle
+          id="alert-dialog-title"
+          className={`${background ? "text-white" : ""}`}
+        >
+          {dialogTitle}
+        </DialogTitle>
         <DialogContent>
-          <DialogContentText id="alert-dialog-description">
+          <DialogContentText
+            id="alert-dialog-description"
+            className={`${background ? "text-white" : ""}`}
+          >
             {description}
           </DialogContentText>
         </DialogContent>

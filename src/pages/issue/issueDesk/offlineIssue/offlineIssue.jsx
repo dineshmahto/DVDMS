@@ -7,6 +7,7 @@ import {
   faSearch,
   faArrowLeft,
   faFloppyDisk,
+  faCircleXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CustomSelect from "../../../../components/select/customSelect";
@@ -165,7 +166,11 @@ const OfflineIssue = () => {
       name: "ISSUED QTY",
       sortable: false,
     },
-    ,
+    {
+      id: "action",
+      name: "ACTION",
+      sortable: false,
+    },
   ]);
 
   const handlePageChange = (event, newPage) => {
@@ -217,15 +222,56 @@ const OfflineIssue = () => {
   const formatDate = (date) => {
     return dayjs(date).format("MM/DD/YYYY");
   };
-   const handleChange = (idx, id, e, data, setData) => {
-     const clone = [...data];
-     clone[idx] = {
-       ...clone[idx],
-       [id]: e,
-     };
-     setData(clone);
-   };
+  const handleChange = (idx, id, e, data, setData) => {
+    const clone = [...data];
+    clone[idx] = {
+      ...clone[idx],
+      [id]: e,
+    };
+    setData(clone);
+  };
 
+  const handleIssueDrugList = (data) => {
+    console.log("data", data);
+    //isPositiveInteger(e.target.value);
+
+    const filtered = [...data]?.filter((ele) => {
+      if (
+        ele?.hasOwnProperty("requestedQty") &&
+        ele?.hasOwnProperty("issueDQty")
+      ) {
+        return ele;
+      }
+    });
+    let newElement = [];
+    filtered?.map((element, index) => {
+      const elementExist = displayData?.filter((item) => {
+        return item.stockId === element?.stockId;
+      });
+      if (elementExist.length === 0) {
+        newElement.push(element);
+      } else {
+        for (let [i, item] of [...displayData]?.entries()) {
+          if (item.stockId === element?.stockId) {
+            displayData.splice(i, 1);
+          }
+        }
+        newElement.push(element);
+      }
+    });
+
+    setDisplayData([...displayData, ...newElement]);
+  };
+
+  const isPositiveInteger = (inputValue) => {
+    return /^[1-9]\d*$/.test(inputValue);
+  };
+
+  const handleRemoveSpecificRow = (idx) => {
+    const clone = [...displayData];
+    clone.splice(idx, 1);
+    setDisplayData(clone);
+  };
   return (
     <>
       <div className="row mt-2">
@@ -272,7 +318,7 @@ const OfflineIssue = () => {
       </div>
       <div className="row">
         {displayData && displayData.length > 0 ? (
-          <>
+          <Paper>
             <TableComponent
               columns={selectedColumns}
               sortField={sortField}
@@ -287,6 +333,20 @@ const OfflineIssue = () => {
                     return (
                       <NormalTableRow key={row.id}>
                         {selectedColumns.map((d, k) => {
+                          if (d.id === "action") {
+                            return (
+                              <StyledTableCell
+                                padding="none"
+                                style={{ cursor: "pointer" }}
+                              >
+                                <FontAwesomeIcon
+                                  icon={faCircleXmark}
+                                  onClick={() => handleRemoveSpecificRow(index)}
+                                  size="2x"
+                                />
+                              </StyledTableCell>
+                            );
+                          }
                           return (
                             <StyledTableCell
                               key={k}
@@ -378,7 +438,7 @@ const OfflineIssue = () => {
                 />
               </div>
             </div>
-          </>
+          </Paper>
         ) : null}
       </div>
       <div className="row mt-2">
@@ -421,13 +481,37 @@ const OfflineIssue = () => {
                         if (d.id === "requestedQty") {
                           return (
                             <StyledTableCell key={k} padding="none">
-                              <BasicInput type="number" name={d.id} />
+                              <BasicInput
+                                type="number"
+                                name={d.id}
+                                onChange={(e) => {
+                                  handleChange(
+                                    index,
+                                    d.id,
+                                    e.target.value.trim(),
+                                    tableData,
+                                    setTableData
+                                  );
+                                }}
+                              />
                             </StyledTableCell>
                           );
                         } else if (d.id === "issueDQty") {
                           return (
                             <StyledTableCell key={k} padding="none">
-                              <BasicInput type="number" name={d.id} />
+                              <BasicInput
+                                type="number"
+                                name={d.id}
+                                onChange={(e) => {
+                                  handleChange(
+                                    index,
+                                    d.id,
+                                    e.target.value.trim(),
+                                    tableData,
+                                    setTableData
+                                  );
+                                }}
+                              />
                             </StyledTableCell>
                           );
                         } else {
@@ -449,6 +533,17 @@ const OfflineIssue = () => {
               rowsPerPage={controller?.rowsPerPage}
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </div>
+        </div>
+        <div className="row">
+          <div className="d-flex justify-content-center">
+            <Basicbutton
+              className="btn btn-primary rounded-0"
+              buttonText="Add"
+              onClick={() => {
+                handleIssueDrugList(tableData);
+              }}
             />
           </div>
         </div>

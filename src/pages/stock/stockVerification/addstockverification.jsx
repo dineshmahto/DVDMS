@@ -210,6 +210,8 @@ const AddStockVerification = () => {
         });
         console.log("newList", newIssueList);
         //setSelected([]);
+        console.log("selected", selected);
+        console.log("totalSelectedList", totalSelectedList);
         setDisplaySelected(selected);
         setDisplayData(totalSelectedList);
         setTableData(newIssueList);
@@ -309,7 +311,7 @@ const AddStockVerification = () => {
       </div>
       <div className="row d-flex justify-content-start">
         <div className="col-12">
-          <div className="row">
+          <div className="row align-items-center">
             <div className="col-auto">
               <label>Store Name</label>
             </div>
@@ -501,6 +503,7 @@ const AddStockVerification = () => {
           <div className="d-flex justify-content-end">
             <SearchField
               className="me-1 mt-1"
+              placeholder="Search....."
               iconPosition="end"
               iconName={faSearch}
               onChange={(e) => {

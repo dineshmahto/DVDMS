@@ -212,7 +212,7 @@ const UpdateStockRack = () => {
                           return (
                             <StyledTableCell key={k} padding="none">
                               <BasicInput
-                                value={data?.rack}
+                                defaultValue={data?.rack}
                                 type="number"
                                 onChange={(e) => {
                                   console.log("value", e?.target?.value);

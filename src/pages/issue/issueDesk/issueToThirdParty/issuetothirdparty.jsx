@@ -6,6 +6,7 @@ import { Spinner } from "react-bootstrap";
 import {
   faShareFromSquare,
   faFloppyDisk,
+  faCircleXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CustomSelect from "../../../../components/select/customSelect";
@@ -35,6 +36,7 @@ import {
   SERVER_STATUS_CODE,
   SORTINGORDER,
 } from "../../../../common/constant/constant";
+import BasicTextAreaField from "../../../../components/inputbox/textarea";
 const IssueDrugModal = lazy(() => import("./issuedrugmodal"));
 
 const IssueToThirdParty = () => {
@@ -127,7 +129,11 @@ const IssueToThirdParty = () => {
       name: "ISSUE QTY",
       sortable: false,
     },
-    ,
+    {
+      id: "action",
+      name: "ACTION",
+      sortable: false,
+    },
   ]);
 
   const handlePageChange = (newPage) => {
@@ -226,10 +232,12 @@ const IssueToThirdParty = () => {
     }
   }, [saveIssueThirdPartyResp]);
   const handleIssueDrugList = (data) => {
+    console.log("data", data);
     const elementExist = displayData?.filter((item) => {
       return item.stockId === data[0]?.stockId;
     });
     if (elementExist.length === 0) {
+      console.log("displayItem", displayData);
       setDisplayData([...displayData, data[0]]);
     } else {
       for (let [i, item] of [...displayData]?.entries()) {
@@ -237,6 +245,7 @@ const IssueToThirdParty = () => {
           displayData.splice(i, 1);
         }
       }
+      console.log("displayItem", displayData);
       setDisplayData([...displayData, data[0]]);
     }
   };
@@ -244,7 +253,11 @@ const IssueToThirdParty = () => {
   const formatDate = (date) => {
     return dayjs(date).format("MM/DD/YYYY");
   };
-
+  const handleRemoveSpecificRow = (idx) => {
+    const clone = [...displayData];
+    clone.splice(idx, 1);
+    setDisplayData(clone);
+  };
   return (
     <>
       <BackButon routePath="openIssueDesk" />
@@ -253,7 +266,7 @@ const IssueToThirdParty = () => {
           <p className="fs-6">THIRD PARTY ISSUE</p>
         </div>
       </div>
-      <div className="row d-flex justify-content-start">
+      <div className="row d-flex justify-content-start mb-2">
         <div className="col-12">
           <div className="row align-items-center">
             <div className="col-auto">
@@ -290,8 +303,11 @@ const IssueToThirdParty = () => {
       </div>
 
       <div className="row">
+        <div className="d-flex justify-content-start">
+          <p className="fs-6">SELECTED DRUG LIST</p>
+        </div>
         {displayData && displayData.length > 0 ? (
-          <>
+          <Paper elevation={1}>
             <TableComponent
               columns={selectedColumns}
               sortField={sortField}
@@ -303,33 +319,48 @@ const IssueToThirdParty = () => {
                 {displayData &&
                   displayData?.length > 0 &&
                   displayData?.map((row, index) => {
-                    console.log("selectedColumns", selectedColumns);
                     return (
-                      <NormalTableRow key={row.id}>
-                        {selectedColumns.map((d, k) => {
-                          return (
-                            <StyledTableCell
-                              key={k}
-                              padding="none"
-                              style={{
-                                padding: "4px",
-                                fontSize: "0.7rem",
-                              }}
-                            >
-                              {row[d.id]}
-                            </StyledTableCell>
-                          );
-                        })}
-                      </NormalTableRow>
+                      <>
+                        <NormalTableRow key={row.id}>
+                          {selectedColumns.map((d, k) => {
+                            if (d.id === "action") {
+                              return (
+                                <StyledTableCell padding="none">
+                                  <FontAwesomeIcon
+                                    icon={faCircleXmark}
+                                    onClick={() =>
+                                      handleRemoveSpecificRow(index)
+                                    }
+                                    size="2x"
+                                  />
+                                </StyledTableCell>
+                              );
+                            }
+                            return (
+                              <StyledTableCell
+                                padding="none"
+                                style={{
+                                  padding: "4px",
+                                  fontSize: "0.7rem",
+                                }}
+                              >
+                                {row[d.id]}
+                              </StyledTableCell>
+                            );
+                          })}
+                        </NormalTableRow>
+                      </>
                     );
                   })}
               </TableBody>
             </TableComponent>
 
-            <div className="col-12 mb-1">
-              <div className="row mb-2">
-                <div className="col-4">
+            <div className="row mb-2">
+              <div className="col-4">
+                <div className="col-auto">
                   <label className="form-label">Issue Date</label>
+                </div>
+                <div className="col-auto">
                   <CustDatepicker
                     value={submitData?.issueDate}
                     name="issueDate"
@@ -344,11 +375,15 @@ const IssueToThirdParty = () => {
                     }}
                   />
                 </div>
-                <div className="col-8">
+              </div>
+              <div className="col-8">
+                <div className="col-auto">
                   <label htmlFor="remarks" className="form-label">
                     Remarks
                   </label>
-                  <textarea
+                </div>
+                <div className="col-auto">
+                  <BasicTextAreaField
                     name="remarks"
                     className="form-control shadow-none"
                     rows="3"
@@ -359,27 +394,39 @@ const IssueToThirdParty = () => {
                         remarks: e?.target?.value,
                       });
                     }}
-                  ></textarea>
+                  />
                 </div>
               </div>
             </div>
+
             <div className="d-flex justify-content-center">
               <div className="me-1">
                 <Basicbutton
-                  className="primary rounded-0"
+                  className="primary rounded-0 mb-1"
                   buttonText="save"
                   icon={
                     <FontAwesomeIcon icon={faFloppyDisk} className="me-1" />
                   }
                   onClick={() => {
-                    if (
-                      submitData?.remarks === "" ||
+                    if (submitData?.thirdPartyId === "") {
+                      toastMessage(
+                        "Third Party Issue",
+                        "Select the Third Party Name",
+                        "error"
+                      );
+                    } else if (
                       submitData?.issueDate === null ||
-                      submitData?.stockId === ""
+                      submitData?.issueDate === ""
                     ) {
                       toastMessage(
                         "Third Party Issue",
-                        "provide all the fields",
+                        "Pick the Issue Date",
+                        "error"
+                      );
+                    } else if (submitData?.remarks === "") {
+                      toastMessage(
+                        "Third Party Issue",
+                        "Enter the Remarks",
                         "error"
                       );
                     } else {
@@ -408,7 +455,7 @@ const IssueToThirdParty = () => {
                 />
               </div>
             </div>
-          </>
+          </Paper>
         ) : null}
       </div>
 

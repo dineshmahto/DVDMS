@@ -42,6 +42,7 @@ const login = (state = initialState, action) => {
       };
       break;
     case LOGOUT_RESPONSE:
+      console.log("logoutResponse", action?.payload);
       state = {
         ...state,
         logoutResponse: action?.payload,

@@ -1,15 +1,11 @@
-import { React, useState, useEffect, useMemo } from "react";
-
+import { React, useState, useEffect, useMemo, lazy, Suspense } from "react";
 import BasicButton from "../../../components/button/basicbutton";
 import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
-
-import Modal from "react-awesome-modal";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import SearchField from "../../../components/search/search";
-import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { faList, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { TableBody, Paper } from "@mui/material";
 import Checkbox from "@mui/material/Checkbox";
-import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
 import { useDispatch, useSelector } from "react-redux";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import moment from "moment";
@@ -20,27 +16,30 @@ import StyledTableRow from "../../../components/tables/datatable/customTableRow"
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 import { getCentralpurchaseList } from "../../../store/ordermanagement/action";
 import handleSortingFunc from "../../../components/tables/datatable/sortable";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faClose } from "@fortawesome/free-solid-svg-icons";
-
+import { useNavigate } from "react-router-dom";
+import {
+  NETWORK_STATUS_CODE,
+  SORTINGORDER,
+} from "../../../common/constant/constant";
+import searchFunc from "../../../components/tables/searchFunc";
+const AcitvityListModal = lazy(() => import("./ActtivityList"));
 const CentralPurchase = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const CentralPurchaseListResponse = useSelector(
     (state) => state.ordermanaagement.centralPurchaseListResponse
   );
-
   console.log("CentralPurchaseListResponse", CentralPurchaseListResponse);
+
   const [tableData, setTableData] = useState([]);
-  const [sortedData, handleSorting] = useSortableTable();
   const [totalRows, setTotalRows] = useState(0);
-  const [open, setOpen] = useState([]);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
   });
   const [sortField, setSortField] = useState("");
-  const [order, setOrder] = useState("asc");
+  const [order, setOrder] = useState(SORTINGORDER.ASC);
   const [selected, setSelected] = useState([]);
   const [selectedRow, setSelectedRow] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,8 +47,9 @@ const CentralPurchase = () => {
   const [openPreview, setOpenPreview] = useState(false);
   const [prevData, setPrevdata] = useState([]);
   const [modalHeadLine, setModalHeadLine] = useState("");
-  const [modelCol, setModelCol] = useState("");
-
+  const [colKey, setColKey] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+  const [filterData, setFilterData] = useState([]);
   const columns = useMemo(() => [
     {
       id: "id",
@@ -89,7 +89,7 @@ const CentralPurchase = () => {
       sortable: true,
     },
   ]);
-  const handlePageChange = (event, newPage) => {
+  const handlePageChange = (newPage) => {
     setController({
       ...controller,
       page: newPage,
@@ -104,28 +104,11 @@ const CentralPurchase = () => {
     });
   };
 
-  // const handleClick = (event, index, row) => {
-  //   if (selected.includes(index)) {
-  //     const openCopy = selected.filter((element) => {
-  //       return element !== index;
-  //     });
-  //     setSelectedRow([]);
-  //     setSelected(openCopy);
-  //   } else {
-  //     setSelectedRow(row);
-  //     const openCopy = [...selected];
-  //     openCopy.shift();
-  //     openCopy.push(index);
-  //     setSelected(openCopy);
-  //   }
-  // };
-
-  const handleClick = (event, index, row) => {
+  const handleClick = (index, row) => {
     if (selected.includes(index)) {
       const openCopy = selected.filter((element) => {
         return element !== index;
       });
-
       const newselrow = selectedRow.filter((ele) => {
         return ele.id !== row.id;
       });
@@ -134,19 +117,16 @@ const CentralPurchase = () => {
     } else {
       selectedRow.push(row);
       const openCopy = [...selected];
-      //openCopy.shift();
       openCopy.push(index);
       setSelected(openCopy);
     }
   };
-  useEffect(() => {
-    console.log("selected", selected);
-    console.log("selectedRow", selectedRow);
-  }, [selected, selectedRow]);
 
   const handleSortingChange = (accessor) => {
     const sortOrder =
-      accessor === sortField && order === "asc" ? "desc" : "asc";
+      accessor === sortField && order === SORTINGORDER.ASC
+        ? SORTINGORDER.DESC
+        : SORTINGORDER.ASC;
     setSortField(accessor);
     setOrder(sortOrder);
     setTableData(handleSortingFunc(accessor, sortOrder, tableData));
@@ -165,23 +145,29 @@ const CentralPurchase = () => {
     }
     return () => {
       isApiSubcribed = false;
+      setSelected([]);
     };
   }, [controller]);
 
   useEffect(() => {
     if (
       CentralPurchaseListResponse &&
-      CentralPurchaseListResponse?.status === 200
+      CentralPurchaseListResponse?.status === NETWORK_STATUS_CODE.SUCCESS
     ) {
       setTotalRows(CentralPurchaseListResponse?.data?.pageList?.totalElements);
       setTableData(CentralPurchaseListResponse?.data?.pageList?.content);
+      setFilterData(CentralPurchaseListResponse?.data?.pageList?.content);
       setLoading(false);
     } else if (
       CentralPurchaseListResponse &&
-      CentralPurchaseListResponse?.status == 400
+      CentralPurchaseListResponse?.status == NETWORK_STATUS_CODE.INTERNAL_ERROR
     ) {
       setLoading(false);
-      toastMessage("Login Error", "Please enter valid ID", "error");
+      toastMessage(
+        "Central Purchase",
+        CentralPurchaseListResponse?.data?.message,
+        "error"
+      );
     }
   }, [CentralPurchaseListResponse]);
 
@@ -222,18 +208,6 @@ const CentralPurchase = () => {
           <HorizonatalLine text="Notification details" />
         </div>
       </div>
-      {/* <div className="row mt-2 mb-3">
-          <div className="col-md-12">
-            <label htmlFor="Show" >Show</label>
-            <select name="" id="" style={{height:'19px',width:'80px' ,marginLeft:'3px' ,marginRight:'3px'}}>
-                <option value={10}>10</option>
-                <option value={10}>20</option>
-                <option value={10}>50</option>
-                <option value={10}>100</option>
-            </select>
-            <label htmlFor="Entries" >Entries</label>
-          </div>
-        </div> */}
 
       <Paper>
         <div className="row mt-2">
@@ -241,9 +215,12 @@ const CentralPurchase = () => {
             {
               <BasicButton
                 disabled={selectedRow.length === 0}
-                className="btn btn-success border rounded"
+                className="btn btn-primary border rounded-0 mb-1"
                 buttonText="Create Po."
                 outlineType={true}
+                onClick={() =>
+                  navigate("/openNotificationDetails", { state: selectedRow })
+                }
               ></BasicButton>
             }
           </div>
@@ -253,7 +230,13 @@ const CentralPurchase = () => {
                 iconPosition="end"
                 iconName={faSearch}
                 onChange={(e) => {
-                  console.log(e);
+                  if (e.target?.value != "") {
+                    setSearchValue(e?.target?.value);
+                    setTableData(searchFunc(filterData, e.target?.value));
+                  } else {
+                    setTableData(filterData);
+                    setSearchValue("");
+                  }
                 }}
               />
             </div>
@@ -275,6 +258,7 @@ const CentralPurchase = () => {
                   tableData &&
                   tableData?.length > 0 &&
                   tableData?.map((row, index) => {
+                    console.log("checked", selected.includes(index));
                     const labelId = `enhanced-table-checkbox-${index}`;
                     return (
                       <StyledTableRow
@@ -286,7 +270,7 @@ const CentralPurchase = () => {
                       >
                         <StyledTableCell padding="none">
                           <Checkbox
-                            onClick={(event) => handleClick(event, index, row)}
+                            onClick={() => handleClick(index, row)}
                             color="primary"
                             checked={selected.includes(index)}
                             inputProps={{
@@ -309,46 +293,50 @@ const CentralPurchase = () => {
                           if (d.id === "programList") {
                             return (
                               <StyledTableCell key={k} padding="none">
-                                <a
-                                  href="##"
+                                <span
+                                  className="text-decoration-underline me-2"
+                                  style={{
+                                    fontSize: "0.8rem",
+                                    cursor: "pointer",
+                                  }}
                                   onClick={() => {
-                                    setModalHeadLine("Programme List");
-                                    setModelCol("programName");
+                                    setModalHeadLine("Programe List");
+                                    setColKey("programName");
                                     handleView(row[d.id]);
                                   }}
                                 >
-                                  <p
-                                    style={{
-                                      textDecoration: "underline",
-                                      fontSize: "13px",
-                                    }}
-                                  >
-                                    view Programme
-                                  </p>
-                                </a>
+                                  <FontAwesomeIcon
+                                    icon={faList}
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="VIEW PROGRMME"
+                                  />
+                                </span>
                               </StyledTableCell>
                             );
                           }
                           if (d.id === "drugList") {
                             return (
                               <StyledTableCell key={k} padding="none">
-                                <a
-                                  href="##"
+                                <span
+                                  className="text-decoration-underline me-2"
+                                  style={{
+                                    fontSize: "0.8rem",
+                                    cursor: "pointer",
+                                  }}
                                   onClick={() => {
                                     setModalHeadLine("Drug List");
-                                    setModelCol("drugName");
+                                    setColKey("drugName");
                                     handleView(row[d.id]);
                                   }}
                                 >
-                                  <p
-                                    style={{
-                                      textDecoration: "underline",
-                                      fontSize: "13px",
-                                    }}
-                                  >
-                                    view Druglist
-                                  </p>
-                                </a>
+                                  <FontAwesomeIcon
+                                    icon={faList}
+                                    data-bs-toggle="tooltip"
+                                    data-bs-placement="top"
+                                    title="SHOW DRUG"
+                                  />
+                                </span>
                               </StyledTableCell>
                             );
                           }
@@ -378,47 +366,17 @@ const CentralPurchase = () => {
         </div>
       </Paper>
 
-      <Modal visible={openPreview} width="700" height="400" effect="fadeInLeft">
-        <div
-          style={{ maxHeight: "100%", overflowY: "auto", overflowX: "hidden" }}
-        >
-          <div className="row">
-            <div className="col-md-12">
-              <div className="row  mt-2 mb-4">
-                <div className="col-md-10  offset-1 ">
-                  <h4 className="text-primary">{modalHeadLine}</h4>
-                </div>
-                <div className="col-md-1">
-                  <span type="button" onClick={handleClose}>
-                    <FontAwesomeIcon
-                      icon={faClose}
-                      className="fa-2xl"
-                      color="red"
-                    />
-                  </span>
-                </div>
-                <hr></hr>
-              </div>
-              <div className="row mt-4">
-                <div className="col-md-12">
-                  <ul>
-                    {prevData.map((data, index) => {
-                      return (
-                        <>
-                          <span style={{ marginRight: "16px" }}>
-                            {index + 1}
-                          </span>
-                          <span key={data.id}>{data[modelCol]}</span>; <br></br>
-                        </>
-                      );
-                    })}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Modal>
+      {openPreview && (
+        <Suspense>
+          <AcitvityListModal
+            showActivityModal={openPreview}
+            handleActivityShowModal={handleClose}
+            activityList={prevData}
+            title={modalHeadLine}
+            colKey={colKey}
+          />
+        </Suspense>
+      )}
     </>
   );
 };

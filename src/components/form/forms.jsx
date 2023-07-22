@@ -188,9 +188,9 @@ const FormikDynamic = ({
                           </div>
                           <div className="col-6">
                             <BasicInput
-                              floatingLabel={false}
+                              floatinglabel={false ? false : undefined}
                               htmlFor={name}
-                              labelText={label}
+                              labeltext={label}
                               key={name}
                               className="form-control shadow-none"
                               value={values[`${name}`]}
@@ -239,10 +239,11 @@ const FormikDynamic = ({
                     />
                   </div>
                 </div>
-
-                <small className="form-text text-danger">
-                  NOTE:- A star (asterisk) marked fields are mandatory
-                </small>
+                <div className="d-flex justify-content-center mt-2">
+                  <small className="form-text text-danger">
+                    NOTE:- A star (asterisk) marked fields are mandatory
+                  </small>
+                </div>
               </div>
             </div>
           </div>

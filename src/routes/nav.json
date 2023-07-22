@@ -51,6 +51,12 @@
         "url": "/openCentralPurchase"
       },
       {
+        "name": "openLocalPOForm",
+        "displayName": "Local Purchase",
+        "id": 22,
+        "url": "/openLocalPOForm"
+      },
+      {
         "name": "manufecturingList",
         "displayName": "Manufacturing list",
         "id": 22,
@@ -151,10 +157,10 @@
         "url": "/openIndentDesk"
       },
       {
-        "name": "openReturnDesk",
+        "name": "transferList",
         "displayName": " Transfer List",
         "id": 22,
-        "url": "/openReturnDesk"
+        "url": "/transferList"
       }
     ]
   },

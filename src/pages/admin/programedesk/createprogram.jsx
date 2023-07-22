@@ -378,7 +378,7 @@ const CreateProgramDeskForm = ({
           }) => (
             <Form>
               <div className="row">
-                <div className="col-10 offset-1">
+                <div className="col-sm-12 col-md-10 col-lg-10 offset-md-1 offset-lg-1">
                   {addProgramField &&
                     addProgramField?.length > 0 &&
                     addProgramField.map(

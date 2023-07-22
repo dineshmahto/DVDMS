@@ -6,7 +6,7 @@ import SearchField from "../../../components/search/search";
 import { useDispatch, useSelector } from "react-redux";
 import toastMessage from "../../../common/toastmessage/toastmessage";
 import moment from "moment";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { TableBody, TableRow, TableCell, Paper } from "@mui/material";
 import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
 import StyledTableRow from "../../../components/tables/datatable/customTableRow";
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
@@ -171,149 +171,153 @@ const ReceiveOfDrugs = () => {
             />
           </div>
         </div>
-        <div className="row">
-          <div className="col-12">
-            <TableComponent
-              columns={columns}
-              sortField={sortField}
-              order={order}
-              handleSorting={handleSortingChange}
-              checkBoxRequired={true}
-            >
-              <TableBody>
-                {loading ? (
-                  <TableRowLaoder />
-                ) : (
-                  tableData &&
-                  tableData.map((data, index) => (
-                    <>
-                      <StyledTableRow key={data.id}>
-                        <StyledTableCell>
-                          {data?.transferDrugDetail &&
-                          data?.transferDrugDetail.length > 0 ? (
-                            <IconButton
-                              aria-label="expand row"
-                              size="small"
-                              onClick={() => handleCollapse(index)}
+        <Paper elevation={3} className="mb-2">
+          <div className="row">
+            <div className="col-12">
+              <TableComponent
+                columns={columns}
+                sortField={sortField}
+                order={order}
+                handleSorting={handleSortingChange}
+                checkBoxRequired={true}
+              >
+                <TableBody>
+                  {loading ? (
+                    <TableRowLaoder />
+                  ) : (
+                    tableData &&
+                    tableData.map((data, index) => (
+                      <>
+                        <StyledTableRow key={data.id}>
+                          <StyledTableCell>
+                            {data?.transferDrugDetail &&
+                            data?.transferDrugDetail.length > 0 ? (
+                              <IconButton
+                                aria-label="expand row"
+                                size="small"
+                                onClick={() => handleCollapse(index)}
+                              >
+                                <FontAwesomeIcon
+                                  icon={
+                                    open.includes(index)
+                                      ? faChevronUp
+                                      : faChevronDown
+                                  }
+                                />
+                              </IconButton>
+                            ) : null}
+                          </StyledTableCell>
+                          <StyledTableCell padding="none">
+                            {data?.Id}
+                          </StyledTableCell>
+                          <StyledTableCell padding="none">
+                            {data?.Id}
+                          </StyledTableCell>
+
+                          <StyledTableCell padding="none">
+                            {moment(data?.requestDate).format("DD/MM/YYYY")}
+                          </StyledTableCell>
+                          <StyledTableCell padding="none">
+                            {moment(data?.issueDate).format("DD/MM/YYYY")}
+                          </StyledTableCell>
+
+                          <StyledTableCell padding="none">
+                            {data?.fromStore}
+                          </StyledTableCell>
+                          <StyledTableCell padding="none">
+                            {data?.type}
+                          </StyledTableCell>
+                        </StyledTableRow>
+                        {data?.transferDrugDetail &&
+                        data?.transferDrugDetail.length > 0 ? (
+                          <TableRow>
+                            <TableCell
+                              style={{ paddingBottom: 0, paddingTop: 0 }}
+                              colSpan={6}
                             >
-                              <FontAwesomeIcon
-                                icon={
-                                  open.includes(index)
-                                    ? faChevronUp
-                                    : faChevronDown
-                                }
-                              />
-                            </IconButton>
-                          ) : null}
-                        </StyledTableCell>
-                        <StyledTableCell padding="none">
-                          {data?.Id}
-                        </StyledTableCell>
-                        <StyledTableCell padding="none">
-                          {data?.Id}
-                        </StyledTableCell>
+                              <Collapse
+                                in={open.includes(index)}
+                                timeout="auto"
+                                unmountOnExit
+                              >
+                                <Box sx={{ margin: 1 }}>
+                                  <Typography
+                                    variant="h6"
+                                    gutterBottom
+                                    component="div"
+                                  >
+                                    Transfer Details
+                                  </Typography>
+                                  <Table size="small" aria-label="purchases">
+                                    <TableHead>
+                                      <TableRow>
+                                        <StyledTableCell>
+                                          Drug Name
+                                        </StyledTableCell>
+                                        <StyledTableCell>
+                                          MANUFACTURE DATE
+                                        </StyledTableCell>
+                                        <StyledTableCell>
+                                          EXPIRY DATE
+                                        </StyledTableCell>
 
-                        <StyledTableCell padding="none">
-                          {moment(data?.requestDate).format("DD/MM/YYYY")}
-                        </StyledTableCell>
-                        <StyledTableCell padding="none">
-                          {moment(data?.issueDate).format("DD/MM/YYYY")}
-                        </StyledTableCell>
-
-                        <StyledTableCell padding="none">
-                          {data?.fromStore}
-                        </StyledTableCell>
-                        <StyledTableCell padding="none">
-                          {data?.type}
-                        </StyledTableCell>
-                      </StyledTableRow>
-                      {data?.transferDrugDetail &&
-                      data?.transferDrugDetail.length > 0 ? (
-                        <TableRow>
-                          <TableCell
-                            style={{ paddingBottom: 0, paddingTop: 0 }}
-                            colSpan={6}
-                          >
-                            <Collapse
-                              in={open.includes(index)}
-                              timeout="auto"
-                              unmountOnExit
-                            >
-                              <Box sx={{ margin: 1 }}>
-                                <Typography
-                                  variant="h6"
-                                  gutterBottom
-                                  component="div"
-                                >
-                                  Transfer Details
-                                </Typography>
-                                <Table size="small" aria-label="purchases">
-                                  <TableHead>
-                                    <TableRow>
-                                      <StyledTableCell>
-                                        Drug Name
-                                      </StyledTableCell>
-                                      <StyledTableCell>
-                                        MANUFACTURE DATE
-                                      </StyledTableCell>
-                                      <StyledTableCell>
-                                        EXPIRY DATE
-                                      </StyledTableCell>
-
-                                      <StyledTableCell>REQ QTY</StyledTableCell>
-                                      <StyledTableCell>
-                                        TRANSFER QTY
-                                      </StyledTableCell>
-                                    </TableRow>
-                                  </TableHead>
-                                  <TableBody>
-                                    {data?.transferDrugDetail &&
-                                      data?.transferDrugDetail.length > 0 &&
-                                      data?.transferDrugDetail.map((ele) => {
-                                        return (
-                                          <>
-                                            <StyledTableRow key={ele?.id}>
-                                              <StyledTableCell padding="none">
-                                                {ele?.drugName}
-                                              </StyledTableCell>
-                                              <StyledTableCell padding="none">
-                                                {ele?.manufactureDate}
-                                              </StyledTableCell>
-                                              <StyledTableCell padding="none">
-                                                {ele?.expiryDate}
-                                              </StyledTableCell>
-                                              <StyledTableCell padding="none">
-                                                {ele?.requestQty}
-                                              </StyledTableCell>
-                                              <StyledTableCell padding="none">
-                                                {ele?.issueQty}
-                                              </StyledTableCell>
-                                            </StyledTableRow>
-                                          </>
-                                        );
-                                      })}
-                                  </TableBody>
-                                </Table>
-                              </Box>
-                            </Collapse>
-                          </TableCell>
-                        </TableRow>
-                      ) : null}
-                    </>
-                  ))
-                )}
-                <EmptyRow loading={loading} tableData={tableData} />
-              </TableBody>
-            </TableComponent>
-            <TablePagination
-              page={controller.page + 1}
-              count={totalRows}
-              rowsPerPage={controller?.rowsPerPage}
-              onPageChange={handlePageChange}
-              onRowsPerPageChange={handleChangeRowsPerPage}
-            />
+                                        <StyledTableCell>
+                                          REQ QTY
+                                        </StyledTableCell>
+                                        <StyledTableCell>
+                                          TRANSFER QTY
+                                        </StyledTableCell>
+                                      </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                      {data?.transferDrugDetail &&
+                                        data?.transferDrugDetail.length > 0 &&
+                                        data?.transferDrugDetail.map((ele) => {
+                                          return (
+                                            <>
+                                              <StyledTableRow key={ele?.id}>
+                                                <StyledTableCell padding="none">
+                                                  {ele?.drugName}
+                                                </StyledTableCell>
+                                                <StyledTableCell padding="none">
+                                                  {ele?.manufactureDate}
+                                                </StyledTableCell>
+                                                <StyledTableCell padding="none">
+                                                  {ele?.expiryDate}
+                                                </StyledTableCell>
+                                                <StyledTableCell padding="none">
+                                                  {ele?.requestQty}
+                                                </StyledTableCell>
+                                                <StyledTableCell padding="none">
+                                                  {ele?.issueQty}
+                                                </StyledTableCell>
+                                              </StyledTableRow>
+                                            </>
+                                          );
+                                        })}
+                                    </TableBody>
+                                  </Table>
+                                </Box>
+                              </Collapse>
+                            </TableCell>
+                          </TableRow>
+                        ) : null}
+                      </>
+                    ))
+                  )}
+                  <EmptyRow loading={loading} tableData={tableData} />
+                </TableBody>
+              </TableComponent>
+              <TablePagination
+                page={controller.page + 1}
+                count={totalRows}
+                rowsPerPage={controller?.rowsPerPage}
+                onPageChange={handlePageChange}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+              />
+            </div>
           </div>
-        </div>
+        </Paper>
       </div>
     </>
   );

@@ -16,6 +16,10 @@ import {
   createProgramFundingResponse,
 } from "../../../store/admin/action";
 import toastMessage from "../../../common/toastmessage/toastmessage";
+import {
+  NETWORK_STATUS_CODE,
+  SERVER_STATUS_CODE,
+} from "../../../common/constant/constant";
 const ProgrameFundingSource = () => {
   const [tempArray, setTempArray] = useState([]);
   const [rightTempArray, setRightTempArray] = useState([]);
@@ -45,7 +49,10 @@ const ProgrameFundingSource = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (getProgranFundRes && getProgranFundRes?.status === 200) {
+    if (
+      getProgranFundRes &&
+      getProgranFundRes?.status === NETWORK_STATUS_CODE.SUCCESS
+    ) {
       setProgramList(getProgranFundRes.data.programmeList);
       setSelectedItem([]);
       setRightTempArray([]);
@@ -56,7 +63,10 @@ const ProgrameFundingSource = () => {
       setTransferableRoleList(getProgranFundRes?.data?.sourceList);
       setCopyData(getProgranFundRes?.data?.sourceList);
       dispatch(getProgrameFundingSourceListResponse(""));
-    } else if (getProgranFundRes && getProgranFundRes?.status === 500) {
+    } else if (
+      getProgranFundRes &&
+      getProgranFundRes?.status === NETWORK_STATUS_CODE?.INTERNAL_ERROR
+    ) {
       dispatch(getProgrameFundingSourceListResponse(""));
       toastMessage("Programme Funding", "Something went wrong", "");
     }
@@ -65,11 +75,11 @@ const ProgrameFundingSource = () => {
   useEffect(() => {
     if (
       fundingSrcListByProgrmName &&
-      fundingSrcListByProgrmName?.status === 200
+      fundingSrcListByProgrmName?.status === NETWORK_STATUS_CODE?.SUCCESS
     ) {
     } else if (
       fundingSrcListByProgrmName &&
-      fundingSrcListByProgrmName?.status === 500
+      fundingSrcListByProgrmName?.status === NETWORK_STATUS_CODE?.INTERNAL_ERROR
     ) {
       dispatch(getFundingSourceByPrgrmNameResponse(""));
       toastMessage("Programme Funding", "Something went wrong", "");
@@ -79,7 +89,7 @@ const ProgrameFundingSource = () => {
   useEffect(() => {
     if (
       fundingSrcListByProgrmName &&
-      fundingSrcListByProgrmName?.status === 200
+      fundingSrcListByProgrmName?.status === NETWORK_STATUS_CODE?.SUCCESS
     ) {
       setFirstClick(true);
       setTempArray(fundingSrcListByProgrmName?.data);
@@ -101,9 +111,13 @@ const ProgrameFundingSource = () => {
   useEffect(() => {
     if (
       createProgrmFundingResponse &&
-      createProgrmFundingResponse?.status === 201
+      createProgrmFundingResponse?.status ===
+        NETWORK_STATUS_CODE.CREATED_SUCCESSFULLY
     ) {
-      if (createProgrmFundingResponse?.data?.status === 1) {
+      if (
+        createProgrmFundingResponse?.data?.status ===
+        SERVER_STATUS_CODE?.SUCCESS
+      ) {
         dispatch(getProgrameFundingSourceList());
         toastMessage(
           "Programme Funding Desk",
@@ -111,7 +125,9 @@ const ProgrameFundingSource = () => {
         );
 
         dispatch(createProgramFundingResponse(""));
-      } else if (createProgrmFundingResponse?.data?.status === 0) {
+      } else if (
+        createProgrmFundingResponse?.data?.status === SERVER_STATUS_CODE?.FAILED
+      ) {
         toastMessage(
           "Programme Funding Desk",
           createProgrmFundingResponse?.data?.message
@@ -120,7 +136,8 @@ const ProgrameFundingSource = () => {
       }
     } else if (
       createProgrmFundingResponse &&
-      createProgrmFundingResponse?.status === 500
+      createProgrmFundingResponse?.status ===
+        NETWORK_STATUS_CODE?.INTERNAL_ERROR
     ) {
       dispatch(createProgramFundingResponse(""));
       toastMessage("Programme Funding Desk", "Something went wrong", "");
@@ -135,6 +152,7 @@ const ProgrameFundingSource = () => {
     return () => {
       isApiSubcribed = false;
       dispatch(getProgrameFundingSourceListResponse(""));
+      setSelectedItem([]);
     };
   }, []);
 
@@ -328,44 +346,43 @@ const ProgrameFundingSource = () => {
   return (
     <Paper className="mt-2">
       <div className="container-fluid  border rounded">
-        <div className="row text-center mt-1">
-          <div className="col-6 offset-3">
+        <div className="row  mt-1">
+          <div className="d-flex justify-content-center">
             <h6 className="p-1">PROGRAMME FUNDING SOURCE</h6>
           </div>
         </div>
         <div className="row">
-          <div className="col-9 offset-1">
-            <div className="row mb-2">
-              <div className="col-10 offset-1">
-                <div className="row">
-                  <div className="col-4">Programme Name</div>
-                  <div className="col-8">
-                    <CustomSelect
-                      options={programList}
-                      onChange={(val) => {
-                        setProgramId(val?.value);
-                        dispatch(
-                          getFundingSourceByPrgrmName({
-                            programId: val?.value,
-                          })
-                        );
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="col-sm-12 col-md-10 col-lg-10 offset-md-1 offset-lg-1">
             <div className="row mb-1">
-              <div className="col-10 offset-1">
+              <div className="col-sm-12 col-md-10 col-sm-10 col-lg-10 offset-md-1 offset-lg-1">
                 <div className="row">
-                  <div className="col-4">Financial Year</div>
-                  <div className="col-8">
-                    <CustomSelect
-                      options={finincialYear}
-                      onChange={(val) => {
-                        setyear(val?.value);
-                      }}
-                    />
+                  <div className="col-sm-12 col-md-6 col-lg-6">
+                    <div className="col-auto">Programme Name</div>
+                    <div className="col-auto">
+                      <CustomSelect
+                        options={programList}
+                        onChange={(val) => {
+                          setProgramId(val?.value);
+                          dispatch(
+                            getFundingSourceByPrgrmName({
+                              programId: val?.value,
+                            })
+                          );
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-sm-12 col-md-6 col-lg-6">
+                    <div className="col-auto">Financial Year</div>
+                    <div className="col-auto">
+                      <CustomSelect
+                        options={finincialYear}
+                        onChange={(val) => {
+                          setyear(val?.value);
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -374,7 +391,7 @@ const ProgrameFundingSource = () => {
               <HorizonatalLine text="Funding Source List" />
             </div>
             <div className="row">
-              <div className="col-10 offset-1">
+              <div className="col-sm-12 col-md-10 col-lg-10 offset-md-1 offset-lg-1">
                 <div className="row text-center">
                   <p>
                     Select Funding Source (Move selected Funding Source from
@@ -451,7 +468,7 @@ const ProgrameFundingSource = () => {
                     <div className="me-1">
                       <Basicbutton
                         buttonText="Save"
-                        className="btn btn-success"
+                        className="btn btn-success rounded-0 shadow-sm rounded"
                         icon={
                           <FontAwesomeIcon
                             icon={faFloppyDisk}
@@ -488,7 +505,7 @@ const ProgrameFundingSource = () => {
                     <div className="ms-1">
                       <Basicbutton
                         buttonText="Cancel"
-                        className="btn btn-danger"
+                        className="btn btn-danger rounded-0 shadow-sm rounded"
                         icon={
                           <FontAwesomeIcon icon={faXmark} className="me-2" />
                         }

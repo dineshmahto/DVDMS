@@ -248,7 +248,7 @@ const IntentDrug = () => {
       <div className="row mt-2">
         <HorizonatalLine text="Excess/Shortage Requested Details" />
       </div>
-      <Paper elevation={2}>
+      <Paper elevation={2} className="mb-2">
         <div className="row mb-1">
           <div className="d-flex justify-content-end">
             <SearchField

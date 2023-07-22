@@ -3,6 +3,7 @@ import { Service } from "../../config/commonFetch";
 import * as CONSTANTS from "../../common/constant/constants";
 import {
   CANCEL_NOTIFICATION,
+  FREEZE_NOTIFICATION,
   GET_ALL_OPEN_NOTIFICATION_LIST,
   GET_ANNUAL_DEMAND_NOTIFICATION,
   GET_COMPILE_DEMAND,
@@ -15,6 +16,7 @@ import {
 } from "./actionTypes";
 import {
   cancelNotificationResponse,
+  freezeNotificationResponse,
   getAllOpenNotificationResponse,
   getAnnualDemandNotificationResp,
   getCompileDemand,
@@ -183,7 +185,7 @@ function* saveCompileDemand({ payload: saveCompileDmdDetails }) {
   try {
     const response = yield call(
       Service.commonPost,
-      CONSTANTS.SAVE_GENERATE_ANNUAL_DEMAND,
+      CONSTANTS.SAVE_COMPILE_DEAMND_REQUEST,
       saveCompileDmdDetails
     );
     console.log("Response", response);
@@ -191,6 +193,22 @@ function* saveCompileDemand({ payload: saveCompileDmdDetails }) {
   } catch (error) {
     console.log("Error", error);
     put(saveCompileDemandResp(error));
+  }
+}
+
+function* freezeNotification({ payload: notificationId }) {
+  console.log("notificationId", notificationId);
+  try {
+    const response = yield call(
+      Service.commonFetch,
+      `Notification/freezeNotification`,
+      { params: notificationId }
+    );
+    console.log("Response", response);
+    yield put(freezeNotificationResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(freezeNotificationResponse(error));
   }
 }
 
@@ -208,5 +226,6 @@ function* DemandSaga() {
   yield takeEvery(GET_COMPILE_DEMAND, getCompileDemandList);
   yield takeEvery(SAVE_GENERATE_ANNUAL_DEMAND, saveGenerateAnnualDmd);
   yield takeEvery(SAVE_COMPILE_DEMAND, saveCompileDemand);
+  yield takeEvery(FREEZE_NOTIFICATION, freezeNotification);
 }
 export default DemandSaga;

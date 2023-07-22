@@ -1,20 +1,10 @@
-import React, {
-  useState,
-  useMemo,
-  useEffect,
-  lazy,
-  Suspense,
-  useCallback,
-} from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import HorizonatalLine from "../../../../components/horizontalLine/horizonatalLine";
 import TableComponent from "../../../../components/tables/datatable/tableComponent";
-import { TableBody, TableRow, TableCell } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { TableBody } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import moment from "moment";
-import { Spinner } from "react-bootstrap";
 import { faFilePdf, faSearch } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CustomSelect from "../../../../components/select/customSelect";
 import Basicbutton from "../../../../components/button/basicbutton";
 import SearchField from "../../../../components/search/search";
@@ -28,48 +18,25 @@ import toastMessage from "../../../../common/toastmessage/toastmessage";
 import Checkbox from "@mui/material/Checkbox";
 import { Paper } from "@mui/material";
 import TablePagination from "../../../../components/tables/datatable/tablepagination";
-import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import TableRowLaoder from "../../../../components/tables/datatable/tableRowLaoder";
 import StyledTableRow from "../../../../components/tables/datatable/customTableRow";
 import StyledTableCell from "../../../../components/tables/datatable/customTableCell";
 import EmptyRow from "../../../../components/tables/datatable/emptyRow";
 import handleSortingFunc from "../../../../components/tables/datatable/sortable";
-const useStyles = makeStyles({
-  tableCell: {
-    padding: "10px !important",
-    fontSize: "0.8rem !important",
-  },
-  lineHeight: {
-    lineHeight: "3",
-  },
-});
-const tempData = [
-  {
-    id: 1,
-    storeName: "STATE WAREHOUSE",
-    drugName: "PARACETAMOL TAB. 500MG",
-    progName: "COVID19",
-    batchNo: "	21443792",
-    expDate: "NOV-2024",
-    mfgDate: "DEC-2021",
-    dToExp: "597",
-    avalQty: "579",
-    rack: "0 ",
-    instiute: "BOTH(NHM & DHS)",
-    source: "ECRP",
-  },
-];
+import { SORTINGORDER } from "../../../../common/constant/constant";
+import { useNavigate } from "react-router-dom";
+
 const AnnualDemand = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const approvalDeskListResponse = useSelector(
     (state) => state.ordermanaagement?.approvalDeskListResponse
   );
   console.log("approvalDeskListResponse", approvalDeskListResponse);
-  let classes = useStyles();
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [totalPages, setTotalPages] = useState(0);
-  const [tableData, setTableData] = useState(tempData);
+  const [tableData, setTableData] = useState();
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
@@ -160,7 +127,6 @@ const AnnualDemand = () => {
   }, [approvalDeskListResponse]);
 
   const handlePageChange = (newPage) => {
-    console.log("newPage", newPage);
     setLoading(true);
     setController({
       ...controller,
@@ -176,13 +142,15 @@ const AnnualDemand = () => {
   };
   const handleSortingChange = (accessor) => {
     const sortOrder =
-      accessor === sortField && order === "asc" ? "desc" : "asc";
+      accessor === sortField && order === SORTINGORDER.ASC
+        ? SORTINGORDER.DESC
+        : SORTINGORDER.ASC;
     setSortField(accessor);
     setOrder(sortOrder);
     handleSortingFunc(accessor, sortOrder, tableData);
   };
 
-  const handleClick = (event, index, row) => {
+  const handleClick = (index, row) => {
     if (selected.includes(index)) {
       const openCopy = selected.filter((element) => {
         return element !== index;
@@ -206,7 +174,7 @@ const AnnualDemand = () => {
         </div>
       </div>
       <div className="row d-flex justify-content-start mb-2">
-        <div className="col-6">
+        <div className="col-12">
           <div className="row align-items-center">
             <div className="col-auto">
               <label>Store Name</label>
@@ -222,6 +190,26 @@ const AnnualDemand = () => {
                 ]}
               />
             </div>
+
+            <div className="col-auto">
+              <label className="labellineHeight" htmlFor="requestStatus">
+                Reuest Status
+              </label>
+            </div>
+            <div className="col-auto">
+              <CustomSelect
+                defaultValue={{
+                  value: "1",
+                  label: "ACTIVE",
+                }}
+                options={[
+                  { value: "99", label: "ALL" },
+                  { value: "1", label: " Approval Pending" },
+                  { value: "4", label: "Approved By Ins Head" },
+                  { value: "5", label: "Rejected By Ins Head" },
+                ]}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -231,13 +219,17 @@ const AnnualDemand = () => {
           <div className="row align-items-center">
             <div className="col-auto">
               <div>
-                <Link to={"/openIssueToThirdparty"}>
-                  <Basicbutton
-                    type="button"
-                    buttonText="Approval"
-                    className="primary rounded-0"
-                  />
-                </Link>
+                <Basicbutton
+                  type="button"
+                  buttonText="Approval"
+                  className="primary rounded-0"
+                  disabled={selected.length > 0 ? null : "disabled"}
+                  onClick={() => {
+                    navigate("/openDemandApprovalForm", {
+                      state: selectedRow?.id,
+                    });
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -281,11 +273,11 @@ const AnnualDemand = () => {
                         <StyledTableCell padding="none">
                           <Checkbox
                             size="small"
-                            onClick={(event) => handleClick(event, index, data)}
+                            onClick={(event) => handleClick(data?.id, data)}
                             color="primary"
-                            checked={selected.includes(index)}
+                            checked={selected.includes(data?.id)}
                             inputProps={{
-                              "aria-labelledby": `enhanced-table-checkbox-${index}`,
+                              "aria-labelledby": `enhanced-table-checkbox-${data?.id}`,
                             }}
                           />
                         </StyledTableCell>

@@ -52,8 +52,7 @@ const DrugDesk = () => {
   console.log("deleteDrugResponse", deleteDrugResponses);
   console.log("drugDeskListResponse", drugDeskListResponse);
   const [sortField, setSortField] = useState("");
-  const [order, setOrder] = useState("asc");
-  const [totalPages, setTotalPages] = useState(0);
+  const [order, setOrder] = useState(SORTINGORDER.ASC);
   const [totalRows, setTotalRows] = useState(0);
   const [tableData, setTableData] = useState([]);
   const [filterData, setFilterData] = useState([]);
@@ -74,6 +73,7 @@ const DrugDesk = () => {
   const [categoryList, setCategoryList] = useState([]);
   const [manufactureList, setManufactureList] = useState([]);
   const [classList, setClassList] = useState([]);
+  //const [, startTransition] = useTransition();
   const keyWords = {
     DRUG_ID: "id",
     DRUG_NAME: "name",
@@ -155,7 +155,7 @@ const DrugDesk = () => {
         drugDeskListResponse?.data?.pageList &&
         drugDeskListResponse?.data?.pageList?.content
       ) {
-        setTotalRows(drugDeskListResponse?.data?.pagelist?.totalElements);
+        setTotalRows(drugDeskListResponse?.data?.pageList?.totalElements);
         setTableData(drugDeskListResponse?.data?.pageList?.content);
         setFilterData(drugDeskListResponse?.data?.pageList?.content);
 
@@ -285,7 +285,7 @@ const DrugDesk = () => {
             buttonText="Add New Drug"
             className={`btn btn-outline-primary ${
               isDesktopOrLaptop ? "btn" : "btn-sm"
-            } rounded-0 mb-2 me-1 mt-2`}
+            } rounded-0 mb-2 me-1 mt-2 shadow-sm rounded`}
             onClick={() => {
               setShowAddDrugModal(true);
             }}
@@ -307,7 +307,7 @@ const DrugDesk = () => {
           />
         </div>
       </div>
-      <Paper>
+      <Paper elevation={3} className="mb-2">
         <div className="row">
           <div className="col-12">
             <TableComponent
@@ -316,6 +316,7 @@ const DrugDesk = () => {
               order={order}
               handleSorting={handleSortingChange}
               checkBoxRequired={false}
+              caption="Drug List"
             >
               <TableBody>
                 {loading ? (
@@ -385,50 +386,59 @@ const DrugDesk = () => {
               onRowsPerPageChange={handleChangeRowsPerPage}
             />
           </div>
-          <Suspense>
-            <AddNewDrugModal
-              openAddNewDrugModal={showAddDrugModal}
-              handleOpenAddDrugModal={handleOpenAddDrugModal}
-              categoryList={categoryList}
-              manufactureList={manufactureList}
-              classList={classList}
-            />
-          </Suspense>
 
-          <Suspense>
-            <AddNewAssetModal
-              openAddNewAssetModal={showAddAssetModal}
-              handleOpenAddAssetModal={handleOpenAddAssetModal}
-            />
-          </Suspense>
-          <Suspense>
-            <EditDrugModal
-              openEditDrugModal={showEditDrugModal}
-              handleEditDrugModal={handleEditDrugModal}
-              editData={editData}
-              classList={classList}
-              manufactureList={manufactureList}
-              categoryList={categoryList}
-            />
-          </Suspense>
-
-          <Suspense>
-            <AlertDialog
-              open={showDeleteDialog}
-              handleClose={handleDeleteDialog}
-              description="You are about to delete one record, this procedure is irreversible.
-Do you want to proceed?"
-            >
-              <Basicbutton
-                buttonText="Disagree"
-                onClick={() => {
-                  setDeleteId("");
-                  setShowDeleteDialog(false);
-                }}
+          {showAddDrugModal && (
+            <Suspense>
+              <AddNewDrugModal
+                openAddNewDrugModal={showAddDrugModal}
+                handleOpenAddDrugModal={handleOpenAddDrugModal}
+                categoryList={categoryList}
+                manufactureList={manufactureList}
+                classList={classList}
               />
-              <Basicbutton buttonText="Agree" onClick={handleDeleteDrug} />
-            </AlertDialog>
-          </Suspense>
+            </Suspense>
+          )}
+          {showAddAssetModal && (
+            <Suspense>
+              <AddNewAssetModal
+                openAddNewAssetModal={showAddAssetModal}
+                handleOpenAddAssetModal={handleOpenAddAssetModal}
+              />
+            </Suspense>
+          )}
+
+          {showEditDrugModal && (
+            <Suspense>
+              <EditDrugModal
+                openEditDrugModal={showEditDrugModal}
+                handleEditDrugModal={handleEditDrugModal}
+                editData={editData}
+                classList={classList}
+                manufactureList={manufactureList}
+                categoryList={categoryList}
+              />
+            </Suspense>
+          )}
+
+          {showDeleteDialog && (
+            <Suspense>
+              <AlertDialog
+                open={showDeleteDialog}
+                handleClose={handleDeleteDialog}
+                description="You are about to delete one record, this procedure is irreversible.
+Do you want to proceed?"
+              >
+                <Basicbutton
+                  buttonText="Disagree"
+                  onClick={() => {
+                    setDeleteId("");
+                    setShowDeleteDialog(false);
+                  }}
+                />
+                <Basicbutton buttonText="Agree" onClick={handleDeleteDrug} />
+              </AlertDialog>
+            </Suspense>
+          )}
         </div>
       </Paper>
     </>

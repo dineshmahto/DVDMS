@@ -4,7 +4,7 @@ import Basicbutton from "./basicbutton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
 
-const BackButon = ({ routePath }) => {
+const BackButon = ({ routePath, stateValue }) => {
   const navigate = useNavigate();
   return (
     <div className="row mt-2">
@@ -13,7 +13,13 @@ const BackButon = ({ routePath }) => {
           buttonText="Back"
           className="warning rounded-0"
           icon={<FontAwesomeIcon icon={faArrowLeft} />}
-          onClick={() => navigate(`/${routePath}`)}
+          onClick={() =>
+            navigate(`/${routePath}`, {
+              state: {
+                stateValue,
+              },
+            })
+          }
         />
       </div>
     </div>

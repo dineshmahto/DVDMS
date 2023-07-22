@@ -337,40 +337,45 @@ const FundingDesk = () => {
           </div>
         </div>
       </Paper>
-
-      <Suspense>
-        <AddNewFundingModal
-          openNewFundinngModal={showCreateModal}
-          handleNewFundingModal={handleNewFundingModal}
-        />
-      </Suspense>
-
-      <Suspense>
-        <EditFundingModal
-          openNewFundingModal={showEditModal}
-          handleEditFundingModal={handleEditFundingModal}
-          resetPageDetails={resetPageDetails}
-          editdata={editData}
-        />
-      </Suspense>
-
-      <Suspense>
-        <AlertDialog
-          open={showDeleteDialog}
-          handleClose={handleDeleteDialog}
-          description="You are about to delete one record, this procedure is irreversible.
-Do you want to proceed?"
-        >
-          <Basicbutton
-            buttonText="Disagree"
-            onClick={() => {
-              setDeleteId("");
-              setShowDeleteDialog(false);
-            }}
+      {showCreateModal && (
+        <Suspense>
+          <AddNewFundingModal
+            openNewFundinngModal={showCreateModal}
+            handleNewFundingModal={handleNewFundingModal}
           />
-          <Basicbutton buttonText="Agree" onClick={handleDeleteFunding} />
-        </AlertDialog>
-      </Suspense>
+        </Suspense>
+      )}
+
+      {showEditModal && (
+        <Suspense>
+          <EditFundingModal
+            openNewFundingModal={showEditModal}
+            handleEditFundingModal={handleEditFundingModal}
+            resetPageDetails={resetPageDetails}
+            editdata={editData}
+          />
+        </Suspense>
+      )}
+
+      {showDeleteDialog && (
+        <Suspense>
+          <AlertDialog
+            open={showDeleteDialog}
+            handleClose={handleDeleteDialog}
+            description="You are about to delete one record, this procedure is irreversible.
+Do you want to proceed?"
+          >
+            <Basicbutton
+              buttonText="Disagree"
+              onClick={() => {
+                setDeleteId("");
+                setShowDeleteDialog(false);
+              }}
+            />
+            <Basicbutton buttonText="Agree" onClick={handleDeleteFunding} />
+          </AlertDialog>
+        </Suspense>
+      )}
     </>
   );
 };

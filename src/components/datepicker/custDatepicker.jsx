@@ -22,7 +22,9 @@ const CustDatepicker = (props) => {
         <DatePicker
           className={classes.root}
           {...props}
-          renderInput={(params) => <TextField {...params} />}
+          renderInput={(params) => (
+            <TextField {...params} sx={{ width: "100%" }} />
+          )}
         />
       </LocalizationProvider>
     </>

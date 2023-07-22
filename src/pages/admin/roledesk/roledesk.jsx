@@ -100,8 +100,6 @@ const RoleDesk = () => {
 
   const [, startTransition] = useTransition();
 
-  const [load, setLoad] = useState(false);
-
   const handlePageChange = (newPage) => {
     console.log("newPage", newPage);
     setLoading(true);
@@ -243,7 +241,7 @@ const RoleDesk = () => {
           <Basicbutton
             buttonText="Add New Role"
             outlineType={true}
-            className="btn btn-primary rounded-0 mb-2 me-1 mt-2"
+            className="btn btn-outline-primary rounded-0 mb-2 me-1 mt-2 shadow-sm rounded"
             onClick={() => {
               startTransition(() => {
                 setShowModal(true);
@@ -275,6 +273,7 @@ const RoleDesk = () => {
               order={order}
               handleSorting={handleSortingChange}
               checkBoxRequired={false}
+              caption="Role List"
             >
               <TableBody>
                 {loading ? (

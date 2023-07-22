@@ -31,6 +31,8 @@ import {
   getTransferList,
 } from "../../../store/requisition/action";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
+import { NETWORK_STATUS_CODE } from "../../../common/constant/constant";
+import toastMessage from "../../../common/toastmessage/toastmessage";
 
 const useStyles = makeStyles({
   tableCell: {
@@ -129,6 +131,7 @@ const TransferList = () => {
   }, [controller]);
 
   useEffect(() => {
+    console.log("Dinesh", transferListResponse);
     if (transferListResponse && transferListResponse?.status === 200) {
       if (
         transferListResponse?.data?.pageList?.content &&
@@ -145,6 +148,13 @@ const TransferList = () => {
     ) {
       dispatch(getIntentDrugListResponse(""));
       setLoading(false);
+    } else if (
+      transferListResponse &&
+      transferListResponse?.status === NETWORK_STATUS_CODE.INTERNAL_ERROR
+    ) {
+      setLoading(false);
+      toastMessage("RETURN DESK", transferListResponse?.data?.status, "error");
+      dispatch(getIntentDrugListResponse(""));
     }
   }, [transferListResponse]);
 

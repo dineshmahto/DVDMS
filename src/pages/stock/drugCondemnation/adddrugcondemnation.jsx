@@ -308,7 +308,7 @@ const AddDrugCondemnation = () => {
       </div>
       <div className="row d-flex justify-content-start">
         <div className="col-12">
-          <div className="row text-align-center mb-1">
+          <div className="row align-items-center mb-1">
             <div className="col-auto">
               <label>Store Name</label>
             </div>
@@ -342,7 +342,7 @@ const AddDrugCondemnation = () => {
           </div>
         </div>
       </div>
-      <div className="row d-flex justify-content-start">
+      <div className="row d-flex justify-content-start mt-2">
         <div className="col-12">
           <div className="row">
             <div className="col-auto">
@@ -548,6 +548,7 @@ const AddDrugCondemnation = () => {
         <div className="row mb-1">
           <div className="d-flex justify-content-end">
             <SearchField
+              placeholder="Search...."
               className="me-1 mt-1"
               iconPosition="end"
               iconName={faSearch}

@@ -143,76 +143,98 @@ const AnnualDemand = () => {
       annualNotificationListResponse &&
       annualNotificationListResponse?.status === NETWORK_STATUS_CODE.SUCCESS
     ) {
-      setProgramList(
-        annualNotificationListResponse?.data?.getAnnualDemand.programList
-      );
       if (
-        annualNotificationListResponse?.data?.getAnnualDemand?.programList
-          .length > 0
+        annualNotificationListResponse?.data?.status ===
+        SERVER_STATUS_CODE.SUCCESS
       ) {
-        let temp = [];
-        [
-          ...annualNotificationListResponse?.data?.getAnnualDemand?.programList,
-        ].map((element) => {
-          let ele = {};
-          ele["id"] = `reqQty_${element?.id}`;
-          ele["name"] = element?.name;
-          temp.push(ele);
-        });
-
-        setDynamicColumn(temp);
-        setColumn(columns.concat(temp));
-        setLoading(false);
-      } else {
-        setColumn(
-          columns.concat([
-            {
-              id: "reqQty_",
-              name: "REQUEST QTY",
-              sortable: false,
-            },
-          ])
+        setProgramList(
+          annualNotificationListResponse?.data?.getAnnualDemand.programList
         );
+        if (
+          annualNotificationListResponse?.data?.getAnnualDemand?.programList
+            .length > 0
+        ) {
+          let temp = [];
+          [
+            ...annualNotificationListResponse?.data?.getAnnualDemand
+              ?.programList,
+          ].map((element) => {
+            let ele = {};
+            ele["id"] = `reqQty_${element?.id}`;
+            ele["name"] = element?.name;
+            temp.push(ele);
+          });
+
+          setDynamicColumn(temp);
+          setColumn(columns.concat(temp));
+          setLoading(false);
+        } else {
+          setColumn(
+            columns.concat([
+              {
+                id: "reqQty_",
+                name: "REQUEST QTY",
+                sortable: false,
+              },
+            ])
+          );
+        }
+        console.log("Dinesheshehh");
+
+        setTotalElements(
+          annualNotificationListResponse?.data?.getAnnualDemand?.drugList
+        );
+        setNotificationId(
+          annualNotificationListResponse?.data?.getAnnualDemand?.Id
+        );
+        const totalPageCount = Math.ceil(
+          [...annualNotificationListResponse?.data?.getAnnualDemand?.drugList]
+            ?.length / controller?.rowsPerPage
+        );
+        setLastDate(
+          annualNotificationListResponse?.data.getAnnualDemand?.lastDate
+        );
+        setFinancialYear(
+          annualNotificationListResponse?.data?.getAnnualDemand?.financialDate
+        );
+        setTotalPages(totalPageCount);
+
+        const offset = controller.page * controller.rowsPerPage;
+
+        console.log("offset", offset);
+        const currentPageData = [
+          ...annualNotificationListResponse?.data?.getAnnualDemand?.drugList,
+        ].slice(offset, offset + controller.rowsPerPage);
+        console.log(
+          "data",
+          annualNotificationListResponse?.data?.getAnnualDemand?.drugList
+        );
+        console.log("currentPageData", currentPageData);
+        setTableData(currentPageData);
+
+        setLoading(false);
+        dispatch(getAnnualDemandNotificationResp(""));
+      } else if (
+        annualNotificationListResponse?.data?.status ===
+        SERVER_STATUS_CODE.FAILED
+      ) {
+        setLoading(false);
+        toastMessage(
+          "ANNUAL DEMAND",
+          annualNotificationListResponse?.data?.message
+        );
+        dispatch(getAnnualDemandNotificationResp(""));
       }
-      console.log("Dinesheshehh");
-
-      setTotalElements(
-        annualNotificationListResponse?.data?.getAnnualDemand?.drugList
-      );
-      setNotificationId(
-        annualNotificationListResponse?.data?.getAnnualDemand?.Id
-      );
-      const totalPageCount = Math.ceil(
-        [...annualNotificationListResponse?.data?.getAnnualDemand?.drugList]
-          ?.length / controller?.rowsPerPage
-      );
-      setLastDate(
-        annualNotificationListResponse?.data.getAnnualDemand?.lastDate
-      );
-      setFinancialYear(
-        annualNotificationListResponse?.data?.getAnnualDemand?.financialDate
-      );
-      setTotalPages(totalPageCount);
-
-      const offset = controller.page * controller.rowsPerPage;
-
-      console.log("offset", offset);
-      const currentPageData = [
-        ...annualNotificationListResponse?.data?.getAnnualDemand?.drugList,
-      ].slice(offset, offset + controller.rowsPerPage);
-      console.log(
-        "data",
-        annualNotificationListResponse?.data?.getAnnualDemand?.drugList
-      );
-      console.log("currentPageData", currentPageData);
-      setTableData(currentPageData);
-
-      setLoading(false);
     } else if (
       annualNotificationListResponse &&
-      annualNotificationListResponse?.status == NETWORK_STATUS_CODE.BAD_REQUEST
+      annualNotificationListResponse?.status ===
+        NETWORK_STATUS_CODE.INTERNAL_ERROR
     ) {
       setLoading(false);
+      toastMessage(
+        "ANNUAL DEMAND",
+        annualNotificationListResponse?.data?.message
+      );
       dispatch(getAnnualDemandNotificationResp(""));
     }
   }, [annualNotificationListResponse]);
@@ -320,7 +342,7 @@ const AnnualDemand = () => {
     const result = [...totalElements]?.map((ele) => {
       if (ele?.id === id) {
         let clone = JSON.parse(JSON.stringify(ele));
-        clone[`${idx}`] = e;
+        clone[`${idx}_${id}`] = e;
         return clone;
       }
       return ele;
@@ -389,17 +411,6 @@ const AnnualDemand = () => {
         );
       }
     }
-    // else if (
-    //   saveGenerateAnnualDmdResponse?.status ===
-    //     NETWORK_STATUS_CODE.INTERNAL_ERROR ||
-    //   NETWORK_STATUS_CODE.PAGE_NOT_FOUND
-    // ) {
-    //   toastMessage(
-    //     "Annual Demand",
-    //     saveGenerateAnnualDmdResponse?.data?.message,
-    //     "error"
-    //   );
-    // }
   }, [saveGenerateAnnualDmdResponse]);
   return (
     <>
@@ -588,7 +599,7 @@ const AnnualDemand = () => {
                     <BasicTextAreaField
                       name="remarks"
                       rows={2}
-                      col={10}
+                      col={5}
                       onChange={(e) => setRemarks(e.target?.value)}
                     />
                   </div>

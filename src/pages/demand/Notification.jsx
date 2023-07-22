@@ -17,6 +17,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   cancelNotification,
   cancelNotificationResponse,
+  freezeNotification,
+  freezeNotificationResponse,
   getNotificationList,
   getNotificationListResponse,
 } from "../../store/demand/action";
@@ -31,6 +33,7 @@ import EmptyRow from "../../components/tables/datatable/emptyRow";
 import {
   DELETE_MESSAGE_DESCRIPTION,
   NETWORK_STATUS_CODE,
+  SERVER_STATUS_CODE,
   SORTINGORDER,
 } from "../../common/constant/constant";
 import Basicbutton from "../../components/button/basicbutton";
@@ -43,8 +46,12 @@ const Notification = () => {
   const cancelNotificationResponses = useSelector(
     (state) => state?.demand?.cancelNotificationResponse
   );
+  const freezeNotificationResponses = useSelector(
+    (state) => state?.demand?.freezeNotResp
+  );
   console.log("cancelNotificationResponse", cancelNotificationResponses);
   console.log("notficationListResponse", notficationListResponse);
+  console.log("freezeNotificationResponse", freezeNotificationResponses);
   let navigate = useNavigate();
   const [tableData, setTableData] = useState([]);
   console.log(typeof tableData, tableData?.length);
@@ -63,9 +70,7 @@ const Notification = () => {
   const [modalTitle, setModalTitle] = useState("");
   const [selectedRow, setSelectedRow] = useState([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [open, setOpen] = React.useState(false);
-
-  const [notificationId, setNotificationId] = useState("");
+  const [showFreezeDialog, setShowFreezeDialog] = useState(false);
   const columns = useMemo(() => [
     {
       id: "notificationDate",
@@ -146,6 +151,52 @@ const Notification = () => {
 
   useEffect(() => {
     if (
+      freezeNotificationResponses &&
+      freezeNotificationResponses?.status ===
+        NETWORK_STATUS_CODE.CREATED_SUCCESSFULLY
+    ) {
+      if (
+        freezeNotificationResponses?.data?.status === SERVER_STATUS_CODE.SUCCESS
+      ) {
+        setShowFreezeDialog(false);
+        dispatch(
+          getNotificationList({
+            pageNumber: controller.page,
+            pageSize: controller.rowsPerPage,
+            status: controller.notitificationStatus,
+          })
+        );
+        toastMessage(
+          "Notification",
+          freezeNotificationResponses?.data?.message
+        );
+        dispatch(freezeNotificationResponse(""));
+      } else if (
+        freezeNotificationResponses?.data?.status === SERVER_STATUS_CODE.FAILED
+      ) {
+        setShowFreezeDialog(false);
+        toastMessage(
+          "Notification",
+          freezeNotificationResponses?.data?.message
+        );
+        dispatch(freezeNotificationResponse(""));
+      }
+    } else if (
+      freezeNotificationResponses &&
+      freezeNotificationResponses?.status == NETWORK_STATUS_CODE.INTERNAL_ERROR
+    ) {
+      setShowFreezeDialog(false);
+      toastMessage(
+        "Notication",
+        freezeNotificationResponses?.data?.message,
+        "error"
+      );
+      dispatch(freezeNotificationResponse(""));
+    }
+  }, [freezeNotificationResponses]);
+
+  useEffect(() => {
+    if (
       cancelNotificationResponses &&
       cancelNotificationResponses?.status ===
         NETWORK_STATUS_CODE.CREATED_SUCCESSFULLY
@@ -159,14 +210,14 @@ const Notification = () => {
           notitificationStatus: 1,
         })
       );
-      setOpen(false);
+      setShowDeleteDialog(false);
       toastMessage("Notification", cancelNotificationResponses?.data?.message);
       dispatch(cancelNotificationResponse(""));
     } else if (
       cancelNotificationResponses &&
-      cancelNotificationResponses?.status == NETWORK_STATUS_CODE.PAGE_NOT_FOUND
+      cancelNotificationResponses?.status == NETWORK_STATUS_CODE.INTERNAL_ERROR
     ) {
-      setOpen(false);
+      setShowDeleteDialog(false);
       toastMessage(
         "Notication",
         cancelNotificationResponses?.data?.message,
@@ -197,6 +248,7 @@ const Notification = () => {
         : SORTINGORDER.ASC;
     setSortField(accessor);
     setOrder(sortOrder);
+
     handleSorting(accessor, sortOrder);
   };
   const handleSorting = useCallback(
@@ -253,6 +305,10 @@ const Notification = () => {
     console.log("clicked handle Action");
     dispatch(cancelNotification(selectedRow?.id));
   };
+
+  const hanldeFreeze = () => {
+    dispatch(freezeNotification({ id: selectedRow?.id }));
+  };
   const preview = useCallback(() => {
     return (
       <BasicModal
@@ -305,8 +361,8 @@ const Notification = () => {
             <div className="col-auto">
               <CustomSelect
                 defaultValue={{
-                  value: "1",
-                  label: "ACTIVE",
+                  value: "99",
+                  label: "ALL",
                 }}
                 options={[
                   { value: "99", label: "ALL" },
@@ -339,7 +395,7 @@ const Notification = () => {
                 type="button"
                 buttonText="Cancel Notification"
                 outlineType={true}
-                className="primary btn-sm ms-1 rounded-0"
+                className="danger btn-sm ms-1 rounded-0"
                 disabled={selected.length > 0 ? null : "disabled"}
                 onClick={(e) => {
                   setShowDeleteDialog(true);
@@ -367,6 +423,16 @@ const Notification = () => {
                   navigate("/openExtendNotificationForm", {
                     state: selectedRow,
                   });
+                }}
+              />
+              <BasicButton
+                type="button"
+                buttonText="Freeze"
+                outlineType={true}
+                className="primary btn-sm ms-1 rounded-0"
+                disabled={selected.length > 0 ? null : "disabled"}
+                onClick={() => {
+                  setShowFreezeDialog(true);
                 }}
               />
               <BasicButton
@@ -500,17 +566,36 @@ const Notification = () => {
             {preview()}
           </div>
         </div>
-        <AlertDialog
-          open={showDeleteDialog}
-          handleClose={handleDeleteDialog}
-          description={DELETE_MESSAGE_DESCRIPTION}
-        >
-          <Basicbutton
-            buttonText="Disagree"
-            onClick={() => setShowDeleteDialog(false)}
-          />
-          <Basicbutton buttonText="Agree" onClick={handleCancelNotification} />
-        </AlertDialog>
+        {showDeleteDialog && (
+          <AlertDialog
+            open={showDeleteDialog}
+            handleClose={handleDeleteDialog}
+            description={DELETE_MESSAGE_DESCRIPTION}
+          >
+            <Basicbutton
+              buttonText="Disagree"
+              onClick={() => setShowDeleteDialog(false)}
+            />
+            <Basicbutton
+              buttonText="Agree"
+              onClick={handleCancelNotification}
+            />
+          </AlertDialog>
+        )}
+
+        {showFreezeDialog && (
+          <AlertDialog
+            open={showFreezeDialog}
+            handleClose={() => setShowFreezeDialog(false)}
+            description="Are you sure to close / freeze demand notification"
+          >
+            <Basicbutton
+              buttonText="Disagree"
+              onClick={() => setShowFreezeDialog(false)}
+            />
+            <Basicbutton buttonText="Agree" onClick={hanldeFreeze} />
+          </AlertDialog>
+        )}
       </Paper>
     </>
   );
