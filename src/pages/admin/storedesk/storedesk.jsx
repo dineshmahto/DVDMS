@@ -23,11 +23,13 @@ import handleSortingFunc from "../../../components/tables/datatable/sortable";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
 import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
 import searchFunc from "../../../components/tables/searchFunc";
+import { useMediaQuery } from "react-responsive";
 const CreateStoreModal = lazy(() => import("./createstoremodal"));
 const EditStoreModal = lazy(() => import("./editstoremodal"));
 const AlertDialog = lazy(() => import("../../../components/dialog/dialog"));
 
 const StoreDesk = () => {
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 600px)" });
   const dispatch = useDispatch();
   const storeDeskListResponse = useSelector(
     (state) => state.admin.storeDeskListResponse
@@ -56,15 +58,11 @@ const StoreDesk = () => {
 
   const [activityList, setActivityList] = useState([]);
   const [ownerList, setOwnerList] = useState([]);
-  const [pageList, setPageList] = useState([]);
   const [storeTypeList, setStoreTypeList] = useState([]);
   const [storeList, setStoreList] = useState([]);
   const [blockList, setBlockList] = useState([]);
   const [districtList, setDistrictList] = useState([]);
   const [editData, setEditData] = useState({});
-
-  const [dropDwonRoleList, setDropDownRoleList] = useState([]);
-  const [dropDownStoreList, setDropDownStoreList] = useState([]);
   const columns = useMemo(() => [
     {
       id: "id",
@@ -268,17 +266,23 @@ const StoreDesk = () => {
       <HorizonatalLine text="Store Management Desk" />
 
       <div className="row">
-        <div className="d-flex flex-row justify-content-between">
+        <div
+          className={`d-flex ${
+            isSmallScreen ? "flex-column" : "flex-row"
+          } justify-content-between`}
+        >
           <Basicbutton
             buttonText="Add New Store"
             outlineType={true}
-            className="btn btn-outline-primary rounded-0 mb-2 me-1 mt-2 ms-1 shadow-sm rounded"
+            className={`btn btn-outline-primary ${
+              isSmallScreen ? "btn-sm" : "btn-md"
+            } rounded-0 mb-2 me-1 mt-2 shadow-sm rounded`}
             onClick={() => {
               setShowAddModal(true);
             }}
           />
           <SearchField
-            className="me-1 mt-1"
+            className={`me-1 ${isSmallScreen ? "mb-1" : "mb-0"} mt-1`}
             iconPosition="end"
             disabled={tableData.length === 0 ? true : false}
             onChange={(e) => {

@@ -14,11 +14,13 @@ interface selectProps {
   onBlur: (e: any) => void;
   disabled: boolean | false;
   menuPlacement?: menuPosition;
+  value?: string;
+  menuPortal?: boolean | false;
 }
 const customStyles = {
   menu: (provided: any, state: any) => ({
     ...provided,
-    zIndex: 10,
+    zIndex: 10000,
   }),
 };
 
@@ -32,6 +34,8 @@ const CustomSelect: React.FC<selectProps> = ({
   onBlur,
   disabled,
   menuPlacement,
+  value,
+  menuPortal,
 }) => {
   return (
     <div>
@@ -39,13 +43,14 @@ const CustomSelect: React.FC<selectProps> = ({
         id={id}
         options={options}
         defaultValue={defaultValue || "Select"}
+        value={value}
         onChange={onChange}
         name={name}
         onBlur={onBlur}
         isDisabled={disabled}
         styles={customStyles}
         menuPlacement={menuPlacement}
-        menuPortalTarget={document.body}
+        menuPortalTarget={menuPortal ? document.body : null}
       />
     </div>
   );

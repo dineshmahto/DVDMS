@@ -1,10 +1,8 @@
-import React, { useState, useMemo, useEffect, lazy, Suspense } from "react";
-import BasicButton from "../../../components/button/basicbutton";
-import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
+import React, { useState, useMemo, useEffect } from "react";
 import TableComponent from "../../../components/tables/datatable/tableComponent";
 import SearchField from "../../../components/search/search";
-import { faSearch, faAdd } from "@fortawesome/free-solid-svg-icons";
-import { TableBody, TableRow, TableCell, Paper } from "@mui/material";
+import { faSearch } from "@fortawesome/free-solid-svg-icons";
+import { TableBody, Paper } from "@mui/material";
 import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
 import { useDispatch, useSelector } from "react-redux";
 import toastMessage from "../../../common/toastmessage/toastmessage";
@@ -15,12 +13,17 @@ import StyledTableRow from "../../../components/tables/datatable/customTableRow"
 import StyledTableCell from "../../../components/tables/datatable/customTableCell";
 import TablePagination from "../../../components/tables/datatable/tablepagination";
 import EmptyRow from "../../../components/tables/datatable/emptyRow";
-const AcceptChallan = () => {
+import {
+  NETWORK_STATUS_CODE,
+  SORTINGORDER,
+} from "src/common/constant/constant";
+import handleSortingFunc from "src/components/tables/datatable/sortable";
+const ChallanList = () => {
   const dispatch = useDispatch();
-  const rateContractListResponse = useSelector(
-    (state) => state.admin.rateContractListResponse
+  const allChallanListResp = useSelector(
+    (state) => state?.receiving?.allChallanListResp
   );
-  console.log("rateContractListResponse", rateContractListResponse);
+  console.log("allChallanListResp", allChallanListResp);
   const [tableData, setTableData] = useState([]);
   const [sortedData, handleSorting] = useSortableTable();
   const [totalRows, setTotalRows] = useState(0);
@@ -31,8 +34,6 @@ const AcceptChallan = () => {
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
   const [loading, setLoading] = useState(true);
-  const [showDrugList, setShowDrugList] = useState(false);
-  const [modalData, setModalData] = useState([]);
   const columns = useMemo(() => [
     {
       id: "poNo",
@@ -94,13 +95,12 @@ const AcceptChallan = () => {
 
   const handleSortingChange = (accessor) => {
     const sortOrder =
-      accessor === sortField && order === "asc" ? "desc" : "asc";
+      accessor === sortField && order === SORTINGORDER.ASC
+        ? SORTINGORDER.DESC
+        : SORTINGORDER.ASC;
     setSortField(accessor);
     setOrder(sortOrder);
-
-    handleSorting(accessor, sortOrder);
-    console.log("sortedData", sortedData);
-    setTableData(sortedData);
+    setTableData(handleSortingFunc(accessor, sortOrder, tableData));
   };
 
   useEffect(() => {
@@ -120,37 +120,36 @@ const AcceptChallan = () => {
   }, [controller]);
 
   useEffect(() => {
-    if (rateContractListResponse && rateContractListResponse?.status === 200) {
+    if (
+      allChallanListResp &&
+      allChallanListResp?.status === NETWORK_STATUS_CODE?.SUCCESS
+    ) {
       if (
-        rateContractListResponse &&
-        rateContractListResponse?.data?.pageList &&
-        rateContractListResponse?.data?.pageList?.content
+        allChallanListResp &&
+        allChallanListResp?.data?.pageList &&
+        allChallanListResp?.data?.pageList?.content
       ) {
-        setTotalRows(rateContractListResponse?.data?.pageList?.totalElements);
-        setTableData(rateContractListResponse?.data?.pageList?.content);
+        setTotalRows(allChallanListResp?.data?.pageList?.totalElements);
+        setTableData(allChallanListResp?.data?.pageList?.content);
       }
 
       setLoading(false);
     } else if (
-      rateContractListResponse &&
-      rateContractListResponse?.status == 400
+      allChallanListResp &&
+      allChallanListResp?.status == NETWORK_STATUS_CODE?.BAD_REQUEST
     ) {
       setLoading(false);
-      toastMessage("Login Error", "Please enter valid ID", "error");
+      toastMessage("Challan List", allChallanListResp?.data?.message, "error");
     }
-  }, [rateContractListResponse]);
+  }, [allChallanListResp]);
 
   return (
     <>
       <div className="container-fluid">
         <div className="row mt-2">
           <div className="d-flex justify-content-start">
-            <p className="fs-6">RATE CONTRACT DESK</p>
+            <p className="fs-6">CHALLAN LIST</p>
           </div>
-        </div>
-
-        <div className="row mt-2">
-          <HorizonatalLine text="Rate Contract Management Desk" />
         </div>
 
         <div className="row mt-1 mb-2">
@@ -182,12 +181,7 @@ const AcceptChallan = () => {
                       return (
                         <StyledTableRow key={index}>
                           {columns.map((d, k) => {
-                            if (
-                              d.id === "contactTo" ||
-                              d.id === "contactFrom" ||
-                              d.id === "contactDate" ||
-                              d.id === "tenderDate"
-                            ) {
+                            if (d.id === "challanDate") {
                               return (
                                 <StyledTableCell key={k} padding="none">
                                   {moment(row[d.id]).format("DD/MM/YYYY")}
@@ -223,4 +217,4 @@ const AcceptChallan = () => {
   );
 };
 
-export default AcceptChallan;
+export default ChallanList;

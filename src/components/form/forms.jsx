@@ -7,6 +7,7 @@ import Basicbutton from "../button/basicbutton";
 import RadioCheckBox from "../switch/radiocheckbox";
 import "./form.css";
 import BasicInput from "../inputbox/floatlabel/basicInput";
+import { useMediaQuery } from "react-responsive";
 const FormikDynamic = ({
   initialValues,
   validationSchema,
@@ -15,6 +16,7 @@ const FormikDynamic = ({
   buttonText,
   handleCancel,
 }) => {
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 690px)" });
   return (
     <Formik
       validateOnMount
@@ -36,14 +38,18 @@ const FormikDynamic = ({
       }) => (
         <Form noValidate>
           <div className="row">
-            <div className="col-10 offset-1">
+            <div className="col-sm-12 col-md-10 col-lg-10 offset-md-1 offset-lg-1">
               {inputs.map(({ name, type, value, label, ...props }, index) => {
                 switch (type) {
                   case "select":
                     return (
                       <>
                         <div className="row mb-2" key={name + index}>
-                          <div className="col-3">
+                          <div
+                            className={`${
+                              isSmallScreen ? "col-sm-12" : "col-3"
+                            }`}
+                          >
                             <label
                               htmlFor={name}
                               className={`col-form-label ${
@@ -53,11 +59,16 @@ const FormikDynamic = ({
                               {label}
                             </label>
                           </div>
-                          <div className="col-6">
+                          <div
+                            className={`${
+                              isSmallScreen ? "col-sm-12" : "col-6"
+                            }`}
+                          >
                             <CustomSelect
                               id={name}
                               key={name}
                               name={name}
+                              menuPlacement="top"
                               defaultValue={props.option?.find(
                                 (c) => c.value === values[`${name}`]
                               )}
@@ -78,7 +89,11 @@ const FormikDynamic = ({
                               onBlur={setFieldTouched}
                             />
                           </div>
-                          <div className="col-3">
+                          <div
+                            className={`${
+                              isSmallScreen ? "col-sm-12" : "col-3"
+                            }`}
+                          >
                             {errors?.[`${name}`] && touched?.[`${name}`] ? (
                               <div className="text-danger float-end">
                                 {errors?.[`${name}`]}
@@ -93,7 +108,11 @@ const FormikDynamic = ({
                     return (
                       <>
                         <div className="row mb-2" key={name + index}>
-                          <div className="col-3">
+                          <div
+                            className={`${
+                              isSmallScreen ? "col-sm-12" : "col-3"
+                            }`}
+                          >
                             <label
                               htmlFor={name}
                               className={`col-form-label ${
@@ -103,7 +122,11 @@ const FormikDynamic = ({
                               {label} :
                             </label>
                           </div>
-                          <div className="col-6">
+                          <div
+                            className={`${
+                              isSmallScreen ? "col-sm-12" : "col-6"
+                            }`}
+                          >
                             <RadioCheckBox
                               key={name}
                               list={[
@@ -127,7 +150,11 @@ const FormikDynamic = ({
                                 setFieldValue(name, e.target?.value);
                               }}
                             />
-                            <div className="col-3">
+                            <div
+                              className={`${
+                                isSmallScreen ? "col-sm-12" : "col-3"
+                              }`}
+                            >
                               {errors?.[`${name}`] && touched?.[`${name}`] ? (
                                 <div className="text-danger float-end">
                                   {errors?.[`${name}`]}
@@ -144,7 +171,11 @@ const FormikDynamic = ({
                     return (
                       <>
                         <div className="row mb-2" key={name + index}>
-                          <div className="col-3">
+                          <div
+                            className={`${
+                              isSmallScreen ? "col-sm-12" : "col-3"
+                            }`}
+                          >
                             <label
                               htmlFor={name}
                               className={`col-form-label ${
@@ -154,7 +185,11 @@ const FormikDynamic = ({
                               {label} :
                             </label>
                           </div>
-                          <div className="col-6">
+                          <div
+                            className={`${
+                              isSmallScreen ? "col-sm-12" : "col-6"
+                            }`}
+                          >
                             <CustDatepicker
                               key={name}
                               value={values[`${name}`]}
@@ -176,7 +211,11 @@ const FormikDynamic = ({
                     return (
                       <>
                         <div className="row mb-2" key={name + index}>
-                          <div className="col-3">
+                          <div
+                            className={`${
+                              isSmallScreen ? "col-sm-12" : "col-3"
+                            }`}
+                          >
                             <label
                               htmlFor={name}
                               className={`col-form-label ${
@@ -186,7 +225,11 @@ const FormikDynamic = ({
                               {label}
                             </label>
                           </div>
-                          <div className="col-6">
+                          <div
+                            className={`${
+                              isSmallScreen ? "col-sm-12" : "col-6"
+                            }`}
+                          >
                             <BasicInput
                               floatinglabel={false ? false : undefined}
                               htmlFor={name}
@@ -202,7 +245,11 @@ const FormikDynamic = ({
                               placeholder={props?.placeholder}
                             />
                           </div>
-                          <div className="col-3">
+                          <div
+                            className={`${
+                              isSmallScreen ? "col-sm-12" : "col-3"
+                            }`}
+                          >
                             {errors?.[`${name}`] && touched?.[`${name}`] ? (
                               <div className="text-danger float-end">
                                 {errors?.[`${name}`]}

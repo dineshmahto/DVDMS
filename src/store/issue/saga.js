@@ -13,7 +13,9 @@ import {
   getReturnDeskListResponse,
   getSubStoreReturnListResponse,
   getThirdPartyReturnListResponse,
+  saveIssueAgainstIntentResponse,
   saveIssueToThirdPartyResponse,
+  saveOfflineIssueResponse,
 } from "./action";
 import {
   GET_ADD_MISCELLANOUS_LIST,
@@ -27,7 +29,9 @@ import {
   GET_RETURN_DESK_LIST,
   GET_SUB_STORE_RETURN_LIST,
   GET_THIRD_PARTY_RETURN,
+  SAVE_ISSUE_AGAINST_INTENT,
   SAVE_ISSUE_TO_THIRD_PARTY,
+  SAVE_OFFLINE_ISSUE,
 } from "./actionTypes";
 
 function* getIssueDeskList({ payload: pageDetails }) {
@@ -41,7 +45,11 @@ function* getIssueDeskList({ payload: pageDetails }) {
       }
     );
     console.log("Response", response);
-    yield put(getIssueDeskListResponse(response));
+    if (response?.code) {
+      yield put(getIssueDeskListResponse(response?.response));
+    } else {
+      yield put(getIssueDeskListResponse(response));
+    }
   } catch (error) {
     console.log("Error", error);
     put(getIssueDeskListResponse(error));
@@ -59,7 +67,7 @@ function* getReturnDeskList({ payload: pageDetails }) {
       }
     );
     console.log("Response", response);
-    yield put(getReturnDeskListResponse(response));
+    yield put(getReturnDeskListResponse(response?.response));
   } catch (error) {
     console.log("Error", error);
     put(getReturnDeskListResponse(error));
@@ -243,6 +251,38 @@ function* getIntentDrug({ payload: intentNo }) {
     put(getIntentDrugResponse(error));
   }
 }
+
+function* saveIssueAgainstIntent({ payload: intentDetails }) {
+  console.log("intentDetails", intentDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.SAVE_ISSUE_AGAINST_INTENT,
+      intentDetails
+    );
+    console.log("Response", response);
+    yield put(saveIssueAgainstIntentResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(saveIssueAgainstIntentResponse(error));
+  }
+}
+
+function* saveOfflineIssue({ payload: offlineIssueDetails }) {
+  console.log("offlineIssueDetails", offlineIssueDetails);
+  try {
+    const response = yield call(
+      Service.commonPost,
+      CONSTANTS.SAVE_OFFLINE_ISSUE,
+      offlineIssueDetails
+    );
+    console.log("Response", response);
+    yield put(saveOfflineIssueResponse(response));
+  } catch (error) {
+    console.log("Error", error);
+    put(saveIssueAgainstIntentResponse(error));
+  }
+}
 function* IssueReturnSaga() {
   yield takeEvery(GET_ISSUE_DESK_LIST, getIssueDeskList);
   yield takeEvery(GET_RETURN_DESK_LIST, getReturnDeskList);
@@ -258,5 +298,7 @@ function* IssueReturnSaga() {
 
   // POST
   yield takeEvery(SAVE_ISSUE_TO_THIRD_PARTY, saveIssueToThirdPartyDetails);
+  yield takeEvery(SAVE_ISSUE_AGAINST_INTENT, saveIssueAgainstIntent);
+  yield takeEvery(SAVE_OFFLINE_ISSUE, saveOfflineIssue);
 }
 export default IssueReturnSaga;

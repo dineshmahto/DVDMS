@@ -21,8 +21,12 @@ import {
   GET_SUB_STORE_RETURN_LIST_RESPONSE,
   GET_THIRD_PARTY_RETURN,
   GET_THIRD_PARTY_RETURN_RESPONSE,
+  SAVE_ISSUE_AGAINST_INTENT,
+  SAVE_ISSUE_AGAINST_INTENT_RESPONSE,
   SAVE_ISSUE_TO_THIRD_PARTY,
   SAVE_ISSUE_TO_THIRD_PARTY_RESPONSE,
+  SAVE_OFFLINE_ISSUE,
+  SAVE_OFFLINE_ISSUE_RESPONSE,
 } from "./actionTypes";
 
 export const getIssueDeskList = (pageDetails) => {
@@ -177,5 +181,33 @@ export const getIntentDrugResponse = (intentDrugResponse) => {
   return {
     type: GET_INTENT_DRUG_RESPONSE,
     payload: intentDrugResponse,
+  };
+};
+
+export const saveIssueAgainstIntent = (intentDetails) => {
+  return {
+    type: SAVE_ISSUE_AGAINST_INTENT,
+    payload: intentDetails,
+  };
+};
+
+export const saveIssueAgainstIntentResponse = (saveIssueIntentResp) => {
+  return {
+    type: SAVE_ISSUE_AGAINST_INTENT_RESPONSE,
+    payload: saveIssueIntentResp,
+  };
+};
+
+export const saveOfflineIssue = (offlineIssueDetails) => {
+  return {
+    type: SAVE_OFFLINE_ISSUE,
+    payload: offlineIssueDetails,
+  };
+};
+
+export const saveOfflineIssueResponse = (saveOfflineIssueResp) => {
+  return {
+    type: SAVE_OFFLINE_ISSUE_RESPONSE,
+    payload: saveOfflineIssueResp,
   };
 };

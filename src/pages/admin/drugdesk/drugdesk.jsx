@@ -39,6 +39,7 @@ const DrugDesk = () => {
   const isDesktopOrLaptop = useMediaQuery({
     query: "(min-width: 1224px)",
   });
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 600px)" });
   const isBigScreen = useMediaQuery({ query: "(min-width: 1824px)" });
   const isTabletOrMobile = useMediaQuery({ query: "(max-width: 1224px)" });
   const isPortrait = useMediaQuery({ query: "(orientation: portrait)" });
@@ -280,18 +281,22 @@ const DrugDesk = () => {
       <HorizonatalLine text="Drug Management Desk" />
 
       <div className="row ">
-        <div className="d-flex flex-row justify-content-between">
+        <div
+          className={`d-flex ${
+            isSmallScreen ? "flex-column" : "flex-row"
+          } justify-content-between`}
+        >
           <Basicbutton
             buttonText="Add New Drug"
             className={`btn btn-outline-primary ${
-              isDesktopOrLaptop ? "btn" : "btn-sm"
+              isSmallScreen ? "btn-sm" : "btn-md"
             } rounded-0 mb-2 me-1 mt-2 shadow-sm rounded`}
             onClick={() => {
               setShowAddDrugModal(true);
             }}
           />
           <SearchField
-            className="me-1 "
+            className={`me-1 ${isSmallScreen ? "mb-1" : "mb-0"}`}
             iconPosition="end"
             onChange={(e) => {
               if (e.target?.value != "") {

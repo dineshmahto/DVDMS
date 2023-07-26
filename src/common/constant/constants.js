@@ -155,6 +155,8 @@ export const GET_ADD_MISCELLANOUS_LIST =
 
 export const SAVE_ISSUE_TO_THIRD_PARTY = "issue/saveIssueToThirdParty";
 export const GET_INTENT_DRUG_BY_INTENTNO = "issue/getIssueToSubStore";
+export const SAVE_ISSUE_AGAINST_INTENT = "issue/issueAgainstIndent";
+export const SAVE_OFFLINE_ISSUE = "issue/offLineIssueAgainstIndent";
 // End of Issue Desk Module
 
 // Requisition Module
@@ -165,6 +167,9 @@ export const GET_TRANSFER_LIST = "pagination/getTransferLists";
 export const GET_RECEIVED_DRUG_LISTS = "pagination/getReceiveDrugList";
 
 export const REFRESH_TOKEN = "auth/refresh-token";
+
+//Supplier
+export const GET_PO_APPROVED_LIST = "pagination/getPoApprovedList";
 
 //reports
 

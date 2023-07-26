@@ -42,12 +42,13 @@ import {
   SERVER_STATUS_CODE,
   SORTINGORDER,
 } from "../../../common/constant/constant";
-
+import { useMediaQuery } from "react-responsive";
 const CreateUserModalForm = lazy(() => import("./createusermodalform"));
 const EditUserModalForm = lazy(() => import("./editusermodalform"));
 const UserActivityListModal = lazy(() => import("./useractivitylistmodal"));
 const AlertDialog = lazy(() => import("../../../components/dialog/dialog"));
 const UserDesk = () => {
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 600px)" });
   const userListResponse = useSelector(
     (state) => state?.admin?.userListResponse
   );
@@ -304,11 +305,17 @@ const UserDesk = () => {
         <HorizonatalLine text="User Management Desk" />
       </div>
       <div className="row">
-        <div className="d-flex flex-row justify-content-between">
+        <div
+          className={`d-flex ${
+            isSmallScreen ? "flex-column" : "flex-row"
+          } justify-content-between`}
+        >
           <Basicbutton
             buttonText="Add New User"
             outlineType={true}
-            className="btn btn-outline-primary btn-md rounded-0 mb-2 me-1 mt-2 shadow-sm rounded"
+            className={`btn btn-outline-primary btn-md rounded-0 mb-2 me-1 mt-2 shadow-sm rounded ${
+              isSmallScreen ? "btn-sm" : "btn-md"
+            }`}
             onClick={() => {
               setDropDownRoleList(roleList);
               setDropDownStoreList(storeList);
@@ -316,7 +323,7 @@ const UserDesk = () => {
             }}
           />
           <SearchField
-            className="me-1 "
+            className={`me-1 ${isSmallScreen ? "mb-1" : "mb-0"}`}
             iconPosition="end"
             iconName={faSearch}
             disabled={tableData.length === 0 ? true : false}

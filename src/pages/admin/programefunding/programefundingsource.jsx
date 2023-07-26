@@ -31,8 +31,8 @@ const ProgrameFundingSource = () => {
   const [transferableRoleList, setTransferableRoleList] = useState([]);
   const [programList, setProgramList] = useState([]);
   const finincialYear = [{ value: "2021-2022", label: "2021-22" }];
-  const [programId, setProgramId] = useState("");
-  const [year, setyear] = useState("");
+  const [programId, setProgramId] = useState(null);
+  const [year, setyear] = useState(null);
 
   const getProgranFundRes = useSelector(
     (state) => state?.admin?.programFundingSourceResponse
@@ -118,6 +118,8 @@ const ProgrameFundingSource = () => {
         createProgrmFundingResponse?.data?.status ===
         SERVER_STATUS_CODE?.SUCCESS
       ) {
+        setyear(null);
+        setProgramId(null);
         dispatch(getProgrameFundingSourceList());
         toastMessage(
           "Programme Funding Desk",
@@ -361,6 +363,10 @@ const ProgrameFundingSource = () => {
                     <div className="col-auto">
                       <CustomSelect
                         options={programList}
+                        defaultValue={programList?.find(
+                          (c) => c.value === programId
+                        )}
+                        value={programList?.find((c) => c.value === programId)}
                         onChange={(val) => {
                           setProgramId(val?.value);
                           dispatch(
@@ -377,7 +383,11 @@ const ProgrameFundingSource = () => {
                     <div className="col-auto">Financial Year</div>
                     <div className="col-auto">
                       <CustomSelect
+                        value={finincialYear?.find((c) => c.value === year)}
                         options={finincialYear}
+                        defaultValue={finincialYear?.find(
+                          (c) => c.value === year
+                        )}
                         onChange={(val) => {
                           setyear(val?.value);
                         }}
@@ -476,10 +486,26 @@ const ProgrameFundingSource = () => {
                           />
                         }
                         onClick={() => {
-                          if (selectedItem && selectedItem?.length === 0) {
+                          if (programId === "" || programId === null) {
                             toastMessage(
                               "PROGRAMME FUNDING",
-                              "please map the Funding Source list"
+                              "Select the Programme Name",
+                              "error"
+                            );
+                          } else if (year === "" || year === null) {
+                            toastMessage(
+                              "PROGRAMME FUNDING",
+                              "Select the Financial Year",
+                              "error"
+                            );
+                          } else if (
+                            selectedItem &&
+                            selectedItem?.length === 0
+                          ) {
+                            toastMessage(
+                              "PROGRAMME FUNDING",
+                              "please map the Funding Source list",
+                              "error"
                             );
                           } else {
                             const cloneData = [...selectedItem];

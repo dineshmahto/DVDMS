@@ -189,7 +189,18 @@ const ChallanList = lazy(() =>
 const ReceivedDrug = lazy(() =>
   import("./pages/receiving/receiveofdrugs/receiveofdrug")
 );
-
+const ReceivePoChallan = lazy(() =>
+  import("./pages/receiving/receivepochallan/receivepochallan")
+);
+const ReceiveChallanForm = lazy(() =>
+  import("./pages/receiving/receivepochallan/receivechallan")
+);
+// End of Receiving
+// Supplier
+const SupplierPoApporovedList = lazy(() =>
+  import("./pages/supplier/supplierList")
+);
+const AcceptanceForm = lazy(() => import("./pages/supplier/acceptanceForm"));
 const DynamicRow = lazy(() => import("./pages/stock/stockEntry/stock"));
 function App() {
   return (
@@ -681,7 +692,22 @@ function App() {
               {/* Reveiving Module */}
               <Route path="openChallanDesk" element={<ChallanList />} />
               <Route path="openIndentReceiveDesk" element={<ReceivedDrug />} />
+              <Route
+                path="updateChallanStatus"
+                element={<ReceivePoChallan />}
+              />
+              <Route
+                path="receiveChallanForm"
+                element={<ReceiveChallanForm />}
+              />
               {/* End of Receiving Module */}
+
+              {/* start of Supplier module */}
+              <Route
+                path="supplierInterface"
+                element={<SupplierPoApporovedList />}
+              />
+              {/* End of Supplier */}
               <Route path="intent" element={<OpenIntentDesk />} />
               <Route path="pdf" element={<Pdf />} />
               <Route path="csv" element={<Csv />} />

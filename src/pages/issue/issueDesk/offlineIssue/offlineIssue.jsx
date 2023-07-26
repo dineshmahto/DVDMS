@@ -16,6 +16,8 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   getOfflineIssueList,
   getOfflineIssueListResponse,
+  saveOfflineIssue,
+  saveOfflineIssueResponse,
 } from "../../../../store/issue/action";
 import { useNavigate } from "react-router-dom";
 import Basicbutton from "../../../../components/button/basicbutton";
@@ -29,6 +31,11 @@ import NormalTableRow from "../../../../components/tables/datatable/normalTableR
 import CustDatepicker from "../../../../components/datepicker/custDatepicker";
 import toastMessage from "../../../../common/toastmessage/toastmessage";
 import dayjs from "dayjs";
+import {
+  NETWORK_STATUS_CODE,
+  SERVER_STATUS_CODE,
+} from "src/common/constant/constant";
+import BasicTextAreaField from "src/components/inputbox/textarea";
 const IssueDrugModal = lazy(() =>
   import("../issueToThirdParty/issuedrugmodal")
 );
@@ -38,6 +45,10 @@ const OfflineIssue = () => {
   const offlineIssueListResponse = useSelector(
     (state) => state?.issuereturn?.offlineIssueListResponse
   );
+  const saveOfflineIssueResp = useSelector(
+    (state) => state?.issuereturn?.saveOfflineIssueResp
+  );
+  console.log("saveOfflineIssueResp", saveOfflineIssueResp);
   console.log("offlineIssueListResponse", offlineIssueListResponse);
   const [sortField, setSortField] = useState("");
   const [order, setOrder] = useState("asc");
@@ -56,6 +67,7 @@ const OfflineIssue = () => {
   const [submitData, setSubmitData] = useState({
     issueDate: null,
     remarks: "",
+    subStoreId: null,
   });
   const columns = useMemo(() => [
     {
@@ -195,7 +207,7 @@ const OfflineIssue = () => {
     setShowAddDrugModal(false);
   };
   useEffect(() => {
-    setLoading(false);
+    setLoading(true);
 
     setTimeout(() => {
       dispatch(
@@ -204,7 +216,7 @@ const OfflineIssue = () => {
           pageSize: controller.rowsPerPage,
         })
       );
-    }, 10000);
+    }, 1000);
     return () => {
       clearTimeout();
       dispatch(getOfflineIssueListResponse(""));
@@ -213,12 +225,45 @@ const OfflineIssue = () => {
 
   useEffect(() => {
     if (offlineIssueListResponse && offlineIssueListResponse?.status === 200) {
+      setLoading(false);
       setTableData(offlineIssueListResponse?.data?.pageList?.content);
       setTotalRows(offlineIssueListResponse?.data?.pageList?.totalElements);
       setSubStoreList(offlineIssueListResponse?.data?.subStoreList);
       setLoading(false);
     }
   }, [offlineIssueListResponse]);
+
+  useEffect(() => {
+    if (
+      saveOfflineIssueResp &&
+      saveOfflineIssueResp?.status === NETWORK_STATUS_CODE?.CREATED_SUCCESSFULLY
+    ) {
+      if (saveOfflineIssueResp?.data?.status === SERVER_STATUS_CODE?.SUCCESS) {
+        toastMessage(
+          "OFFLINE ISSUE",
+          saveOfflineIssueResp?.data?.message,
+          "success"
+        );
+        dispatch(saveOfflineIssueResponse(""));
+        navigate("/openIssueDesk");
+      } else if (
+        saveOfflineIssueResp?.data?.status === SERVER_STATUS_CODE?.FAILED
+      ) {
+        toastMessage(
+          "OFFLINE ISSUE",
+          saveOfflineIssueResp?.data?.message,
+          "error"
+        );
+        dispatch(saveOfflineIssueResponse(""));
+      }
+    } else if (
+      saveOfflineIssueResp &&
+      saveOfflineIssueResp?.status === NETWORK_STATUS_CODE?.INTERNAL_ERROR
+    ) {
+      toastMessage("OFFLINE ISSUE", "Something went Wrong", "error");
+      dispatch(saveOfflineIssueResponse(""));
+    }
+  }, [saveOfflineIssueResp]);
   const formatDate = (date) => {
     return dayjs(date).format("MM/DD/YYYY");
   };
@@ -289,156 +334,203 @@ const OfflineIssue = () => {
           <p className="fs-6">OFFLINE ISSUE</p>
         </div>
       </div>
-      <div className="row d-flex justify-content-start">
-        <div className="col-12">
-          <div className="row align-items-center">
-            <div className="col-auto">
-              <label>Your Store</label>
-            </div>
-            <div className="col-auto">
-              <CustomSelect
-                defaultValue={{
-                  value: "statewarehouse",
-                  label: "STATE WAREHOUSE",
-                }}
-                options={[
-                  { value: "statewarehouse", label: "STATE WAREHOUSE" },
-                ]}
-              />
-            </div>
-
-            <div className="col-auto">
-              <label>Sub Store</label>
-            </div>
-            <div className="col-auto">
-              <CustomSelect options={subStoreList} />
-            </div>
+      <div className="row">
+        <div className="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+          <div className="col-auto">
+            <label>Your Store</label>
+          </div>
+          <div className="col-auto">
+            <CustomSelect
+              defaultValue={{
+                value: "statewarehouse",
+                label: "STATE WAREHOUSE",
+              }}
+              options={[{ value: "statewarehouse", label: "STATE WAREHOUSE" }]}
+            />
+          </div>
+        </div>
+        <div className="col-sm-12 col-md-6 col-lg-6 col-xl-6">
+          <div className="col-auto">
+            <label>Sub Store</label>
+          </div>
+          <div className="col-auto">
+            <CustomSelect
+              options={subStoreList}
+              value={
+                subStoreList &&
+                subStoreList?.find((c) => c.value === submitData?.subStoreId)
+              }
+              onChange={(val) => {
+                setSubmitData({
+                  ...submitData,
+                  subStoreId: val?.value,
+                });
+              }}
+            />
           </div>
         </div>
       </div>
+      <div className="row d-flex justify-content-start">
+        <div className="col-12 align-items-center"></div>
+      </div>
       <div className="row">
         {displayData && displayData.length > 0 ? (
-          <Paper>
-            <TableComponent
-              columns={selectedColumns}
-              sortField={sortField}
-              order={order}
-              paginationRequired={true}
-              handleSorting={handleSortingChange}
-            >
-              <TableBody>
-                {displayData &&
-                  displayData?.length > 0 &&
-                  displayData?.map((row, index) => {
-                    return (
-                      <NormalTableRow key={row.id}>
-                        {selectedColumns.map((d, k) => {
-                          if (d.id === "action") {
+          <>
+            <HorizonatalLine text="Selected Drug" />
+            <Paper elevation={3}>
+              <TableComponent
+                columns={selectedColumns}
+                sortField={sortField}
+                order={order}
+                paginationRequired={true}
+                handleSorting={handleSortingChange}
+              >
+                <TableBody>
+                  {displayData &&
+                    displayData?.length > 0 &&
+                    displayData?.map((row, index) => {
+                      return (
+                        <NormalTableRow key={row.id}>
+                          {selectedColumns.map((d, k) => {
+                            if (d.id === "action") {
+                              return (
+                                <StyledTableCell
+                                  padding="none"
+                                  style={{ cursor: "pointer" }}
+                                >
+                                  <FontAwesomeIcon
+                                    icon={faCircleXmark}
+                                    onClick={() =>
+                                      handleRemoveSpecificRow(index)
+                                    }
+                                    size="2x"
+                                  />
+                                </StyledTableCell>
+                              );
+                            }
                             return (
                               <StyledTableCell
+                                key={k}
                                 padding="none"
-                                style={{ cursor: "pointer" }}
+                                style={{
+                                  padding: "4px",
+                                  fontSize: "0.7rem",
+                                }}
                               >
-                                <FontAwesomeIcon
-                                  icon={faCircleXmark}
-                                  onClick={() => handleRemoveSpecificRow(index)}
-                                  size="2x"
-                                />
+                                {row[d.id]}
                               </StyledTableCell>
                             );
-                          }
-                          return (
-                            <StyledTableCell
-                              key={k}
-                              padding="none"
-                              style={{
-                                padding: "4px",
-                                fontSize: "0.7rem",
-                              }}
-                            >
-                              {row[d.id]}
-                            </StyledTableCell>
-                          );
-                        })}
-                      </NormalTableRow>
-                    );
-                  })}
-              </TableBody>
-            </TableComponent>
+                          })}
+                        </NormalTableRow>
+                      );
+                    })}
+                </TableBody>
+              </TableComponent>
 
-            <div className="col-12 mb-1">
-              <div className="row mb-2">
-                <div className="col-4">
-                  <label className="form-label">Issue Date</label>
-                  <CustDatepicker
-                    value={submitData?.issueDate}
-                    name="issueDate"
-                    inputFormat="DD/MM/YYYY"
-                    onChange={(newValue) => {
-                      console.log("name", newValue);
+              <div className="col-12 mb-1">
+                <div className="row mb-2">
+                  <div className="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                    <div className="col-auto">
+                      <label className="form-label">Issue Date</label>
+                    </div>
+                    <div className="col-auto">
+                      <CustDatepicker
+                        value={submitData?.issueDate}
+                        name="issueDate"
+                        inputFormat="DD/MM/YYYY"
+                        onChange={(newValue) => {
+                          console.log("name", newValue);
+                          setSubmitData({
+                            ...submitData,
+                            issueDate: formatDate(newValue),
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-sm-12 col-md-4 col-lg-4">
+                    <div className="col-auto">
+                      <label className="form-label">
+                        Office Intent/ Letter No
+                      </label>
+                    </div>
+                    <div className="col-auto">
+                      <BasicTextAreaField
+                        className="form-control shadow-none"
+                        rows="3"
+                        onChange={(e) => {
+                          setSubmitData({
+                            ...submitData,
+                            letterNo: e.target?.value,
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="col-sm-12 col-md-4 col-lg-4 col-xl-4">
+                    <div className="col-auto">
+                      <label htmlFor="remarks" className="form-label">
+                        Remarks
+                      </label>
+                    </div>
+                    <div className="col-auto">
+                      <BasicTextAreaField
+                        name="remarks"
+                        className="form-control shadow-none"
+                        rows="3"
+                        id="remarks"
+                        onChange={(e) => {
+                          setSubmitData({
+                            ...submitData,
+                            remarks: e.target.value.trim(),
+                          });
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="d-flex justify-content-center">
+                <div className="me-1">
+                  <Basicbutton
+                    className="primary rounded-0"
+                    buttonText="save"
+                    icon={
+                      <FontAwesomeIcon icon={faFloppyDisk} className="me-1" />
+                    }
+                    onClick={() => {
+                      if (submitData?.subStoreId === null) {
+                        toastMessage(
+                          "Offline Issue",
+                          "Select the Sub Store",
+                          "error"
+                        );
+                      } else if (submitData?.issueDate === null) {
+                        toastMessage(
+                          "Offline Issue",
+                          "Select the Issue Date",
+                          "error"
+                        );
+                      } else if (submitData?.remarks === "") {
+                        toastMessage(
+                          "Offline Issue",
+                          "Enter the Remarks",
+                          "error"
+                        );
+                      } else {
+                        let finalData = {
+                          list: [...displayData],
+                          ...submitData,
+                        };
+                        console.log("finalData", finalData);
+                        dispatch(saveOfflineIssue(finalData));
+                      }
                     }}
                   />
                 </div>
-                <div className="col-8">
-                  <label htmlFor="remarks" className="form-label">
-                    Remarks
-                  </label>
-                  <textarea
-                    name="remarks"
-                    className="form-control shadow-none"
-                    rows="3"
-                    id="remarks"
-                    onChange={(e) => {}}
-                  ></textarea>
-                </div>
               </div>
-            </div>
-            <div className="d-flex justify-content-center">
-              <div className="me-1">
-                <Basicbutton
-                  className="primary rounded-0"
-                  buttonText="save"
-                  icon={
-                    <FontAwesomeIcon icon={faFloppyDisk} className="me-1" />
-                  }
-                  onClick={() => {
-                    if (
-                      submitData?.remarks === "" ||
-                      submitData?.issueDate === null ||
-                      submitData?.stockId === ""
-                    ) {
-                      toastMessage(
-                        "Third Party Issue",
-                        "provide all the fields",
-                        "error"
-                      );
-                    } else {
-                      const cloneData = [...displayData];
-                      console.log("cloneData", cloneData);
-                      let programId = [];
-                      cloneData &&
-                        cloneData.map(({ stockId, issueQty }) => {
-                          let ele = {};
-                          ele["stockId"] = stockId;
-                          ele["issueQty"] = issueQty;
-                          programId.push(ele);
-                          return stockId;
-                        });
-
-                      // dispatch(
-                      //   saveIssueToThirdParty({
-                      //     thirdPartyId: submitData?.thirdPartyId,
-                      //     issueDate: formatDate(submitData?.issueDate),
-                      //     remarks: submitData?.remarks,
-                      //     list: programId,
-                      //   })
-                      // );
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          </Paper>
+            </Paper>
+          </>
         ) : null}
       </div>
       <div className="row mt-2">

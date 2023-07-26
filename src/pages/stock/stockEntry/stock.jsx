@@ -416,6 +416,7 @@ const Stock = () => {
                                     );
                                   }}
                                   id={row.id + row[d.id]}
+                                  menuPortal={true}
                                 />
                               </TableCell>
                             );

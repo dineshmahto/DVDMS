@@ -21,8 +21,12 @@ import {
   GET_SUB_STORE_RETURN_LIST_RESPONSE,
   GET_THIRD_PARTY_RETURN,
   GET_THIRD_PARTY_RETURN_RESPONSE,
+  SAVE_ISSUE_AGAINST_INTENT,
+  SAVE_ISSUE_AGAINST_INTENT_RESPONSE,
   SAVE_ISSUE_TO_THIRD_PARTY,
   SAVE_ISSUE_TO_THIRD_PARTY_RESPONSE,
+  SAVE_OFFLINE_ISSUE,
+  SAVE_OFFLINE_ISSUE_RESPONSE,
 } from "./actionTypes";
 
 const initialState = {
@@ -167,6 +171,29 @@ const issueReturn = (state = initialState, action) => {
       state = {
         ...state,
         intentDrugResponse: action?.payload,
+      };
+      break;
+
+    case SAVE_ISSUE_AGAINST_INTENT:
+      state = {
+        ...state,
+      };
+      break;
+    case SAVE_ISSUE_AGAINST_INTENT_RESPONSE:
+      state = {
+        ...state,
+        saveIssueIntentResp: action?.payload,
+      };
+      break;
+    case SAVE_OFFLINE_ISSUE:
+      state = {
+        ...state,
+      };
+      break;
+    case SAVE_OFFLINE_ISSUE_RESPONSE:
+      state = {
+        ...state,
+        saveOfflineIssueResp: action?.payload,
       };
       break;
     default:

@@ -138,7 +138,10 @@ const Sidenav = () => {
                             activeMenuItem.menu1 === el?.name ? "active-me" : ""
                           }`}
                           to={{ pathname: `/${el?.url}` }}
-                          onClick={() =>
+                          onClick={() => {
+                            document.body.classList.toggle(
+                              "sb-sidenav-toggled"
+                            );
                             handleMenuItemClick(
                               el?.name,
                               true,
@@ -146,8 +149,8 @@ const Sidenav = () => {
                               false,
                               "",
                               false
-                            )
-                          }
+                            );
+                          }}
                         >
                           <div className="sb-nav-link-icon">
                             <i className={`fas ${el?.iconName}`}></i>
@@ -204,7 +207,10 @@ const Sidenav = () => {
                                             : ""
                                         }`}
                                         to={{ pathname: `${ele?.url}` }}
-                                        onClick={() =>
+                                        onClick={() => {
+                                          document.body.classList.toggle(
+                                            "sb-sidenav-toggled"
+                                          );
                                           handleMenuItemClick(
                                             el?.module,
                                             true,
@@ -212,8 +218,8 @@ const Sidenav = () => {
                                             true,
                                             ele?.url,
                                             true
-                                          )
-                                        }
+                                          );
+                                        }}
                                       >
                                         {ele?.displayName}
                                       </Link>
@@ -270,7 +276,10 @@ const Sidenav = () => {
                                                     to={{
                                                       pathname: `${subItem?.url}`,
                                                     }}
-                                                    onClick={() =>
+                                                    onClick={() => {
+                                                      document.body.classList.toggle(
+                                                        "sb-sidenav-toggled"
+                                                      );
                                                       handleMenuItemClick(
                                                         el?.module,
                                                         true,
@@ -278,8 +287,8 @@ const Sidenav = () => {
                                                         true,
                                                         subItem?.url,
                                                         true
-                                                      )
-                                                    }
+                                                      );
+                                                    }}
                                                   >
                                                     {subItem?.displayName}
                                                   </Link>

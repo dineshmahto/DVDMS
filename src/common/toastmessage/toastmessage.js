@@ -1,6 +1,12 @@
 import { toast } from "react-toastify";
 
-const toastMessage = (title, description, type = "default", delay = 5000) => {
+const toastMessage = (
+  title,
+  description,
+  type = "default",
+  position = "bottom-right",
+  delay = 5000
+) => {
   switch (type) {
     case "error":
       toast.error(
@@ -9,7 +15,7 @@ const toastMessage = (title, description, type = "default", delay = 5000) => {
           <br /> {description}
         </div>,
         {
-          position: toast.POSITION.BOTTOM_RIGHT,
+          position: position,
           autoClose: delay,
         }
       );
@@ -21,7 +27,7 @@ const toastMessage = (title, description, type = "default", delay = 5000) => {
           <br /> {description}
         </div>,
         {
-          position: toast.POSITION.BOTTOM_RIGHT,
+          position: position,
           autoClose: delay,
         }
       );
@@ -33,7 +39,7 @@ const toastMessage = (title, description, type = "default", delay = 5000) => {
           <br /> {description}
         </div>,
         {
-          position: toast.POSITION.BOTTOM_RIGHT,
+          position: position,
           autoClose: delay,
         }
       );

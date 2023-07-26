@@ -16,12 +16,14 @@ import {
   updateProgramResponse,
 } from "../../../store/admin/action";
 import dayjs from "dayjs";
+import { useMediaQuery } from "react-responsive";
 const EditProgramDeskForm = ({
   openEditProgrmModal,
   handleCloseEditProgrmModal,
   totalDrugList,
   editData,
 }) => {
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 600px)" });
   const dispatch = useDispatch();
   const updateProgramResp = useSelector(
     (state) => state?.admin?.updateProgramResp
@@ -401,12 +403,20 @@ const EditProgramDeskForm = ({
                           return (
                             <>
                               <div className="row mb-2">
-                                <div className="col-3">
+                                <div
+                                  className={`${
+                                    isSmallScreen ? "col-sm-12" : " col-3"
+                                  }`}
+                                >
                                   <label htmlFor={name} class="col-form-label">
                                     {label}
                                   </label>
                                 </div>
-                                <div className="col-6">
+                                <div
+                                  className={`${
+                                    isSmallScreen ? "col-sm-12" : " col-6"
+                                  }`}
+                                >
                                   <CustomSelect
                                     id={name}
                                     key={name}
@@ -434,7 +444,11 @@ const EditProgramDeskForm = ({
                                     onBlur={setFieldTouched}
                                   />
                                 </div>
-                                <div className="col-3">
+                                <div
+                                  className={`${
+                                    isSmallScreen ? "col-sm-12" : " col-3"
+                                  }`}
+                                >
                                   {errors.name && touched.name ? (
                                     <div className="text-danger float-end">
                                       {errors.name}
@@ -448,12 +462,20 @@ const EditProgramDeskForm = ({
                           return (
                             <>
                               <div className="row mb-2">
-                                <div className="col-3">
+                                <div
+                                  className={`${
+                                    isSmallScreen ? "col-sm-12" : " col-3"
+                                  }`}
+                                >
                                   <label htmlFor={name} class="col-form-label">
                                     {label} :
                                   </label>
                                 </div>
-                                <div className="col-6">
+                                <div
+                                  className={`${
+                                    isSmallScreen ? "col-sm-12" : " col-6"
+                                  }`}
+                                >
                                   <CustDatepicker
                                     value={values[`${name}`]}
                                     name={name}
@@ -476,7 +498,11 @@ const EditProgramDeskForm = ({
                           return (
                             <>
                               <div className="row mb-2">
-                                <div className="col-3">
+                                <div
+                                  className={`${
+                                    isSmallScreen ? "col-sm-12" : " col-3"
+                                  }`}
+                                >
                                   <label
                                     htmlFor={name}
                                     className="col-form-label"
@@ -484,7 +510,11 @@ const EditProgramDeskForm = ({
                                     {label}
                                   </label>
                                 </div>
-                                <div className="col-6">
+                                <div
+                                  className={`${
+                                    isSmallScreen ? "col-sm-12" : " col-6"
+                                  }`}
+                                >
                                   <Field
                                     className="form-control shadow-none"
                                     value={values[`${name}`]}
@@ -496,7 +526,11 @@ const EditProgramDeskForm = ({
                                     placeholder={props?.placeholder}
                                   />
                                 </div>
-                                <div className="col-3">
+                                <div
+                                  className={`${
+                                    isSmallScreen ? "col-sm-12" : " col-3"
+                                  }`}
+                                >
                                   {errors?.name && touched?.name ? (
                                     <div className="text-danger float-end">
                                       {errors?.name}
@@ -510,70 +544,68 @@ const EditProgramDeskForm = ({
                     }
                   )}
 
-                  <div className="row m-1">
-                    <TransferComponent
-                      apiData={transferableRoleList}
-                      activeIndicies={activeIndicies}
-                      handleMoveSelectedItemToLeft={() => {
-                        handleMoveSelectedItemToLeft(
-                          selectItemActiveIndices,
-                          rightTempArray,
-                          setFirstClick,
-                          selectedItem,
-                          setSelectedItemActiveIndices,
-                          tempArray,
-                          setTempArray,
-                          transferableRoleList,
-                          setTransferableRoleList,
-                          setSelectedItem,
-                          setRightTempArray,
-                          setActiveIndicies,
-                          activeIndicies,
-                          copyData
-                        );
-                      }}
-                      handleMoveSelectedItemToRight={() => {
-                        handleMoveSelectedItemToRight(
-                          tempArray,
-                          setFirstClick,
-                          copyData,
-                          setSelectedItemActiveIndices,
-                          setRightTempArray,
-                          setActiveIndicies,
-                          activeIndicies,
-                          setSelectedItem,
-                          setTransferableRoleList
-                        );
-                      }}
-                      handleShiftAllElementToRight={() => {
-                        handleShiftAllElementToRight(
-                          copyData,
-                          setFirstClick,
-                          setSelectedItemActiveIndices,
-                          setSelectedItem,
-                          setRightTempArray,
-                          setTempArray,
-                          setTransferableRoleList
-                        );
-                      }}
-                      handleShiftAllElementToLeft={() => {
-                        handleShiftAllElementToLeft(
-                          copyData,
-                          setSelectedItemActiveIndices,
-                          setTransferableRoleList,
-                          setRightTempArray,
-                          setTempArray,
-                          setSelectedItem,
-                          setActiveIndicies,
-                          activeIndicies
-                        );
-                      }}
-                      handleLeftListItemClick={handleLeftListItemClick}
-                      handleRightListItemClick={handleRightListItemClick}
-                      selectedItem={selectedItem}
-                      selectItemActiveIndices={selectItemActiveIndices}
-                    />
-                  </div>
+                  <TransferComponent
+                    apiData={transferableRoleList}
+                    activeIndicies={activeIndicies}
+                    handleMoveSelectedItemToLeft={() => {
+                      handleMoveSelectedItemToLeft(
+                        selectItemActiveIndices,
+                        rightTempArray,
+                        setFirstClick,
+                        selectedItem,
+                        setSelectedItemActiveIndices,
+                        tempArray,
+                        setTempArray,
+                        transferableRoleList,
+                        setTransferableRoleList,
+                        setSelectedItem,
+                        setRightTempArray,
+                        setActiveIndicies,
+                        activeIndicies,
+                        copyData
+                      );
+                    }}
+                    handleMoveSelectedItemToRight={() => {
+                      handleMoveSelectedItemToRight(
+                        tempArray,
+                        setFirstClick,
+                        copyData,
+                        setSelectedItemActiveIndices,
+                        setRightTempArray,
+                        setActiveIndicies,
+                        activeIndicies,
+                        setSelectedItem,
+                        setTransferableRoleList
+                      );
+                    }}
+                    handleShiftAllElementToRight={() => {
+                      handleShiftAllElementToRight(
+                        copyData,
+                        setFirstClick,
+                        setSelectedItemActiveIndices,
+                        setSelectedItem,
+                        setRightTempArray,
+                        setTempArray,
+                        setTransferableRoleList
+                      );
+                    }}
+                    handleShiftAllElementToLeft={() => {
+                      handleShiftAllElementToLeft(
+                        copyData,
+                        setSelectedItemActiveIndices,
+                        setTransferableRoleList,
+                        setRightTempArray,
+                        setTempArray,
+                        setSelectedItem,
+                        setActiveIndicies,
+                        activeIndicies
+                      );
+                    }}
+                    handleLeftListItemClick={handleLeftListItemClick}
+                    handleRightListItemClick={handleRightListItemClick}
+                    selectedItem={selectedItem}
+                    selectItemActiveIndices={selectItemActiveIndices}
+                  />
 
                   <div className="row mt-1  mb-2">
                     <div className="col-12">

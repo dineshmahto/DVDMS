@@ -1,14 +1,11 @@
 import React, { useState, useMemo, useEffect, Suspense, lazy } from "react";
-import BasicButton from "../../../components/button/basicbutton";
-import HorizonatalLine from "../../../components/horizontalLine/horizonatalLine";
-import SelectOption from "../../../components/option/option";
-import TableComponent from "../../../components/tables/datatable/tableComponent";
-import SearchField from "../../../components/search/search";
+import Basicbutton from "src/components/button/basicbutton";
+import HorizonatalLine from "src/components/horizontalLine/horizonatalLine";
+import TableComponent from "src/components/tables/datatable/tableComponent";
+import SearchField from "src/components/search/search";
 import {
   faSearch,
-  faAdd,
   faXmark,
-  faPenToSquare,
   faChevronDown,
   faChevronUp,
 } from "@fortawesome/free-solid-svg-icons";
@@ -25,40 +22,41 @@ import IconButton from "@mui/material/IconButton";
 import Box from "@mui/material/Box";
 import Collapse from "@mui/material/Collapse";
 import Typography from "@mui/material/Typography";
-import { useSortableTable } from "../../../components/tables/datatable/useSortableTable";
+
 import { useDispatch, useSelector } from "react-redux";
-import toastMessage from "../../../common/toastmessage/toastmessage";
-import { getPurchaseOrderList } from "../../../store/admin/action";
-import moment from "moment";
-import TableRowLaoder from "../../../components/tables/datatable/tableRowLaoder";
-import EmptyRow from "../../../components/tables/datatable/emptyRow";
-import TablePagination from "../../../components/tables/datatable/tablepagination";
-import StyledTableRow from "../../../components/tables/datatable/customTableRow";
-import StyledTableCell from "../../../components/tables/datatable/customTableCell";
+import toastMessage from "src/common/toastmessage/toastmessage";
+
+import TableRowLaoder from "src/components/tables/datatable/tableRowLaoder";
+import EmptyRow from "src/components/tables/datatable/emptyRow";
+import TablePagination from "src/components/tables/datatable/tablepagination";
+import StyledTableRow from "src/components/tables/datatable/customTableRow";
+import StyledTableCell from "src/components/tables/datatable/customTableCell";
 import {
   DELETE_MESSAGE_DESCRIPTION,
   NETWORK_STATUS_CODE,
   SERVER_STATUS_CODE,
   SORTINGORDER,
-} from "../../../common/constant/constant";
-import Basicbutton from "../../../components/button/basicbutton";
-import { cancelPo } from "../../../store/ordermanagement/action";
-import handleSortingFunc from "../../../components/tables/datatable/sortable";
+} from "../../common/constant/constant";
+
+import handleSortingFunc from "src/components/tables/datatable/sortable";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import CustomSelect from "src/components/select/customSelect";
-const AlertDialog = lazy(() => import("../../../components/dialog/dialog"));
-const PurchaseOrderList = () => {
+import { getPoApprovedList } from "src/store/supplier/action";
+import { useNavigate } from "react-router-dom";
+import moment from "moment";
+const AlertDialog = lazy(() => import("../../components/dialog/dialog"));
+const SupplierList = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const purchaseOrderListResponse = useSelector(
+  const poApprovedListResp = useSelector(
     (state) => state.admin.purchaseOrderListResponse
   );
   const cancelPoResp = useSelector(
-    (state) => state?.ordermanaagement?.cancelPoResp
+    (state) => state?.supplier?.poApprovedListResp
   );
-  console.log("purchaseOrderListResponse", purchaseOrderListResponse);
+  console.log("poApprovedListResp", poApprovedListResp);
   console.log("cancelPores", cancelPoResp);
   const [tableData, setTableData] = useState([]);
-  const [sortedData, handleSorting] = useSortableTable();
   const [totalRows, setTotalRows] = useState(0);
   const [controller, setController] = useState({
     page: 0,
@@ -84,22 +82,9 @@ const PurchaseOrderList = () => {
       name: "SL.NO",
       sortable: true,
     },
-
-    {
-      id: "poRef",
-      name: "PO.NO",
-      sortable: true,
-    },
-
     {
       id: "poDate",
       name: "PO DATE",
-      sortable: true,
-    },
-
-    {
-      id: "supplierName",
-      name: "SUPPLIER NO",
       sortable: true,
     },
     {
@@ -189,8 +174,8 @@ const PurchaseOrderList = () => {
     if (isApiSubcribed) {
       setLoading(true);
       dispatch(
-        getPurchaseOrderList({
-          pageNumber: controller.page,
+        getPoApprovedList({
+          pageNumber: 0,
           pageSize: controller.rowsPerPage,
         })
       );
@@ -202,70 +187,27 @@ const PurchaseOrderList = () => {
 
   useEffect(() => {
     if (
-      purchaseOrderListResponse &&
-      purchaseOrderListResponse?.status === NETWORK_STATUS_CODE.SUCCESS
+      poApprovedListResp &&
+      poApprovedListResp?.status === NETWORK_STATUS_CODE.SUCCESS
     ) {
-      setTotalRows(purchaseOrderListResponse?.data?.pageList?.totalElements);
-      setTableData(purchaseOrderListResponse?.data?.pageList?.content);
+      setTotalRows(poApprovedListResp?.data?.pageList?.totalElements);
+      setTableData(poApprovedListResp?.data?.pageList?.content);
       setLoading(false);
     } else if (
-      purchaseOrderListResponse &&
-      purchaseOrderListResponse?.status === NETWORK_STATUS_CODE?.INTERNAL_ERROR
+      poApprovedListResp &&
+      poApprovedListResp?.status === NETWORK_STATUS_CODE?.INTERNAL_ERROR
     ) {
       setLoading(false);
-      toastMessage("Purchase Order List", "Something went wrong", "error");
+      toastMessage("Supplier List", "Something went wrong", "error");
     }
-  }, [purchaseOrderListResponse]);
+  }, [poApprovedListResp]);
 
-  useEffect(() => {
-    if (
-      cancelPoResp &&
-      cancelPoResp?.status === NETWORK_STATUS_CODE.CREATED_SUCCESSFULLY
-    ) {
-      if (cancelPoResp?.data?.status === SERVER_STATUS_CODE.SUCCESS) {
-        setSelectedRow([]);
-        setSelected([]);
-        dispatch(
-          getPurchaseOrderList({
-            pageNumber: 0,
-            pageSize: controller.rowsPerPage,
-          })
-        );
-        setShowDialog(false);
-        toastMessage("CANCEL PO", cancelPoResp?.data?.message, "success");
-      } else if (cancelPoResp?.data?.status === SERVER_STATUS_CODE.FAILED) {
-        setSelectedRow([]);
-        setSelected([]);
-        setShowDialog(false);
-        toastMessage("CANCEL PO", cancelPoResp?.data?.message, "error");
-      }
-    } else if (
-      cancelPoResp &&
-      cancelPoResp?.status === NETWORK_STATUS_CODE?.INTERNAL_ERROR
-    ) {
-      setSelectedRow([]);
-      setSelected([]);
-      setShowDialog(false);
-      toastMessage("CANCEL PO", "Something went wrong", "error");
-    } else if (
-      cancelPoResp &&
-      cancelPoResp?.status === NETWORK_STATUS_CODE?.PAGE_NOT_FOUND
-    ) {
-      setShowDialog(false);
-      toastMessage("CANCEL PO", cancelPoResp?.data?.message, "error");
-    }
-  }, [cancelPoResp]);
-
-  const handleDeletePo = () => {
-    console.log("selectedRow", selectedRow?.id);
-    dispatch(cancelPo({ id: selectedRow?.id }));
-  };
   return (
     <>
       <div className="container-fluid">
         <div className="row mt-2">
           <div className="d-flex justify-content-start">
-            <p className="fs-6">PURCHASE ORDER</p>
+            <p className="fs-6">SUPPLIER INTERFACE DESK</p>
           </div>
         </div>
         <div className="row">
@@ -293,31 +235,24 @@ const PurchaseOrderList = () => {
         <div className="row mt-2">
           <HorizonatalLine text="Purchase Order Management Desk" />
         </div>
+
         <div className="row mt-2 mb-2">
           <div className="d-flex justify-content-between">
-            <div className="">
-              <BasicButton
-                type="button"
-                buttonText="Cancel PO"
-                className="danger btn-sm me-2 rounded-0 col-sm-12"
-                disabled={
-                  selected.length > 0 && isCancelable ? null : "disabled"
-                }
-                onClick={(e) => {
-                  console.log("Selected Data", selectedRow);
-                  setShowDialog(true);
-                }}
-                icon={<FontAwesomeIcon icon={faXmark} className="me-1" />}
-              />
-              <BasicButton
-                type="button"
-                buttonText="Edit PO"
-                className="primary btn-sm rounded-0"
-                disabled={selected.length > 0 ? null : "disabled"}
-                onClick={(e) => console.log("Selected Data", selectedRow)}
-                icon={<FontAwesomeIcon icon={faPenToSquare} className="me-1" />}
-              />
-            </div>
+            {selected && selected.length > 0 ? (
+              <div className="">
+                <Basicbutton
+                  type="button"
+                  buttonText="Acceptance"
+                  className="danger btn-sm me-2 rounded-0 col-sm-12"
+                  disabled={selected.length > 0 ? null : "disabled"}
+                  onClick={(e) => {
+                    console.log("Selected Data", selectedRow);
+                    navigate("/");
+                  }}
+                  icon={<FontAwesomeIcon icon={faXmark} className="me-1" />}
+                />
+              </div>
+            ) : null}
             <SearchField
               iconPosition="end"
               iconName={faSearch}
@@ -477,25 +412,8 @@ const PurchaseOrderList = () => {
           </div>
         </Paper>
       </div>
-
-      {showDialog && (
-        <Suspense>
-          <AlertDialog
-            open={showDialog}
-            handleClose={() => setShowDialog(false)}
-            description={DELETE_MESSAGE_DESCRIPTION}
-            dialogTitle="Delete Po :"
-          >
-            <Basicbutton
-              buttonText="Disagree"
-              onClick={() => setShowDialog(false)}
-            />
-            <Basicbutton buttonText="Agree" onClick={handleDeletePo} />
-          </AlertDialog>
-        </Suspense>
-      )}
     </>
   );
 };
 
-export default PurchaseOrderList;
+export default SupplierList;

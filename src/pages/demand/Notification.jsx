@@ -37,9 +37,10 @@ import {
   SORTINGORDER,
 } from "../../common/constant/constant";
 import Basicbutton from "../../components/button/basicbutton";
-
+import { useMediaQuery } from "react-responsive";
 const Notification = () => {
   const dispatch = useDispatch();
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 690px)" });
   const notficationListResponse = useSelector(
     (state) => state?.demand?.notficationListResponse
   );
@@ -343,47 +344,55 @@ const Notification = () => {
         </div>
       </div>
 
-      <div className="row d-flex justify-content-start mb-2">
-        <div className="col-12">
-          <div className="row align-items-center">
-            <div className="col-auto">
-              <label className="labellineHeight" htmlFor="storeName">
-                Store Name:
-              </label>
-            </div>
-            <div className="col-auto">STATE WAREHOUSE</div>
-
-            <div className="col-auto">
-              <label className="labellineHeight" htmlFor="notificationStatus">
-                Notification Status
-              </label>
-            </div>
-            <div className="col-auto">
-              <CustomSelect
-                defaultValue={{
-                  value: "99",
-                  label: "ALL",
-                }}
-                options={[
-                  { value: "99", label: "ALL" },
-                  { value: "1", label: " ACTIVE" },
-                  { value: "3", label: "CANCELLED" },
-                  { value: "10", label: "Compiled by HQ" },
-                  { value: "11", label: "Closed" },
-                ]}
-                onChange={handleNotificationStatusChange}
-              />
-            </div>
+      <div
+        className={`row d-flex ${
+          isSmallScreen ? "flex-column" : "flex-row"
+        } justify-content-start mb-2`}
+      >
+        <div className="col-sm-12 col-md-4">
+          <div className="col-auto">
+            <label className="labellineHeight" htmlFor="storeName">
+              Store Name: STATE WAREHOUSE
+            </label>
+          </div>
+        </div>
+        <div className="col-sm-12 col-md-4">
+          <div className="col-auto">
+            <label className="labellineHeight" htmlFor="notificationStatus">
+              Notification Status
+            </label>
+          </div>
+          <div className="col-auto">
+            <CustomSelect
+              defaultValue={{
+                value: "99",
+                label: "ALL",
+              }}
+              options={[
+                { value: "99", label: "ALL" },
+                { value: "1", label: " ACTIVE" },
+                { value: "3", label: "CANCELLED" },
+                { value: "10", label: "Compiled by HQ" },
+                { value: "11", label: "Closed" },
+              ]}
+              onChange={handleNotificationStatusChange}
+            />
           </div>
         </div>
       </div>
 
       <div className="row mt-2">
-        <div className="d-flex justify-content-start">
+        <div
+          className={`d-flex ${
+            isSmallScreen ? "flex-column" : "flex-row"
+          } justify-content-start `}
+        >
           <BasicButton
             type="button"
             buttonText="New Notification (HQ)"
-            className="btn btn-outline-primary btn-sm rounded-0"
+            className={`btn btn-outline-primary btn-sm rounded-0 ${
+              isSmallScreen ? "mb-1" : ""
+            }`}
             onClick={(e) => {
               navigate("/openNotification", { state: e });
               dispatch(showLoader());
@@ -395,9 +404,12 @@ const Notification = () => {
                 type="button"
                 buttonText="Cancel Notification"
                 outlineType={true}
-                className="danger btn-sm ms-1 rounded-0"
+                className={`danger btn-sm ms-1 rounded-0 ${
+                  isSmallScreen ? "mb-1" : ""
+                }`}
                 disabled={selected.length > 0 ? null : "disabled"}
                 onClick={(e) => {
+                  e.preventDefault();
                   setShowDeleteDialog(true);
                 }}
               />
@@ -405,7 +417,9 @@ const Notification = () => {
                 type="button"
                 buttonText="Compile"
                 outlineType={true}
-                className="primary btn-sm ms-1 rounded-0"
+                className={`primary btn-sm ms-1 rounded-0 ${
+                  isSmallScreen ? "mb-1" : ""
+                }`}
                 disabled={selected.length > 0 ? null : "disabled"}
                 onClick={(e) => {
                   navigate("/openAnnualCompileForm", {
@@ -417,7 +431,9 @@ const Notification = () => {
                 type="button"
                 buttonText="Change Last Date"
                 outlineType={true}
-                className="primary btn-sm ms-1 rounded-0"
+                className={`primary btn-sm ms-1 rounded-0 ${
+                  isSmallScreen ? "mb-1" : ""
+                }`}
                 disabled={selected.length > 0 ? null : "disabled"}
                 onClick={(e) => {
                   navigate("/openExtendNotificationForm", {
@@ -429,7 +445,9 @@ const Notification = () => {
                 type="button"
                 buttonText="Freeze"
                 outlineType={true}
-                className="primary btn-sm ms-1 rounded-0"
+                className={`primary btn-sm ms-1 rounded-0 ${
+                  isSmallScreen ? "mb-1" : ""
+                }`}
                 disabled={selected.length > 0 ? null : "disabled"}
                 onClick={() => {
                   setShowFreezeDialog(true);
@@ -439,7 +457,9 @@ const Notification = () => {
                 type="button"
                 outlineType={true}
                 buttonText="Annual Demand"
-                className="primary btn-sm ms-1 rounded-0"
+                className={`primary btn-sm ms-1 rounded-0 ${
+                  isSmallScreen ? "mb-1" : ""
+                }`}
                 disabled={selected.length > 0 ? null : "disabled"}
                 onClick={(e) =>
                   navigate("/generateAnnualDemand", { state: selectedRow })
@@ -465,7 +485,7 @@ const Notification = () => {
           />
         </div>
       </div>
-      <Paper>
+      <Paper elevation={3} className="mb-2">
         {/* Table Rendering */}
         <div className="row">
           <div className="col-12">

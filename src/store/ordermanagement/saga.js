@@ -175,7 +175,11 @@ function* getCentralPurchaseList({ payload: pageDetails }) {
       }
     );
     console.log("Response", response);
-    yield put(getCentralpurchaseListResponse(response));
+    if (response?.code) {
+      yield put(getCentralpurchaseListResponse(response?.response));
+    } else {
+      yield put(getCentralpurchaseListResponse(response));
+    }
   } catch (error) {
     console.log("Error", error);
     put(getCentralpurchaseListResponse(error));

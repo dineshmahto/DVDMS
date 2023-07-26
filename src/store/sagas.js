@@ -8,6 +8,7 @@ import IssueReturnSaga from "./issue/saga";
 import RequisitionSaga from "./requisition/saga";
 import ReceivingSaga from "./receiving/saga";
 import ReportSaga from "./report/saga";
+import SupplierSaga from "./supplier/saga";
 export default function* rootSaga() {
   yield all([
     AdminSaga(),
@@ -19,5 +20,6 @@ export default function* rootSaga() {
     RequisitionSaga(),
     ReceivingSaga(),
     ReportSaga(),
+    SupplierSaga(),
   ]);
 }

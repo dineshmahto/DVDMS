@@ -32,11 +32,13 @@ import {
   NETWORK_STATUS_CODE,
   SERVER_STATUS_CODE,
 } from "../../../common/constant/constant";
+import { useMediaQuery } from "react-responsive";
 const CreateProgramDeskForm = lazy(() => import("./createprogram"));
 const EditProgramDeskForm = lazy(() => import("./editprogram"));
 const AlertDialog = lazy(() => import("../../../components/dialog/dialog"));
 
 const ProgrammeDesk = () => {
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 600px)" });
   const programeDeskListResponse = useSelector(
     (state) => state.admin.programeDeskListResponse
   );
@@ -270,17 +272,23 @@ const ProgrammeDesk = () => {
       </div>
 
       <div className="row ">
-        <div className="d-flex flex-row justify-content-between">
+        <div
+          className={`d-flex ${
+            isSmallScreen ? "flex-column" : "flex-row"
+          } justify-content-between`}
+        >
           <Basicbutton
             buttonText="Add New Program"
             outlineType={true}
-            className="btn btn-outline-primary rounded-0 mb-2 me-1 mt-2  shadow-sm  rounded"
+            className={`btn btn-outline-primary ${
+              isSmallScreen ? "btn-sm" : "btn-md"
+            } rounded-0 mb-2 me-1 mt-2 shadow-sm rounded`}
             onClick={() => {
               setShowCreateProgrmModal(true);
             }}
           />
           <SearchField
-            className="me-1 "
+            className={`me-1 ${isSmallScreen ? "mb-1" : "mb-0"} mt-1`}
             iconPosition="end"
             iconName={faSearch}
             onChange={(e) => {

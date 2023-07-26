@@ -35,6 +35,7 @@ import Checkbox from "@mui/material/Checkbox";
 import { useNavigate } from "react-router-dom";
 import TableRowLaoder from "../../../../components/tables/datatable/tableRowLaoder";
 import EmptyRow from "../../../../components/tables/datatable/emptyRow";
+import dayjs from "dayjs";
 const IntentIssueConfirmModal = lazy(() => import("./intentissueconfirmmodal"));
 const useStyles = makeStyles({
   tableCell: {
@@ -78,13 +79,13 @@ const IntentIssue = () => {
       sortable: false,
     },
     {
-      id: "request_id",
+      id: "indentNo",
       name: "INTENT. NUMBER",
       sortable: true,
     },
 
     {
-      id: "request_date",
+      id: "date",
       name: "INTENT DATE",
       sortable: true,
     },
@@ -187,7 +188,7 @@ const IntentIssue = () => {
       openCopy.shift();
       openCopy.push(index);
       setSelected(openCopy);
-      setShowIntentIssueModal(true);
+      //setShowIntentIssueModal(true);
     }
   };
   const handleStatusChange = (selectedOption) => {
@@ -212,6 +213,9 @@ const IntentIssue = () => {
     return null;
   };
 
+  const formatDate = (date) => {
+    return dayjs(date).format("MM/DD/YYYY");
+  };
   // function _find(collection, value) {
   //   const filteredData = [...collection]?.filter((item) => {
   //     if (
@@ -306,6 +310,32 @@ const IntentIssue = () => {
           </div>
         </div>
       </div>
+      {selected && selected.length > 0 ? (
+        <div className="row">
+          <div className="d-flex justify-content-start">
+            <Basicbutton
+              type="button"
+              buttonText="ISSUE"
+              className="primary btn-sm rounded-0 me-1"
+              outlineType={true}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/openIssueIndent", { state: selected[0] });
+              }}
+            />
+
+            <Basicbutton
+              type="button"
+              buttonText="REJECT"
+              className="danger btn-sm rounded-0 me-1"
+              outlineType={true}
+              onClick={(e) => {
+                e.preventDefault();
+              }}
+            />
+          </div>
+        </div>
+      ) : null}
 
       <div className="row mt-2">
         <HorizonatalLine text="Issued Details" />
@@ -343,16 +373,16 @@ const IntentIssue = () => {
                   tableData.length > 0 &&
                   tableData.map((data, index) => (
                     <>
-                      <StyledTableRow key={data.request_id}>
+                      <StyledTableRow key={data.id}>
                         <StyledTableCell>
                           <IconButton
                             aria-label="expand row"
                             size="small"
-                            onClick={() => handleCollapse(data?.request_id)}
+                            onClick={() => handleCollapse(data?.id)}
                           >
                             <FontAwesomeIcon
                               icon={
-                                open.includes(data?.request_id)
+                                open.includes(data?.id)
                                   ? faChevronUp
                                   : faChevronDown
                               }
@@ -362,20 +392,20 @@ const IntentIssue = () => {
                         <StyledTableCell padding="none">
                           <Checkbox
                             onClick={(event) =>
-                              handleClick(event, data?.request_id, data)
+                              handleClick(event, data?.id, data)
                             }
                             color="primary"
-                            checked={selected.includes(data?.request_id)}
+                            checked={selected.includes(data?.id)}
                             inputProps={{
-                              "aria-labelledby": `enhanced-table-checkbox-${data?.request_id}`,
+                              "aria-labelledby": `enhanced-table-checkbox-${data?.id}`,
                             }}
                           />
                         </StyledTableCell>
                         <StyledTableCell padding="none">
-                          {data?.request_id}
+                          {data?.indentNo}
                         </StyledTableCell>
                         <StyledTableCell padding="none">
-                          {data?.request_date}
+                          {formatDate(data?.date)}
                         </StyledTableCell>
 
                         <StyledTableCell padding="none">
@@ -395,7 +425,7 @@ const IntentIssue = () => {
                           colSpan={6}
                         >
                           <Collapse
-                            in={open.includes(data?.request_id)}
+                            in={open.includes(data?.id)}
                             timeout="auto"
                             unmountOnExit
                           >
@@ -416,9 +446,9 @@ const IntentIssue = () => {
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                  {data?.transferDetail &&
-                                    data?.transferDetail.length > 0 &&
-                                    data?.transferDetail.map((ele, index) => {
+                                  {data?.transferDrugList &&
+                                    data?.transferDrugList.length > 0 &&
+                                    data?.transferDrugList.map((ele, index) => {
                                       return (
                                         <>
                                           <StyledTableRow key={index}>

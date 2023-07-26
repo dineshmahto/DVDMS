@@ -164,6 +164,11 @@ const IssueDesk = () => {
       issueDeskResponse?.status === NETWORK_STATUS_CODE.UNAUTHORIZED_ACCESS
     ) {
       setLoading(false);
+    } else if (
+      issueDeskResponse &&
+      issueDeskResponse?.status === NETWORK_STATUS_CODE.INTERNAL_ERROR
+    ) {
+      setLoading(false);
     }
   }, [issueDeskResponse]);
 

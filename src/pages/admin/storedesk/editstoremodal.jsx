@@ -18,6 +18,7 @@ import {
   getStoreDeskList,
 } from "../../../store/admin/action";
 import toastMessage from "../../../common/toastmessage/toastmessage";
+import { useMediaQuery } from "react-responsive";
 const EditStoreModalForm = ({
   openEditStoreModal,
   handleCloseEditStoreModal,
@@ -29,6 +30,7 @@ const EditStoreModalForm = ({
   editData,
   resetPageDetails,
 }) => {
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 600px)" });
   const dispatch = useDispatch();
   const editStoreRcrdResp = useSelector(
     (state) => state?.admin?.editStoreRecrdResp
@@ -120,15 +122,23 @@ const EditStoreModalForm = ({
           }) => (
             <Form>
               <div className="row">
-                <div className="col-10 offset-1">
+                <div
+                  className={`${
+                    isSmallScreen ? "col-sm-12" : " col-10 offset-1"
+                  }`}
+                >
                   <div className="row mb-2 align-items-center">
-                    <div className="col-2">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-2"}`}
+                    >
                       <label htmlFor="storeName" class="col-form-label">
                         Store Name:{" "}
                         {console.log("values", JSON.stringify(values))}
                       </label>
                     </div>
-                    <div className="col-6">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-6"}`}
+                    >
                       <Field
                         className="form-control shadow-none"
                         value={values?.storeName}
@@ -139,7 +149,9 @@ const EditStoreModalForm = ({
                         onBlur={handleBlur}
                       />
                     </div>
-                    <div className="col-4">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-4"}`}
+                    >
                       {errors.userId && touched.storeName ? (
                         <div className="text-danger float-end">
                           {errors.storeName}
@@ -150,12 +162,16 @@ const EditStoreModalForm = ({
                   </div>
 
                   <div className="row mb-2 align-items-center">
-                    <div className="col-2">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-2"}`}
+                    >
                       <label htmlFor="storeType" class="col-form-label">
                         Store Type:
                       </label>
                     </div>
-                    <div className="col-6">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-6"}`}
+                    >
                       <CustomSelect
                         className="form-control shadow-none"
                         name="storeTypeId"
@@ -177,7 +193,9 @@ const EditStoreModalForm = ({
                         onBlur={setFieldTouched}
                       />
                     </div>
-                    <div className="col-4">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-4"}`}
+                    >
                       {errors.storeTypeId && touched.storeTypeId ? (
                         <div className="text-danger float-end">
                           {errors.storeTypeId}
@@ -186,12 +204,16 @@ const EditStoreModalForm = ({
                     </div>
                   </div>
                   <div className="row mb-2 align-items-center">
-                    <div class="col-2">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-2"}`}
+                    >
                       <label htmlFor="parentStoreName" class="col-form-label">
                         Parent Store Name
                       </label>
                     </div>
-                    <div class="col-6">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-6"}`}
+                    >
                       <CustomSelect
                         className="form-control shadow-none"
                         name="toStoreId"
@@ -211,7 +233,9 @@ const EditStoreModalForm = ({
                         onBlur={setFieldTouched}
                       />
                     </div>
-                    <div class="col-4">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-4"}`}
+                    >
                       {errors.toStoreId && touched.toStoreId ? (
                         <div className="text-danger float-end">
                           {errors.toStoreId}
@@ -221,12 +245,16 @@ const EditStoreModalForm = ({
                   </div>
 
                   <div className="row mb-2 align-items-center">
-                    <div class="col-2">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-2"}`}
+                    >
                       <label htmlFor="ownerType" class="col-form-label">
                         Owner Type
                       </label>
                     </div>
-                    <div class="col-6">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-6"}`}
+                    >
                       <CustomSelect
                         className="form-control shadow-none"
                         name="ownerTypeId"
@@ -246,7 +274,9 @@ const EditStoreModalForm = ({
                         onBlur={setFieldTouched}
                       />
                     </div>
-                    <div class="col-4">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-4"}`}
+                    >
                       {errors.ownerTypeId && touched.ownerTypeId ? (
                         <div className="text-danger float-end">
                           {errors.ownerTypeId}
@@ -256,12 +286,16 @@ const EditStoreModalForm = ({
                   </div>
 
                   <div className="row mb-2 align-items-center">
-                    <div class="col-2">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-2"}`}
+                    >
                       <label htmlFor="address" class="col-form-label">
                         Address
                       </label>
                     </div>
-                    <div class="col-6">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-6"}`}
+                    >
                       <Field
                         className="form-control shadow-none"
                         value={values?.address}
@@ -272,7 +306,9 @@ const EditStoreModalForm = ({
                         onBlur={handleBlur}
                       />
                     </div>
-                    <div className="col-4">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-4"}`}
+                    >
                       {errors.address && touched.address ? (
                         <div className="text-danger float-end">
                           {errors.address}
@@ -287,7 +323,9 @@ const EditStoreModalForm = ({
                         Is this an OPD/DEPT/WARD of a Hospital? :
                       </label>
                     </div>
-                    <div className="col-6">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-6"}`}
+                    >
                       <RadioCheckBox
                         list={[
                           {
@@ -310,7 +348,9 @@ const EditStoreModalForm = ({
                           setFieldValue("opd", e.target?.value);
                         }}
                       />
-                      <div className="col-3">
+                      <div
+                        className={`${isSmallScreen ? "col-sm-12" : " col-3"}`}
+                      >
                         {errors?.opd && touched?.opd ? (
                           <div className="text-danger float-end">
                             {errors.opd}
@@ -320,7 +360,9 @@ const EditStoreModalForm = ({
                     </div>
                   </div>
                   <div className="row mb-2 align-items-center">
-                    <div class="col-2">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-2"}`}
+                    >
                       <label
                         htmlFor="districtId"
                         className=""
@@ -329,7 +371,9 @@ const EditStoreModalForm = ({
                         District Name
                       </label>
                     </div>
-                    <div class="col-6">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-6"}`}
+                    >
                       <CustomSelect
                         className="form-control shadow-none"
                         name="districtId"
@@ -351,7 +395,9 @@ const EditStoreModalForm = ({
                         onBlur={setFieldTouched}
                       />
                     </div>
-                    <div className="col-4">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-4"}`}
+                    >
                       {errors.districtId && touched.districtId ? (
                         <div className="text-danger float-end">
                           {errors.districtId}
@@ -360,12 +406,16 @@ const EditStoreModalForm = ({
                     </div>
                   </div>
                   <div className="row mb-2">
-                    <div className="col-2">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-2"}`}
+                    >
                       <label htmlFor="blockId" class="col-form-label">
                         Block Name:
                       </label>
                     </div>
-                    <div className="col-6">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-6"}`}
+                    >
                       <CustomSelect
                         id="blockId"
                         name="blockId"
@@ -384,7 +434,9 @@ const EditStoreModalForm = ({
                         onBlur={setFieldTouched}
                       />
                     </div>
-                    <div className="col-4">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-4"}`}
+                    >
                       {errors.blockId && touched.blockId ? (
                         <div className="text-danger float-end">
                           {errors.blockId}
@@ -394,12 +446,16 @@ const EditStoreModalForm = ({
                   </div>
 
                   <div className="row mb-2">
-                    <div className="col-2">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-2"}`}
+                    >
                       <label htmlFor="contactNo" class="col-form-label">
                         Contact No:
                       </label>
                     </div>
-                    <div className="col-6">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-6"}`}
+                    >
                       <Field
                         className="form-control shadow-none"
                         value={values?.contactNo}
@@ -410,7 +466,9 @@ const EditStoreModalForm = ({
                         onBlur={handleBlur}
                       />
                     </div>
-                    <div className="col-4">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-4"}`}
+                    >
                       {errors.contactNo && touched.contactNo ? (
                         <div className="text-danger float-end">
                           {errors.contactNo}
@@ -420,12 +478,16 @@ const EditStoreModalForm = ({
                   </div>
 
                   <div className="row mb-2">
-                    <div className="col-2">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-2"}`}
+                    >
                       <label htmlFor="longitude" class="col-form-label">
                         Longitude:
                       </label>
                     </div>
-                    <div className="col-6">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-6"}`}
+                    >
                       <Field
                         className="form-control shadow-none"
                         value={values?.longitude}
@@ -436,7 +498,9 @@ const EditStoreModalForm = ({
                         onBlur={handleBlur}
                       />
                     </div>
-                    <div className="col-4">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-4"}`}
+                    >
                       {errors.longitude && touched.longitude ? (
                         <div className="text-danger float-end">
                           {errors.longitude}
@@ -446,12 +510,16 @@ const EditStoreModalForm = ({
                   </div>
 
                   <div className="row mb-2">
-                    <div className="col-2">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-2"}`}
+                    >
                       <label htmlFor="latitude" class="col-form-label">
                         Latitude:
                       </label>
                     </div>
-                    <div className="col-6">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-6"}`}
+                    >
                       <Field
                         className="form-control shadow-none"
                         name="latitude"
@@ -462,7 +530,9 @@ const EditStoreModalForm = ({
                         onBlur={handleBlur}
                       />
                     </div>
-                    <div className="col-4">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-4"}`}
+                    >
                       {errors.latitude && touched.latitude ? (
                         <div className="text-danger float-end">
                           {errors.latitude}
@@ -472,12 +542,16 @@ const EditStoreModalForm = ({
                   </div>
 
                   <div className="row mb-2">
-                    <div className="col-2">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-2"}`}
+                    >
                       <label htmlFor="ninNumber" class="col-form-label">
                         NIN Number:
                       </label>
                     </div>
-                    <div className="col-6">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-6"}`}
+                    >
                       <Field
                         className="form-control shadow-none"
                         name="ninNo"
@@ -488,7 +562,9 @@ const EditStoreModalForm = ({
                         onBlur={handleBlur}
                       />
                     </div>
-                    <div className="col-4">
+                    <div
+                      className={`${isSmallScreen ? "col-sm-12" : " col-4"}`}
+                    >
                       {errors.ninNo && touched.ninNo ? (
                         <div className="text-danger float-end">
                           {errors.ninNo}
