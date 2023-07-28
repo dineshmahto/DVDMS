@@ -7,6 +7,7 @@ interface checkBoxProps {
   label: string;
   name?: string;
   disabled?: boolean | false;
+  onChange: () => void;
 }
 const Checkbox: React.FC<checkBoxProps> = ({
   type,
@@ -15,16 +16,18 @@ const Checkbox: React.FC<checkBoxProps> = ({
   id,
   name,
   disabled,
+  onChange,
 }) => {
   return (
     <Form>
       <Form.Check
         type={type}
         id={`${type}-${id}`}
-        label={`default ${label}`}
+        label={`${label}`}
         className={`${className}`}
         name={name}
         disabled={disabled}
+        onChange={onChange}
       />
     </Form>
   );

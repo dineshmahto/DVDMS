@@ -1,4 +1,5 @@
 import React, { memo } from "react";
+import { Spinner } from "react-bootstrap";
 interface buttonProps {
   id?: string;
   className?: string | "";
@@ -24,7 +25,7 @@ const BasicButton: React.FC<buttonProps> = ({
   outlineType,
   icon,
 }) => {
-  console.log("Initial Render", buttonText);
+  console.log("isLoading", isLoading);
   return (
     <button
       className={`btn btn-${outlineType ? "outline-" : ""}${className}`}
@@ -33,8 +34,8 @@ const BasicButton: React.FC<buttonProps> = ({
       disabled={disabled}
       id={id}
     >
-      {icon}
-      {isLoading ? loadingText : buttonText}
+      {isLoading ? null : icon}
+      {isLoading ? <Spinner /> : buttonText}
     </button>
   );
 };

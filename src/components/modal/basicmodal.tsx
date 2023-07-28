@@ -1,6 +1,5 @@
 import React from "react";
 import Modal from "react-bootstrap/Modal";
-import BasicButton from "../button/basicbutton";
 
 interface modalProps {
   title: string;
@@ -15,6 +14,7 @@ interface modalProps {
   isCenterAlign?: boolean;
   closeButton: boolean;
   children: React.ReactNode;
+  className?: string | "";
 }
 const BasicModal: React.FC<modalProps> = ({
   title,
@@ -29,6 +29,7 @@ const BasicModal: React.FC<modalProps> = ({
   isCenterAlign,
   closeButton,
   children,
+  className,
 }) => {
   return (
     <Modal
@@ -42,19 +43,12 @@ const BasicModal: React.FC<modalProps> = ({
       fullscreen={fullScreen}
       onEscapeKeyDown={onEscapeKeyDown}
       onExit={onExit}
+      className={`${className}`}
     >
       <Modal.Header closeButton>
         <Modal.Title>{title}</Modal.Title>
       </Modal.Header>
-      <Modal.Body style={{position: "relative"}}>{children}</Modal.Body>
-      {/* <Modal.Footer>
-        <BasicButton
-          type="button"
-          buttonText="Close"
-          className="btn btn-danger"
-          
-        />
-      </Modal.Footer> */}
+      <Modal.Body style={{ position: "relative" }}>{children}</Modal.Body>
     </Modal>
   );
 };

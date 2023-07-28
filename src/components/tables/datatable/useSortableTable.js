@@ -1,10 +1,12 @@
 import { useState } from "react";
-// Dynamic sorting custom Hooks
 export const useSortableTable = (data) => {
-  const [sortedData, setSortedData] = useState(data);
+  console.log("Data", data);
+  const [sortedData, setSortedData] = useState();
   const handleSorting = (sortField, sortOrder) => {
+    console.log("data", data);
+    console.log("sortedData", sortedData);
     if (sortField) {
-      const sorted = [...sortedData].sort((a, b) => {
+      const sorted = [...data]?.sort((a, b) => {
         if (a[sortField] === null) return 1;
         if (b[sortField] === null) return -1;
         if (a[sortField] === null && b[sortField] === null) return 0;
@@ -16,9 +18,10 @@ export const useSortableTable = (data) => {
             }) * (sortOrder === "asc" ? 1 : -1)
         );
       });
+      console.log("sorted", sorted);
       setSortedData(sorted);
     }
   };
-
+  console.log("sor", sortedData);
   return [sortedData, handleSorting];
 };

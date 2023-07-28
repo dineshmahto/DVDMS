@@ -1,50 +1,37 @@
 interface radiocheckBoxProps {
-  id1: string;
-  id2: string;
   className?: string;
-  onClick: () => void;
   onChange?: () => void;
-  name: string;
-  labelText1: string;
-  labelText2: string;
+  list: [];
 }
 const RadioCheckBox: React.FC<radiocheckBoxProps> = ({
-  id1,
-  id2,
   className,
   onChange,
-  labelText1,
-  labelText2,
-  name,
+  list,
 }) => {
   return (
     <>
-      <div className="form-check form-check-inline ms-2">
-        <input
-          className={`form-check-input ${className}`}
-          type="radio"
-          name={name}
-          id={id1}
-          value="Yes"
-          onChange={onChange}
-        />
-        <label className="form-check-label" htmlFor={id1}>
-          {labelText1}
-        </label>
-      </div>
-      <div className={`form-check form-check-inline`}>
-        <input
-          className={`form-check-input ${className}`}
-          type="radio"
-          name={name}
-          id={id2}
-          value="No"
-          onChange={onChange}
-        />
-        <label className="form-check-label" htmlFor={id2}>
-          {labelText2}
-        </label>
-      </div>
+      {list &&
+        list.length > 0 &&
+        list.map((ele: any, index) => {
+          console.log("checked", ele?.checked);
+          console.log("value", ele?.value);
+          return (
+            <div className="form-check form-check-inline ms-2" key={ele.index}>
+              <input
+                className={`form-check-input ${className}`}
+                type="radio"
+                name={ele?.name}
+                id={ele?.id}
+                value={ele?.value}
+                onChange={onChange}
+                checked={ele?.checked == ele?.value}
+              />
+              <label className="form-check-label" htmlFor={ele?.id}>
+                {ele?.labelText}
+              </label>
+            </div>
+          );
+        })}
     </>
   );
 };

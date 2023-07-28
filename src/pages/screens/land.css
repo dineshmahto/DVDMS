@@ -7,8 +7,8 @@ b, u, i, center,
 dl, dt, dd, ol, ul, li,
 fieldset, form, label, legend,
 table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed, 
-figure, figcaption, footer, header, hgroup, 
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
 menu, nav, output, ruby, section, summary,
 time, mark, audio, video {
   margin: 0;
@@ -18,7 +18,7 @@ time, mark, audio, video {
   box-sizing: border-box;
 }
 /* HTML5 display-role reset for older browsers */
-article, aside, details, figcaption, figure, 
+article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
   display: block;
 }
@@ -112,9 +112,9 @@ body {
   margin: 10px 0;
 }
 .shadow {
-  box-shadow: 0 0 11px rgba(237, 232, 237, 0.5)  ; 
-  -webkit-box-shadow: 0 0 11px rgba(237, 232, 237, 0.5)  ; 
-  -moz-box-shadow: 0 0 11px rgba(237, 232, 237, 0.5)  ; 
+  box-shadow: 0 0 11px rgba(237, 232, 237, 0.5)  ;
+  -webkit-box-shadow: 0 0 11px rgba(237, 232, 237, 0.5)  ;
+  -moz-box-shadow: 0 0 11px rgba(237, 232, 237, 0.5)  ;
 }
 /* FLEXBOX */
 .flex {
@@ -269,3 +269,77 @@ body {
 .whiteBg {
   background-color: #fff;
 }
+
+
+/******* Login ********/
+.login-form-container{
+  padding: 50px !important;
+}
+@media (max-width: 576px) {
+  .login-form-container{
+    padding: 20px !important;
+  }
+}
+.captch-refresh-btn{
+  border: 1px solid #ced4da !important;
+}
+.modal-content{
+  border-radius: 0px !important;
+}
+
+.login-header-container{
+  margin: 0 auto;
+  /* padding: 25px 0 0; */
+  position: relative;
+  text-align: center;
+  text-shadow: 0 1px 0 #fff;
+  min-width: 280px;
+}
+
+.login-header {
+  font: normal 25px Helvetica, Arial, sans-serif;
+  letter-spacing: -0.05em;
+  line-height: 20px;
+  /* margin: 10px 0 30px; */
+  margin-bottom: 20px;
+}
+
+.login-form-container h1:before {
+  background: #7e7e7e;
+  background: -webkit-gradient(linear, right top, left top, from(#7e7e7e), to(#fff));
+  background: linear-gradient(to left, #7e7e7e 0%, #fff 100%);
+  left: 0;
+}
+
+.login-form-container h1:after {
+  background: #7e7e7e;
+  background: -webkit-gradient(linear, left top, right top, from(#7e7e7e), to(#fff));
+  background: linear-gradient(to right, #7e7e7e 0%, #fff 100%);
+  right: 0;
+}
+
+.login-form-container h1:before, .login-form-container h1:after {
+  content: "";
+  height: 1px;
+  position: absolute;
+  top: 10px;
+  width: 20%;
+}
+
+/* .login-header::before,
+.login-header::after {
+  content: "";
+  position: absolute;
+  bottom: 15px;
+  width: 35%;
+  height: 2px;
+  background-color: #bbb;
+}
+
+.login-header::before {
+  left: 0;
+}
+
+.login-header::after {
+  right: 0;
+} */

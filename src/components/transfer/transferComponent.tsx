@@ -6,11 +6,6 @@ import {
   faAngleRight,
   faAngleLeft,
 } from "@fortawesome/free-solid-svg-icons";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
-import Divider from "@mui/material/Divider";
 import { makeStyles } from "@mui/styles";
 
 const useStyles = makeStyles({
@@ -21,6 +16,7 @@ const useStyles = makeStyles({
 });
 
 interface transferComponentProps {
+  isDisabled: boolean | false;
   apiData: any[];
   selectedItem: any[];
   activeIndicies: any[];
@@ -53,6 +49,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
   selectItemActiveIndices,
   selectedItem,
   handleRightListItemClick,
+  isDisabled,
 }) => {
   const classes = useStyles();
   return (
@@ -60,11 +57,14 @@ const TransferComponent: React.FC<transferComponentProps> = ({
       <div className="container-fluid">
         <div className="row">
           <div
-            className="col-5 border rounded"
+            className="col border rounded border-secondary p-0"
             style={{
               height: "300px",
               overflowX: "hidden",
               overflowY: "scroll",
+              borderWidth: "0px !important",
+              pointerEvents: isDisabled ? "none" : "auto",
+              cursor: isDisabled ? "not-allowed" : "pointer",
             }}
           >
             <ul className="list-group">
@@ -74,7 +74,7 @@ const TransferComponent: React.FC<transferComponentProps> = ({
                   return (
                     <>
                       <li
-                        key={elem?.id}
+                        key={elem?.id + i}
                         className={`list-group-item ${
                           activeIndicies[i] ? classes.active : ""
                         }`}
@@ -90,38 +90,65 @@ const TransferComponent: React.FC<transferComponentProps> = ({
             </ul>
           </div>
 
-          <div className="col-2 d-flex flex-column justify-content-center">
+          <div className="col-1 d-flex flex-column justify-content-center align-items-center">
             <button
-              className="btn btn-secondary btn-sm mb-1"
+              type="button"
+              className="btn btn-secondary btn-sm mb-1 p-3"
               onClick={handleMoveSelectedItemToRight}
+              style={{
+                cursor: isDisabled ? "not-allowed !important" : "pointer",
+              }}
+              disabled={isDisabled}
             >
-              <FontAwesomeIcon icon={faAngleRight} />
+              <FontAwesomeIcon
+                icon={faAngleRight}
+                onClick={handleMoveSelectedItemToRight}
+              />
             </button>
             <button
-              className="btn btn-secondary btn-sm mb-1"
+              type="button"
+              className="btn btn-secondary btn-sm mb-1 p-3"
               onClick={handleMoveSelectedItemToLeft}
+              disabled={isDisabled}
+              style={{
+                cursor: isDisabled ? "not-allowed" : "pointer",
+              }}
             >
               <FontAwesomeIcon icon={faAngleLeft} />
             </button>
             <button
+              type="button"
               className="btn btn-secondary btn-sm mb-1"
               onClick={handleShiftAllElementToRight}
+              disabled={isDisabled}
+              style={{
+                padding: "0.85rem",
+                cursor: isDisabled ? "not-allowed" : "pointer",
+              }}
             >
               <FontAwesomeIcon icon={faAngleDoubleRight} />
             </button>
             <button
+              type="button"
               className="btn btn-secondary btn-sm mb-1"
               onClick={handleShiftAllElementToLeft}
+              style={{
+                padding: "0.85rem",
+                cursor: isDisabled ? "not-allowed" : "pointer",
+              }}
+              disabled={isDisabled}
             >
               <FontAwesomeIcon icon={faAngleDoubleLeft} />
             </button>
           </div>
           <div
-            className="col-5 border rounded"
+            className="col border rounded border-secondary p-0"
             style={{
               height: "300px",
               overflowX: "hidden",
               overflowY: "scroll",
+              pointerEvents: isDisabled ? "none" : "auto",
+              cursor: isDisabled ? "not-allowed" : "default",
             }}
           >
             <ul className="list-group list-group-flush">

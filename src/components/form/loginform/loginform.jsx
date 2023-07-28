@@ -1,23 +1,28 @@
-import {
-  faArrowsRotate,
-  faRightToBracket,
-} from "@fortawesome/free-solid-svg-icons";
+import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState, useEffect } from "react";
 import BasicButton from "../../button/basicbutton";
 import SwitchCheckBox from "../../switch/switchcheckbox";
 import InputFieldFloatLebel from "../../inputbox/floatlabel/InputFieldFloatLabel";
 import toastMessage from "../../../common/toastmessage/toastmessage";
-import loginservice from "../../../services/loginservice/loginservice";
 import { useNavigate } from "react-router-dom";
 import Canvas from "../../canvas/Canvas";
 import { Spinner } from "react-bootstrap";
 import { useDispatch } from "react-redux";
-import { closeLoginModal } from "../../../store/login/actions";
-
+import {
+  closeLoginModal,
+  login,
+  loginResponse,
+} from "../../../store/login/actions";
+import { useSelector } from "react-redux";
+import tokenhandle from "../../../common/tokenhandle/tokenhandle";
+import { NETWORK_STATUS_CODE } from "../../../common/constant/constant";
 const LoginForm = () => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const loginRespons = useSelector((state) => state.login.loginResponse);
+  console.log("loginReposne", loginRespons);
   const [userData, setUSerData] = useState({
     username: "",
     password: "",
@@ -27,7 +32,6 @@ const LoginForm = () => {
   const [isValid, setValid] = useState(false);
   const [isLoading, setLoading] = useState(false);
   const [captchaValue, setCaptchaValue] = useState([]);
- 
 
   const validate = () => {
     if (
@@ -46,34 +50,72 @@ const LoginForm = () => {
 
   const loginAction = async (e) => {
     e.preventDefault();
-    if (isValid) {
-      if (userData.captcha != captchaValue.join("")) {
-        toastMessage("Cpatcha Error", "Please enter valid Captcha", "error");
-        createCaptcha();
-        setUSerData({ ...userData, captcha: "" });
-        setValid(false);
-      } else {
-        setLoading(true);
-        let loginResp = await loginservice("auth/authenticate", userData);
-        if (loginResp.status === 200) {
-          setLoading(false);
-          console.log("loginResp", loginResp.status)
-         dispatch(closeLoginModal()) 
-          navigate("/admin");
-        } else if (loginResp.response.status === 400) {
-          setLoading(false);
-          toastMessage("Login Error", "Please enter valid ID", "error");
-        }
-      }
-    } else {
-      toastMessage("Please ", "Work in progress...", "");
-    }
+    // if (isValid) {
+    // if (userData.captcha != captchaValue.join("")) {
+    //   toastMessage("Cpatcha Error", "Please enter valid Captcha", "error");
+    //   createCaptcha();
+    //   setUSerData({ ...userData, captcha: "" });
+    //   setValid(false);
+    // }
+    setLoading(true);
+    setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+    dispatch(login(userData));
+    // let loginResp = await loginservice(CONSTANTS.LOGIN, userData);
+    // if (loginResp.status === 200) {
+    //   setLoading(false);
+    //   console.log("loginResp", loginResp.status);
+    //   dispatch(closeLoginModal());
+    //   navigate("/dashboard");
+    // } else if (loginResp.response.status === 400) {
+    //   setLoading(false);
+    //   toastMessage("Login Error", "Please enter valid ID", "error");
+    // }
+    // } else {
+    //   toastMessage("Please ", "Work in progress...", "");
+    // }
   };
+
+  useEffect(() => {
+    if (loginRespons && loginRespons?.status === 200) {
+      console.log("loginResponse", loginRespons);
+      toastMessage("LOGIN", "Logged In successfully", "success");
+      tokenhandle.storeRefreshToken(loginRespons?.data?.refresh_token);
+      tokenhandle.storetoken(loginRespons?.data?.access_token);
+      tokenhandle.storeProfileDetails(loginRespons?.data?.displayName);
+      setLoading(false);
+      dispatch(loginResponse(""));
+      dispatch(closeLoginModal());
+      navigate("/stockListing");
+    } else if (
+      loginRespons &&
+      loginRespons?.status == NETWORK_STATUS_CODE.BAD_REQUEST
+    ) {
+      setLoading(false);
+      toastMessage("Login Error", loginRespons?.data?.message, "error");
+      dispatch(loginResponse(""));
+    } else if (
+      loginRespons &&
+      loginRespons?.status == NETWORK_STATUS_CODE.UNAUTHORIZED_ACCESS
+    ) {
+      setLoading(false);
+      toastMessage("Login Error", loginRespons?.data?.message, "error");
+      dispatch(loginResponse(""));
+    } else if (
+      loginRespons &&
+      loginRespons?.status == NETWORK_STATUS_CODE.INTERNAL_ERROR
+    ) {
+      setLoading(false);
+      toastMessage("Login Error", loginRespons?.data?.message, "error");
+      dispatch(loginResponse(""));
+    }
+  }, [loginRespons]);
 
   const createCaptcha = () => {
     console.log("Recalled");
     var charsArray =
-      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ@!#$%^&*";
+      "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     var lengthOtp = 6;
     var captcha = [];
     for (var i = 0; i < lengthOtp; i++) {
@@ -87,6 +129,7 @@ const LoginForm = () => {
   };
   const draw = (context) => {
     context.font = "25px Georgia";
+    context.fillStyle = "#ff00ff";
     context.strokeText(captchaValue.join(""), 0, 30);
   };
 
@@ -96,16 +139,12 @@ const LoginForm = () => {
 
   return (
     <>
-      <div className="card" style={{position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform:" translate(-50%, -50%)"}}>
-        <div className="card-header card-head">
-          <FontAwesomeIcon icon={faRightToBracket} /> &nbsp; LogIn to DVDMS
-          NagaLand
+      <div className="container login-form-container">
+        <div class="login-header-container">
+          <h1 class="login-header">Login</h1>
         </div>
-        <div className="card-body">
-          <div className="mb-1">
+        <div className="p-2 border-0">
+          <div className="mb-3">
             <InputFieldFloatLebel.WithError
               type="text"
               placeholder="UserID"
@@ -138,40 +177,57 @@ const LoginForm = () => {
             />
           </div>
           <div className="mb-4">
-            <div className="row">
-              <div className="col-2"> Captcha</div>
-              <div className="col-3">
-                <Canvas draw={draw} height={50} width={100} />
-              </div>
-              <div className="col-5">
-                <input
-                  className="form-control shadow-none"
-                  type="text"
-                  placeholder="Captcha"
-                  id="captcha"
-                  value={userData?.captcha}
-                  onChange={(e) => {
-                    setUSerData({ ...userData, captcha: e.target.value });
-                  }}
+            <div className="row align-items-center">
+              <div className="col-lg-2 col-md-2 col-sm-2"> Captcha</div>
+              <div className="col-lg-3 col-md-3 col-sm-4">
+                <Canvas
+                  className="captcha-canvas"
+                  draw={draw}
+                  height={50}
+                  width={100}
                 />
               </div>
-              <div className="col-2">
-                <FontAwesomeIcon
-                  icon={faArrowsRotate}
-                  onClick={createCaptcha}
-                />
+              <div className="col-lg-7 col-md-7 col-sm-12">
+                <div className="input-group">
+                  <input
+                    type="text"
+                    id="captcha"
+                    className="form-control shadow-none"
+                    value={userData?.captcha}
+                    placeholder="Enter captcha"
+                    onChange={(e) => {
+                      setUSerData({ ...userData, captcha: e.target.value });
+                    }}
+                  />
+                  <button
+                    className="btn btn-outline-secondary captch-refresh-btn"
+                    type="button"
+                    title="Refresh Captcha"
+                  >
+                    <FontAwesomeIcon
+                      icon={faArrowsRotate}
+                      onClick={createCaptcha}
+                    />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-          <div className="d-grid mb-3">
+          <div className="d-flex justify-content-between">
             <BasicButton
-              disabled={isLoading ? isLoading : !isValid}
-              className="btn btn-bg-login"
-              type="submit"
+              //disabled={isLoading ? isLoading : !isValid}
+              className="primary rounded-0"
               buttonText="Login"
+              type="submit"
               onClick={(e) => loginAction(e)}
-              isLoading={isLoading}
+              isloading={isLoading}
               loadingText={<Spinner />}
+            />
+            <BasicButton
+              className="info rounded-0"
+              buttonText="Forgot Password"
+              type="submit"
+              isloading={isLoading}
             />
           </div>
         </div>

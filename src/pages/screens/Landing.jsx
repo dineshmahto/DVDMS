@@ -6,57 +6,49 @@ import About from "../../components/Sections/About";
 import Contact from "../../components/Sections/Contact";
 import Footer from "../../components/Sections/Footer";
 import Advantages from "../../components/Sections/Advantages";
-import './flexboxgrid.min.css'
-import "./land.css"
+import "./flexboxgrid.min.css";
+import "./land.css";
 import BasicModal from "../../components/modal/basicmodal";
 import LoginForm from "../../components/form/loginform/loginform";
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { closeLoginModal } from "../../store/login/actions";
-import styled, { keyframes } from 'styled-components';
-import { fadeIn } from 'react-animations';
+import styled, { keyframes } from "styled-components";
+import { fadeIn } from "react-animations";
+import { Modal } from "react-bootstrap";
 
-
- const Landing = () => {
-  const dispatch = useDispatch()
+const Landing = () => {
+  const dispatch = useDispatch();
   const show = useSelector((state) => state?.login?.show);
-  console.log("Show", show)
+  console.log("Show", show);
   return (
     <>
-
-      <BasicModal
-      title="Login"
+      <Modal
         show={show}
-        close={() => dispatch(closeLoginModal())}
-        isStatic={false}
+        backdrop={false ? `static` : true}
+        size="md"
+        aria-labelledby="contained-modal-title-vcenter"
+        onHide={() => dispatch(closeLoginModal())}
+        centered={false}
         scrollable={true}
-        isCenterAlign={true}
-        fullScreen={true}
-        size="lg" >
-
-      <BouncyDiv>
-      <LoginForm data-aos="zoom-in-down" />
-      </BouncyDiv>
-
-
-
-
-      </BasicModal>
+        fullscreen={false}
+        className="rounded-0"
+      >
+        <LoginForm data-aos="zoom-in-down" />
+      </Modal>
 
       <TopNavbar />
       <Header />
 
-      <Advantages/>
-      <About/>
+      <Advantages />
+      <About />
       <Contact />
       <Footer />
-
-
     </>
   );
-}
+};
 const bounceAnimation = keyframes`${fadeIn}`;
 const BouncyDiv = styled.div`
   animation: 1s ${bounceAnimation};
-  `;
-export default Landing
+`;
+export default Landing;

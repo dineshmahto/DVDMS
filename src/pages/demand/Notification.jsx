@@ -1,10 +1,8 @@
 import React, { useState, useMemo, useEffect, useCallback } from "react";
 import BasicButton from "../../components/button/basicbutton";
 import HorizonatalLine from "../../components/horizontalLine/horizonatalLine";
-import SelectOption from "../../components/option/option";
 import TableComponent from "../../components/tables/datatable/tableComponent";
-import { getNotificationService } from "../../services/notification/notificationservice";
-import { TableBody, TableRow, TableCell } from "@mui/material";
+import { TableBody } from "@mui/material";
 import "./notification.css";
 import SearchField from "../../components/search/search";
 import { faSearch, faDownload } from "@fortawesome/free-solid-svg-icons";
@@ -13,35 +11,67 @@ import moment from "moment";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import BasicModal from "../../components/modal/basicmodal";
 import Checkbox from "@mui/material/Checkbox";
-import { Spinner } from "react-bootstrap";
-import { makeStyles } from "@mui/styles";
-
-const useStyles = makeStyles({
-  tableCell: {
-    padding: "10px",
-    fontSize: "0.8rem !important",
-  },
-  lineHeight: {
-    lineHeight: "3",
-  },
-});
+import TablePagination from "../../components/tables/datatable/tablepagination";
+import { Paper } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  cancelNotification,
+  cancelNotificationResponse,
+  freezeNotification,
+  freezeNotificationResponse,
+  getNotificationList,
+  getNotificationListResponse,
+} from "../../store/demand/action";
+import toastMessage from "../../common/toastmessage/toastmessage";
+import CustomSelect from "../../components/select/customSelect";
+import { showLoader } from "../../store/loader/actions";
+import AlertDialog from "../../components/dialog/dialog";
+import TableRowLaoder from "../../components/tables/datatable/tableRowLaoder";
+import StyledTableRow from "../../components/tables/datatable/customTableRow";
+import StyledTableCell from "../../components/tables/datatable/customTableCell";
+import EmptyRow from "../../components/tables/datatable/emptyRow";
+import {
+  DELETE_MESSAGE_DESCRIPTION,
+  NETWORK_STATUS_CODE,
+  SERVER_STATUS_CODE,
+  SORTINGORDER,
+} from "../../common/constant/constant";
+import Basicbutton from "../../components/button/basicbutton";
+import { useMediaQuery } from "react-responsive";
 const Notification = () => {
+  const dispatch = useDispatch();
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 690px)" });
+  const notficationListResponse = useSelector(
+    (state) => state?.demand?.notficationListResponse
+  );
+  const cancelNotificationResponses = useSelector(
+    (state) => state?.demand?.cancelNotificationResponse
+  );
+  const freezeNotificationResponses = useSelector(
+    (state) => state?.demand?.freezeNotResp
+  );
+  console.log("cancelNotificationResponse", cancelNotificationResponses);
+  console.log("notficationListResponse", notficationListResponse);
+  console.log("freezeNotificationResponse", freezeNotificationResponses);
   let navigate = useNavigate();
-  let classes = useStyles();
-  const [totalPages, setTotalPages] = useState(0);
   const [tableData, setTableData] = useState([]);
+  console.log(typeof tableData, tableData?.length);
   const [controller, setController] = useState({
     page: 0,
     rowsPerPage: 10,
+    notitificationStatus: 1,
   });
+  const [totalRows, setTotalRows] = useState(0);
   const [sortField, setSortField] = useState("");
-  const [order, setOrder] = useState("asc");
+  const [order, setOrder] = useState(SORTINGORDER.ASC);
   const [selected, setSelected] = useState([]);
   const [loading, setLoading] = useState(false);
   const [show, setShow] = useState(false);
   const [previewList, setPreviewList] = useState([]);
   const [modalTitle, setModalTitle] = useState("");
   const [selectedRow, setSelectedRow] = useState([]);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showFreezeDialog, setShowFreezeDialog] = useState(false);
   const columns = useMemo(() => [
     {
       id: "notificationDate",
@@ -50,26 +80,17 @@ const Notification = () => {
     },
 
     {
-      id: "financialYear",
+      id: "financialDate",
       name: "FINANCIAL YEAR",
       sortable: true,
     },
 
     {
-      id: "demandTypeId",
-      name: "DEMAND TYPE",
-      sortable: true,
-    },
-    {
-      id: "submissionLastDate",
+      id: "lastDate",
       name: "SUBM. LAST DATE",
       sortable: true,
     },
-    {
-      id: "instituteType",
-      name: "INSTITUTE",
-      sortable: true,
-    },
+
     {
       id: "programDetail",
       name: "PROGRAM DETAIL",
@@ -85,6 +106,7 @@ const Notification = () => {
       name: "STATUS",
       sortable: true,
     },
+
     {
       id: "dwonload",
       name: "DOWNLOAD",
@@ -92,57 +114,142 @@ const Notification = () => {
     },
   ]);
 
-  const callApi = async () => {
-    await getNotificationService("pagination/calls/notificationList", {
-      pageNumber: controller.page,
-      pageSize: controller.rowsPerPage,
-    })
-      .then((r) => {
-        setLoading(false);
-        setTotalPages(r?.data?.totalPages);
-        // setTotalRows(r.data.totalElements);
-        setTableData(r.data.content);
-      })
-      .catch((e) => {
-        console.log("Error", e);
-      });
-  };
   useEffect(() => {
-    setLoading(true);
-
-    setTimeout(() => {
-      callApi();
-    }, 10000);
+    let isApiSubcribed = true;
+    if (isApiSubcribed) {
+      setLoading(true);
+      dispatch(
+        getNotificationList({
+          pageNumber: controller.page,
+          pageSize: controller.rowsPerPage,
+          status: controller.notitificationStatus,
+        })
+      );
+    }
     return () => {
-      clearTimeout();
+      dispatch(getNotificationListResponse(""));
+      isApiSubcribed = false;
     };
   }, [controller]);
-  const handlePageChange = (event, newPage) => {
-    setController({
-      ...controller,
-      page: newPage,
-    });
-  };
 
-  const handlePageChange1 = (event, newPage) => {
+  useEffect(() => {
+    if (
+      notficationListResponse &&
+      notficationListResponse?.status === NETWORK_STATUS_CODE.SUCCESS
+    ) {
+      setTotalRows(notficationListResponse?.data?.pageList?.totalElements);
+      setTableData(notficationListResponse?.data?.pageList?.content);
+      setLoading(false);
+    } else if (
+      notficationListResponse &&
+      notficationListResponse?.status == NETWORK_STATUS_CODE.BAD_REQUEST
+    ) {
+      setLoading(false);
+      dispatch(getNotificationListResponse(""));
+      toastMessage("Login Error", "Please enter valid ID", "error");
+    }
+  }, [notficationListResponse]);
+
+  useEffect(() => {
+    if (
+      freezeNotificationResponses &&
+      freezeNotificationResponses?.status ===
+        NETWORK_STATUS_CODE.CREATED_SUCCESSFULLY
+    ) {
+      if (
+        freezeNotificationResponses?.data?.status === SERVER_STATUS_CODE.SUCCESS
+      ) {
+        setShowFreezeDialog(false);
+        dispatch(
+          getNotificationList({
+            pageNumber: controller.page,
+            pageSize: controller.rowsPerPage,
+            status: controller.notitificationStatus,
+          })
+        );
+        toastMessage(
+          "Notification",
+          freezeNotificationResponses?.data?.message
+        );
+        dispatch(freezeNotificationResponse(""));
+      } else if (
+        freezeNotificationResponses?.data?.status === SERVER_STATUS_CODE.FAILED
+      ) {
+        setShowFreezeDialog(false);
+        toastMessage(
+          "Notification",
+          freezeNotificationResponses?.data?.message
+        );
+        dispatch(freezeNotificationResponse(""));
+      }
+    } else if (
+      freezeNotificationResponses &&
+      freezeNotificationResponses?.status == NETWORK_STATUS_CODE.INTERNAL_ERROR
+    ) {
+      setShowFreezeDialog(false);
+      toastMessage(
+        "Notication",
+        freezeNotificationResponses?.data?.message,
+        "error"
+      );
+      dispatch(freezeNotificationResponse(""));
+    }
+  }, [freezeNotificationResponses]);
+
+  useEffect(() => {
+    if (
+      cancelNotificationResponses &&
+      cancelNotificationResponses?.status ===
+        NETWORK_STATUS_CODE.CREATED_SUCCESSFULLY
+    ) {
+      setSelectedRow([]);
+      setSelected([]);
+      dispatch(
+        getNotificationList({
+          page: 0,
+          rowsPerPage: 10,
+          notitificationStatus: 1,
+        })
+      );
+      setShowDeleteDialog(false);
+      toastMessage("Notification", cancelNotificationResponses?.data?.message);
+      dispatch(cancelNotificationResponse(""));
+    } else if (
+      cancelNotificationResponses &&
+      cancelNotificationResponses?.status == NETWORK_STATUS_CODE.INTERNAL_ERROR
+    ) {
+      setShowDeleteDialog(false);
+      toastMessage(
+        "Notication",
+        cancelNotificationResponses?.data?.message,
+        "error"
+      );
+      dispatch(cancelNotificationResponse(""));
+    }
+  }, [cancelNotificationResponses]);
+
+  const handlePageChange = (newPage) => {
     setLoading(true);
     setController({
       ...controller,
       page: newPage - 1,
     });
   };
-  const handleChangeRowsPerPage = (event) => {
+  const handleChangeRowsPerPage = (e) => {
     setController({
       ...controller,
-      rowsPerPage: parseInt(event.target.value, 10),
+      rowsPerPage: e,
       page: 0,
     });
   };
   const handleSortingChange = (accessor) => {
     const sortOrder =
-      accessor === sortField && order === "asc" ? "desc" : "asc";
+      accessor === sortField && order === SORTINGORDER.ASC
+        ? SORTINGORDER.DESC
+        : SORTINGORDER.ASC;
     setSortField(accessor);
     setOrder(sortOrder);
+
     handleSorting(accessor, sortOrder);
   };
   const handleSorting = useCallback(
@@ -184,7 +291,25 @@ const Notification = () => {
       setSelected(openCopy);
     }
   };
+  const handleNotificationStatusChange = (selectedOption) => {
+    setController({
+      ...controller,
+      notitificationStatus: selectedOption?.value,
+    });
+  };
 
+  const handleDeleteDialog = () => {
+    setShowDeleteDialog(false);
+  };
+  const handleCancelNotification = () => {
+    console.log("selelcted", selectedRow?.id);
+    console.log("clicked handle Action");
+    dispatch(cancelNotification(selectedRow?.id));
+  };
+
+  const hanldeFreeze = () => {
+    dispatch(freezeNotification({ id: selectedRow?.id }));
+  };
   const preview = useCallback(() => {
     return (
       <BasicModal
@@ -203,7 +328,7 @@ const Notification = () => {
               <>
                 <p>
                   {" "}
-                  <span>{index + 1}. </span> {element?.programmeName}
+                  <span>{index + 1}. </span> {element?.name}
                 </p>
               </>
             );
@@ -213,245 +338,285 @@ const Notification = () => {
   }, [previewList, show, modalTitle]);
   return (
     <>
-      <div className="container-fluid">
-        <div className="row mt-2">
-          <div className="d-flex justify-content-start">
-            <p className="fs-6">DEMAND NOTIFICATION DESK</p>
+      <div className="row mt-2">
+        <div className="d-flex justify-content-start">
+          <p className="fs-6">DEMAND NOTIFICATION DESK</p>
+        </div>
+      </div>
+
+      <div
+        className={`row d-flex ${
+          isSmallScreen ? "flex-column" : "flex-row"
+        } justify-content-start mb-2`}
+      >
+        <div className="col-sm-12 col-md-4">
+          <div className="col-auto">
+            <label className="labellineHeight" htmlFor="storeName">
+              Store Name: STATE WAREHOUSE
+            </label>
           </div>
         </div>
-        <div className="row">
-          <div className="d-flex justify-content-start">
-            <div className="me-3">
-              <div className="row g-0">
-                <div className="col-5 text-center">
-                  <label className="labellineHeight" htmlFor="storeName">
-                    Store Name
-                  </label>
-                </div>
-                <div className="col-6">
-                  <SelectOption id="storeName" data={[]} />
-                </div>
-              </div>
-            </div>
-            <div className=" col-4">
-              <div className="row g-0">
-                <div className="col-6 text-center">
-                  <label
-                    className="labellineHeight"
-                    htmlFor="notificationStatus"
-                  >
-                    Notification Status
-                  </label>
-                </div>
-                <div className="col-4">
-                  <SelectOption id="notificationStatus" data={[]} />
-                </div>
-              </div>
-            </div>
+        <div className="col-sm-12 col-md-4">
+          <div className="col-auto">
+            <label className="labellineHeight" htmlFor="notificationStatus">
+              Notification Status
+            </label>
           </div>
-        </div>
-        <div className="row mt-2">
-          <div className="d-flex justify-content-start">
-            <BasicButton
-              type="button"
-              outlineType={true}
-              buttonText="New Notification (HQ)"
-              className="primary btn-sm"
-              onClick={(e) => {
-                navigate("/admin/openNotification");
+          <div className="col-auto">
+            <CustomSelect
+              defaultValue={{
+                value: "99",
+                label: "ALL",
               }}
-            />
-            {selected.length > 0 ? (
-              <>
-                <BasicButton
-                  type="button"
-                  buttonText="Edit PO"
-                  outlineType={true}
-                  className="primary btn-sm ms-1"
-                  disabled={selected.length > 0 ? null : "disabled"}
-                  onClick={(e) => console.log("Selected Data", selectedRow)}
-                />
-                <BasicButton
-                  type="button"
-                  buttonText="Edit PO"
-                  outlineType={true}
-                  className="primary btn-sm ms-1"
-                  disabled={selected.length > 0 ? null : "disabled"}
-                  onClick={(e) => console.log("Selected Data", selectedRow)}
-                />
-                <BasicButton
-                  type="button"
-                  buttonText="Edit PO"
-                  outlineType={true}
-                  className="primary btn-sm ms-1"
-                  disabled={selected.length > 0 ? null : "disabled"}
-                  onClick={(e) => console.log("Selected Data", selectedRow)}
-                />
-                <BasicButton
-                  type="button"
-                  outlineType={true}
-                  buttonText="Edit PO"
-                  className="primary btn-sm ms-1"
-                  disabled={selected.length > 0 ? null : "disabled"}
-                  onClick={(e) => console.log("Selected Data", selectedRow)}
-                />
-              </>
-            ) : (
-              ""
-            )}
-          </div>
-        </div>
-        <div className="row mt-2">
-          <HorizonatalLine text="Notification Details" />
-        </div>
-        <div className="row mb-1">
-          <div className="d-flex justify-content-between">
-            <div className="">
-              <div className="d-flex">
-                <div className={classes.lineHeight}>Show</div>
-                <SelectOption
-                  className="ms-1 me-1"
-                  id="rowsPerChange"
-                  data={[
-                    { value: 10, selected: true },
-                    { value: 20, selected: false },
-                    { value: 30, selected: false },
-                    { value: 40, selected: false },
-                  ]}
-                  onChange={(e) => {
-                    console.log("Value", e.target.value);
-                    if (e.target.value != "None") handleChangeRowsPerPage(e);
-                  }}
-                />
-                <div className={classes.lineHeight}>Entries</div>
-              </div>
-            </div>
-            <SearchField
-              iconPosition="end"
-              iconName={faSearch}
-              onChange={(e) => {
-                console.log(e);
-              }}
+              options={[
+                { value: "99", label: "ALL" },
+                { value: "1", label: " ACTIVE" },
+                { value: "3", label: "CANCELLED" },
+                { value: "10", label: "Compiled by HQ" },
+                { value: "11", label: "Closed" },
+              ]}
+              onChange={handleNotificationStatusChange}
             />
           </div>
         </div>
+      </div>
+
+      <div className="row mt-2">
+        <div
+          className={`d-flex ${
+            isSmallScreen ? "flex-column" : "flex-row"
+          } justify-content-start `}
+        >
+          <BasicButton
+            type="button"
+            buttonText="New Notification (HQ)"
+            className={`btn btn-outline-primary btn-sm rounded-0 ${
+              isSmallScreen ? "mb-1" : ""
+            }`}
+            onClick={(e) => {
+              navigate("/openNotification", { state: e });
+              dispatch(showLoader());
+            }}
+          />
+          {selected.length > 0 ? (
+            <>
+              <BasicButton
+                type="button"
+                buttonText="Cancel Notification"
+                outlineType={true}
+                className={`danger btn-sm ms-1 rounded-0 ${
+                  isSmallScreen ? "mb-1" : ""
+                }`}
+                disabled={selected.length > 0 ? null : "disabled"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowDeleteDialog(true);
+                }}
+              />
+              <BasicButton
+                type="button"
+                buttonText="Compile"
+                outlineType={true}
+                className={`primary btn-sm ms-1 rounded-0 ${
+                  isSmallScreen ? "mb-1" : ""
+                }`}
+                disabled={selected.length > 0 ? null : "disabled"}
+                onClick={(e) => {
+                  navigate("/openAnnualCompileForm", {
+                    state: selectedRow,
+                  });
+                }}
+              />
+              <BasicButton
+                type="button"
+                buttonText="Change Last Date"
+                outlineType={true}
+                className={`primary btn-sm ms-1 rounded-0 ${
+                  isSmallScreen ? "mb-1" : ""
+                }`}
+                disabled={selected.length > 0 ? null : "disabled"}
+                onClick={(e) => {
+                  navigate("/openExtendNotificationForm", {
+                    state: selectedRow,
+                  });
+                }}
+              />
+              <BasicButton
+                type="button"
+                buttonText="Freeze"
+                outlineType={true}
+                className={`primary btn-sm ms-1 rounded-0 ${
+                  isSmallScreen ? "mb-1" : ""
+                }`}
+                disabled={selected.length > 0 ? null : "disabled"}
+                onClick={() => {
+                  setShowFreezeDialog(true);
+                }}
+              />
+              <BasicButton
+                type="button"
+                outlineType={true}
+                buttonText="Annual Demand"
+                className={`primary btn-sm ms-1 rounded-0 ${
+                  isSmallScreen ? "mb-1" : ""
+                }`}
+                disabled={selected.length > 0 ? null : "disabled"}
+                onClick={(e) =>
+                  navigate("/generateAnnualDemand", { state: selectedRow })
+                }
+              />
+            </>
+          ) : (
+            ""
+          )}
+        </div>
+      </div>
+      <div className="row mt-2">
+        <HorizonatalLine text="Notification Details" />
+      </div>
+      <div className="row mb-2">
+        <div className="d-flex justify-content-end">
+          <SearchField
+            iconPosition="end"
+            iconName={faSearch}
+            onChange={(e) => {
+              console.log(e);
+            }}
+          />
+        </div>
+      </div>
+      <Paper elevation={3} className="mb-2">
         {/* Table Rendering */}
         <div className="row">
           <div className="col-12">
             <TableComponent
               columns={columns}
               sortField={sortField}
-              page={controller.page + 1}
-              count={totalPages}
-              rowsPerPage={controller.rowsPerPage}
               order={order}
-              paginationRequired={true}
-              onPageChange={handlePageChange1}
-              onRowsPerPageChange={handleChangeRowsPerPage}
               handleSorting={handleSortingChange}
               checkBoxRequired={true}
             >
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell className="text-center" colSpan={12}>
-                      <Spinner />
-                    </TableCell>
-                  </TableRow>
+                  <TableRowLaoder />
                 ) : (
                   tableData &&
-                  tableData.map((data, index) => (
-                    <TableRow key={data.id}>
-                      <TableCell padding="none">
-                        <Checkbox
-                          onClick={(event) => handleClick(event, index, data)}
-                          color="primary"
-                          checked={selected.includes(index)}
-                          inputProps={{
-                            "aria-labelledby": `enhanced-table-checkbox-${index}`,
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {moment(data.notificationDate).format("DD/MM/YYYY")}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data.financialYear}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.demandTypeId?.demandName}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {moment(data?.submissionLastDate).format("DD/MM/YYYY")}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.instituteType?.typeName}
-                      </TableCell>
-
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.programmeList &&
-                        data?.programmeList.length > 0 ? (
-                          <span
-                            className="text-decoration-underline"
-                            onClick={() => {
-                              setModalTitle("Programme List");
-                              setPreviewList(data?.programmeList);
-                              setShow(true);
+                  tableData?.length > 0 &&
+                  tableData?.map((data, index) => {
+                    return (
+                      <StyledTableRow key={data.id}>
+                        <StyledTableCell padding="none">
+                          <Checkbox
+                            onClick={(event) => handleClick(event, index, data)}
+                            color="primary"
+                            checked={selected.includes(index)}
+                            inputProps={{
+                              "aria-labelledby": `enhanced-table-checkbox-${index}`,
                             }}
-                            style={{ fontSize: "0.7rem", cursor: "pointer" }}
-                          >
-                            VIEW PROGRAMME LIST
-                          </span>
-                        ) : (
-                          "NONE"
-                        )}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.drugList && data?.drugList.length > 0 ? (
-                          <span
-                            className="text-decoration-underline"
-                            onClick={() => {
-                              setModalTitle("Drug List");
-                              setPreviewList(data?.drugList);
-                              setShow(true);
-                            }}
-                            style={{ fontSize: "0.7rem" }}
-                          >
-                            VIEW DRUGLIST
-                          </span>
-                        ) : (
-                          ""
-                        )}
-                      </TableCell>
+                          />
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {moment(data.notificationDate).format("DD/MM/YYYY")}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data.financialDate}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {moment.utc(data.lastDate).format("DD/MM/YYYY")}
+                        </StyledTableCell>
 
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.status === 10
-                          ? "	Compiled by HQ"
-                          : data?.status === 11
-                          ? " 	Closed"
-                          : data?.status === 1
-                          ? "Active"
-                          : data?.status === 3
-                          ? "Cancelled"
-                          : ""}
-                      </TableCell>
-                      <TableCell padding="none" className={classes.tableCell}>
-                        {data?.staus === 10 || data?.status === 11 ? (
-                          <FontAwesomeIcon icon={faDownload} />
-                        ) : (
-                          ""
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))
+                        <StyledTableCell padding="none">
+                          {data?.programList && data?.programList.length > 0 ? (
+                            <span
+                              className="text-decoration-underline"
+                              onClick={() => {
+                                setModalTitle("Programme List");
+                                setPreviewList(data?.programList);
+                                setShow(true);
+                              }}
+                              style={{ fontSize: "0.7rem", cursor: "pointer" }}
+                            >
+                              VIEW PROGRAMME LIST
+                            </span>
+                          ) : (
+                            "NONE"
+                          )}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data?.drugList && data?.drugList.length > 0 ? (
+                            <span
+                              className="text-decoration-underline"
+                              onClick={() => {
+                                setModalTitle("Drug List");
+                                setPreviewList(data?.drugList);
+                                setShow(true);
+                              }}
+                              style={{ fontSize: "0.7rem" }}
+                            >
+                              VIEW DRUGLIST
+                            </span>
+                          ) : (
+                            ""
+                          )}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data?.status}
+                        </StyledTableCell>
+                        <StyledTableCell padding="none">
+                          {data?.staus === 10 || data?.status === 11 ? (
+                            <FontAwesomeIcon icon={faDownload} />
+                          ) : (
+                            ""
+                          )}
+                        </StyledTableCell>
+                      </StyledTableRow>
+                    );
+                  })
                 )}
+                <EmptyRow loading={loading} tableData={tableData} />
               </TableBody>
             </TableComponent>
-
+            <TablePagination
+              page={controller.page + 1}
+              count={totalRows}
+              rowsPerPage={controller?.rowsPerPage}
+              onPageChange={handlePageChange}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
             {preview()}
           </div>
         </div>
-      </div>
+        {showDeleteDialog && (
+          <AlertDialog
+            open={showDeleteDialog}
+            handleClose={handleDeleteDialog}
+            description={DELETE_MESSAGE_DESCRIPTION}
+          >
+            <Basicbutton
+              buttonText="Disagree"
+              onClick={() => setShowDeleteDialog(false)}
+            />
+            <Basicbutton
+              buttonText="Agree"
+              onClick={handleCancelNotification}
+            />
+          </AlertDialog>
+        )}
+
+        {showFreezeDialog && (
+          <AlertDialog
+            open={showFreezeDialog}
+            handleClose={() => setShowFreezeDialog(false)}
+            description="Are you sure to close / freeze demand notification"
+          >
+            <Basicbutton
+              buttonText="Disagree"
+              onClick={() => setShowFreezeDialog(false)}
+            />
+            <Basicbutton buttonText="Agree" onClick={hanldeFreeze} />
+          </AlertDialog>
+        )}
+      </Paper>
     </>
   );
 };

@@ -1,0 +1,329 @@
+[
+  {
+    "name": "dashboard",
+    "displayName": "Dashboard",
+    "id": 1,
+    "url": "dashboard",
+    "module": "dashboard",
+    "iconName": "fa-tachometer-alt"
+  },
+  {
+    "name": "demand",
+    "id": 14,
+    "url": "",
+    "module": "demand",
+    "displayName": "Demand",
+    "iconName": "fa-columns",
+    "children": [
+      {
+        "name": "openNotificationDesk",
+        "displayName": "Notification",
+        "id": 21,
+        "url": "/openNotificationDesk"
+      }
+    ]
+  },
+
+  {
+    "name": "ordermgmt",
+    "id": 41,
+    "url": "",
+    "module": "ordermgmt",
+    "displayName": "Order Management",
+    "iconName": "fa-list-radio",
+    "children": [
+      {
+        "name": "openPurchaseOrderList",
+        "displayName": " Purchase Order List.",
+        "id": 21,
+        "url": "/openPurchaseOrderList"
+      },
+      {
+        "name": "openRateContractListing",
+        "displayName": "Rate Contract.",
+        "id": 22,
+        "url": "/openRateContractListing"
+      },
+      {
+        "name": "openCentralPurchase",
+        "displayName": "Central Purchase.",
+        "id": 22,
+        "url": "/openCentralPurchase"
+      },
+      {
+        "name": "openLocalPOForm",
+        "displayName": "Local Purchase",
+        "id": 22,
+        "url": "/openLocalPOForm"
+      },
+      {
+        "name": "manufecturingList",
+        "displayName": "Manufacturing list",
+        "id": 22,
+        "url": "/manufecturingList"
+      },
+      {
+        "name": "approvals",
+        "displayName": "Approvals",
+        "id": 23,
+        "url": "",
+        "children": [
+          {
+            "name": "openDemandApproval",
+            "displayName": "Annual Demands",
+            "id": 55,
+            "url": "/openDemandApproval"
+          },
+          {
+            "name": "openPurchaseOrderForApprovalList",
+            "displayName": "Purchase Order",
+            "id": 56,
+            "url": "/openPurchaseOrderForApprovalList"
+          },
+          {
+            "name": "openApprovalDesk",
+            "displayName": " Intent Approval",
+            "id": 57,
+            "url": "/openApprovalDesk"
+          },
+          {
+            "name": "openTransferApprovalDesk",
+            "displayName": " Transfer Approval",
+            "id": 58,
+            "url": "/openTransferApprovalDesk"
+          },
+          {
+            "name": "openTransferManagerforHQ",
+            "displayName": "Transfer Approval(HQ)",
+            "id": 59,
+            "url": "/openTransferManagerforHQ"
+          }
+        ]
+      }
+    ]
+  },
+
+  {
+    "name": "stock",
+    "id": 41,
+    "url": "",
+    "module": "stock",
+    "displayName": "Stock",
+    "iconName": "fa-warehouse",
+    "children": [
+      {
+        "name": "stocklisting",
+        "displayName": "Stock List.",
+        "id": 21,
+        "url": "/stocklisting"
+      },
+      {
+        "name": "openstockentry",
+        "displayName": "Stock Entry.",
+        "id": 22,
+        "url": "/openstockentry"
+      },
+      {
+        "name": "updateStockRackDesk",
+        "displayName": " Update Stock Rack",
+        "id": 22,
+        "url": "/updateStockRackDesk"
+      },
+      {
+        "name": "openCondeminationRegister",
+        "displayName": "Condemnation Register",
+        "id": 22,
+        "url": "/openCondeminationRegister"
+      },
+      {
+        "name": "openStockVerificationDeck",
+        "displayName": "Stock Verification",
+        "id": 22,
+        "url": "/openStockVerificationDeck"
+      }
+    ]
+  },
+  {
+    "name": "requisition",
+    "id": 41,
+    "url": "",
+    "module": "requisition",
+    "displayName": " Requisition",
+    "children": [
+      {
+        "name": "openIndentDesk",
+        "displayName": "Intent Drugs",
+        "id": 21,
+        "url": "/openIndentDesk"
+      },
+      {
+        "name": "transferList",
+        "displayName": " Transfer List",
+        "id": 22,
+        "url": "/transferList"
+      }
+    ]
+  },
+  {
+    "name": "receiving",
+    "id": 41,
+    "url": "",
+    "module": "receiving",
+    "displayName": " Receiving",
+    "iconName": "fa-inbox-in",
+    "children": [
+      {
+        "name": "openChallanDesk",
+        "displayName": "Challan List",
+        "id": 21,
+        "url": "/openChallanDesk"
+      },
+      {
+        "name": "openIndentReceiveDesk",
+        "displayName": " Receive of Drugs",
+        "id": 22,
+        "url": "/openIndentReceiveDesk"
+      }
+    ]
+  },
+  {
+    "name": "issue",
+    "id": 41,
+    "url": "",
+    "module": "issue",
+    "displayName": "Issue",
+    "iconName": "fa-box-open",
+    "children": [
+      {
+        "name": "openIssueDesk",
+        "displayName": "Issue Desk",
+        "id": 21,
+        "url": "/openIssueDesk"
+      },
+      {
+        "name": "openReturnDesk",
+        "displayName": "Return Desk",
+        "id": 22,
+        "url": "/openReturnDesk"
+      },
+      {
+        "name": "openStockForMisConsumptionDesk",
+        "displayName": "Miscellaneous Consumption",
+        "id": 22,
+        "url": "/openStockForMisConsumptionDesk"
+      }
+    ]
+  },
+  {
+    "name": "admin",
+    "id": 41,
+    "url": "",
+    "module": "admin",
+    "displayName": "Admin",
+    "iconName": "fa-lock",
+    "children": [
+      {
+        "name": "listuser",
+        "displayName": " User Desk",
+        "id": 21,
+        "url": "/listuser"
+      },
+      {
+        "name": "listDrug",
+        "displayName": " Drug Desk",
+        "id": 22,
+        "url": "/listDrug"
+      },
+      {
+        "name": "listStore",
+        "displayName": "Store Desk",
+        "id": 22,
+        "url": "/listStore"
+      },
+      {
+        "name": "programpage",
+        "displayName": "Program Desk",
+        "id": 22,
+        "url": "/programpage"
+      },
+      {
+        "name": "listrole",
+        "displayName": "Role Desk",
+        "id": 22,
+        "url": "/listrole"
+      },
+      {
+        "name": "openProgramFundingInterface",
+        "displayName": "Program Funding Mapping",
+        "id": 22,
+        "url": "/openProgramFundingInterface"
+      },
+      {
+        "name": "storetypedrugmapping",
+        "displayName": " EDL Mapping",
+        "id": 22,
+        "url": "/storetypedrugmapping"
+      },
+      {
+        "name": "openBudgetListingInterface",
+        "displayName": " Budget Interface",
+        "id": 22,
+        "url": "/openBudgetListingInterface"
+      },
+      {
+        "name": "openFundingList",
+        "displayName": "Funding Source",
+        "id": 22,
+        "url": "/openFundingList"
+      }
+    ]
+  },
+  {
+    "name": "reports",
+    "id": 41,
+    "url": "",
+    "module": "reports",
+    "displayName": "Reports",
+    "iconName": "fa-chart-area",
+    "children": [
+      {
+        "name": "stockReport",
+        "displayName": "Stock Report",
+        "id": 23,
+        "url": "",
+        "children": [
+          {
+            "name": "stockledger",
+            "displayName": "Stock Ledger",
+            "id": 55,
+            "url": "/stockledger"
+          },
+          {
+            "name": "stockexpirereport",
+            "displayName": "Expiry Details",
+            "id": 56,
+            "url": "/stockexpirereport"
+          },
+          {
+            "name": "stockstatus",
+            "displayName": "  Stock Status",
+            "id": 57,
+            "url": "/stockstatus"
+          },
+          {
+            "name": "stockstatuspgmwise",
+            "displayName": "Stock Status (Program Wise)",
+            "id": 58,
+            "url": "/stockstatuspgmwise"
+          },
+          {
+            "name": "stockzeroreport",
+            "displayName": " Stock Zero Report",
+            "id": 66,
+            "url": "/stockzeroreport"
+          }
+        ]
+      }
+    ]
+  }
+]
