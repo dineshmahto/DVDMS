@@ -49,13 +49,13 @@ const SupplierList = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const poApprovedListResp = useSelector(
-    (state) => state.admin.purchaseOrderListResponse
+    (state) => state.supplier.poApprovedListResp
   );
-  const cancelPoResp = useSelector(
-    (state) => state?.supplier?.poApprovedListResp
-  );
+  //   const cancelPoResp = useSelector(
+  //     (state) => state?.supplier?.poApprovedListResp
+  //   );
   console.log("poApprovedListResp", poApprovedListResp);
-  console.log("cancelPores", cancelPoResp);
+  // console.log("cancelPores", cancelPoResp);
   const [tableData, setTableData] = useState([]);
   const [totalRows, setTotalRows] = useState(0);
   const [controller, setController] = useState({
@@ -70,13 +70,10 @@ const SupplierList = () => {
   const [showDialog, setShowDialog] = useState(false);
 
   const [isCancelable, setIsCancelable] = useState(false);
+  const [acceptable, setAcceptable] = useState(false);
+  const [dispatchable, setDispatchable] = useState(false);
   const [open, setOpen] = useState([]);
   const columns = useMemo(() => [
-    {
-      id: "action",
-      name: "Action",
-      sortable: false,
-    },
     {
       id: "id",
       name: "SL.NO",
@@ -128,7 +125,8 @@ const SupplierList = () => {
       const openCopy = selected.filter((element) => {
         return element !== index;
       });
-      setIsCancelable(false);
+      setDispatchable(false);
+      setAcceptable(false);
       setSelectedRow([]);
       setSelected(openCopy);
     } else {
@@ -238,21 +236,45 @@ const SupplierList = () => {
 
         <div className="row mt-2 mb-2">
           <div className="d-flex justify-content-between">
-            {selected && selected.length > 0 ? (
-              <div className="">
+            {selected && selected.length > 0 && acceptable ? (
+              <div>
                 <Basicbutton
                   type="button"
                   buttonText="Acceptance"
-                  className="danger btn-sm me-2 rounded-0 col-sm-12"
-                  disabled={selected.length > 0 ? null : "disabled"}
+                  className="primary btn-sm me-2 rounded-0 col-sm-12"
+                  disabled={
+                    selected.length > 0 && acceptable ? null : "disabled"
+                  }
                   onClick={(e) => {
                     console.log("Selected Data", selectedRow);
-                    navigate("/");
+                    navigate("/openAcceptanceForm", { state: selectedRow });
                   }}
                   icon={<FontAwesomeIcon icon={faXmark} className="me-1" />}
                 />
               </div>
             ) : null}
+
+            <div className="row mt-2 mb-2">
+              <div className="d-flex justify-content-between">
+                {selected && selected.length > 0 && dispatchable ? (
+                  <div>
+                    <Basicbutton
+                      type="button"
+                      buttonText="Dispatch"
+                      className="primary btn-sm me-2 rounded-0 col-sm-12"
+                      disabled={
+                        selected.length > 0 && dispatchable ? null : "disabled"
+                      }
+                      onClick={(e) => {
+                        console.log("Selected Data", selectedRow);
+                        navigate("/openDispatchForm", { state: selectedRow });
+                      }}
+                      icon={<FontAwesomeIcon icon={faXmark} className="me-1" />}
+                    />
+                  </div>
+                ) : null}
+              </div>
+            </div>
             <SearchField
               iconPosition="end"
               iconName={faSearch}
@@ -283,7 +305,7 @@ const SupplierList = () => {
                       <>
                         <StyledTableRow key={row.id}>
                           <StyledTableCell>
-                            {row?.drudList && row?.drudList.length > 0 ? (
+                            {row?.drugList && row?.drugList.length > 0 ? (
                               <IconButton
                                 aria-label="expand row"
                                 size="small"
@@ -298,12 +320,16 @@ const SupplierList = () => {
                                 />
                               </IconButton>
                             ) : null}
-                          </StyledTableCell>
-                          <StyledTableCell padding="none">
+
                             <Checkbox
-                              onClick={(event) =>
-                                handleClick(event, index, row)
-                              }
+                              onClick={(event) => {
+                                if (row?.status === 13) {
+                                  setDispatchable(true);
+                                } else if (row?.status === 4) {
+                                  setAcceptable(true);
+                                }
+                                handleClick(event, index, row);
+                              }}
                               color="primary"
                               checked={selected.includes(index)}
                               inputProps={{
@@ -312,17 +338,13 @@ const SupplierList = () => {
                             />
                           </StyledTableCell>
                           <StyledTableCell padding="none">
-                            {row?.id}
+                            {index + 1}
                           </StyledTableCell>
-                          <StyledTableCell padding="none">
-                            {row?.poRef}
-                          </StyledTableCell>
+
                           <StyledTableCell padding="none">
                             {moment(row?.poDate).format("DD/MM/YYYY")}
                           </StyledTableCell>
-                          <StyledTableCell padding="none">
-                            {row?.supplierName}
-                          </StyledTableCell>
+
                           <StyledTableCell padding="none">
                             {row?.consignee}
                           </StyledTableCell>
@@ -332,7 +354,7 @@ const SupplierList = () => {
                           </StyledTableCell>
                           <StyledTableCell padding="none"></StyledTableCell>
                         </StyledTableRow>
-                        {row?.drudList && row?.drudList.length > 0 ? (
+                        {row?.drugList && row?.drugList.length > 0 ? (
                           <TableRow>
                             <TableCell
                               style={{ paddingBottom: 0, paddingTop: 0 }}
@@ -363,9 +385,9 @@ const SupplierList = () => {
                                       </TableRow>
                                     </TableHead>
                                     <TableBody>
-                                      {row?.drudList &&
-                                        row?.drudList.length > 0 &&
-                                        row?.drudList.map((ele) => {
+                                      {row?.drugList &&
+                                        row?.drugList.length > 0 &&
+                                        row?.drugList.map((ele) => {
                                           return (
                                             <>
                                               <StyledTableRow key={ele?.id}>

@@ -35,7 +35,8 @@ import { Seo } from "../../../components/seo/seo";
 import dayjs from "dayjs";
 import { NETWORK_STATUS_CODE } from "../../../common/constant/constant";
 import NextBreadcrumbs from "../../../components/breadcumb/breadcumb";
-
+import { useMediaQuery } from "react-responsive";
+import { useNavigate } from "react-router-dom";
 const useStyles = makeStyles({
   tableCell: {
     padding: "10px !important",
@@ -47,6 +48,8 @@ const useStyles = makeStyles({
 });
 
 const IssueDesk = () => {
+  const navigate = useNavigate();
+  const isSmallScreen = useMediaQuery({ query: "(max-width: 600px)" });
   const dispatch = useDispatch();
   const issueDeskResponse = useSelector(
     (state) => state.issuereturn?.issueDeskListResponse
@@ -219,54 +222,51 @@ const IssueDesk = () => {
         </div>
       </div>
 
-      <div className="row d-flex justify-content-start">
-        <div className="col-12">
-          <div className="row align-items-center">
-            <div className="col-auto">
-              <div>
-                <Link to={"/openIssueToThirdparty"}>
-                  <Basicbutton
-                    type="button"
-                    buttonText="3rd Party Issue"
-                    className="primary rounded-0"
-                  />
-                </Link>
-              </div>
-            </div>
-            <div className="col-auto">
-              <div>
-                <Link to={"/openIssueToSubstore"}>
-                  <Basicbutton
-                    type="button"
-                    buttonText="Intent Issue"
-                    className="primary rounded-0"
-                  />
-                </Link>
-              </div>
-            </div>
-            <div className="col-auto">
-              <div>
-                <Link to={"/openOfflineIssue"}>
-                  <Basicbutton
-                    type="button"
-                    buttonText="Offline Issue (Sub store)"
-                    className="primary rounded-0"
-                  />
-                </Link>
-              </div>
-            </div>
-            <div className="col-auto">
-              <div>
-                <Link to={"/openIssueToCamp"}>
-                  <Basicbutton
-                    type="button"
-                    buttonText="Camp Issue"
-                    className="primary rounded-0"
-                  />
-                </Link>
-              </div>
-            </div>
-          </div>
+      <div className="row">
+        <div
+          className={`d-flex ${
+            isSmallScreen ? "flex-column" : "flex-row"
+          } justify-content-between`}
+        >
+          <Basicbutton
+            type="button"
+            buttonText="3rd Party Issue"
+            className="primary rounded-0"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/openIssueToThirdparty");
+            }}
+          ></Basicbutton>
+
+          <Basicbutton
+            type="button"
+            buttonText="Intent Issue"
+            className="primary rounded-0"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/openIssueToSubstore");
+            }}
+          ></Basicbutton>
+
+          <Basicbutton
+            type="button"
+            buttonText="Offline Issue (Sub store)"
+            className="primary rounded-0"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/openOfflineIssue");
+            }}
+          ></Basicbutton>
+
+          <Basicbutton
+            type="button"
+            buttonText="Camp Issue"
+            className="primary rounded-0"
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("/openIssueToCamp");
+            }}
+          ></Basicbutton>
         </div>
       </div>
       <div className="row mt-2">

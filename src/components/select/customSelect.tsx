@@ -1,5 +1,5 @@
 import React from "react";
-import Select, { components } from "react-select";
+import Select from "react-select";
 export type menuPosition = "bottom" | "auto" | "top";
 interface defaultValue {
   value: string;

@@ -170,6 +170,10 @@ export const REFRESH_TOKEN = "auth/refresh-token";
 
 //Supplier
 export const GET_PO_APPROVED_LIST = "pagination/getPoApprovedList";
+export const GET_PO_INFO_BY_ID = "supplier/getPoInfoForById";
+export const REJECT_PO_INFO = "supplier/getRejectPoInfo";
+export const APPROVE_PO_INFO = "supplier/getApprovePoInfo";
+export const DISPATCH_PO_ITEM = "supplier/dispatchOfPurchaseItem";
 
 //reports
 

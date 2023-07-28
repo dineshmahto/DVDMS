@@ -139,16 +139,13 @@ const UserDesk = () => {
     },
   ]);
 
-  const handlePageChange = useCallback(
-    (newPage) => {
-      setLoading(true);
-      setController({
-        ...controller,
-        page: newPage - 1,
-      });
-    },
-    [controller]
-  );
+  const handlePageChange = (newPage) => {
+    setLoading(true);
+    setController({
+      ...controller,
+      page: newPage - 1,
+    });
+  };
   const handleChangeRowsPerPage = (e) => {
     setController({
       ...controller,
@@ -326,7 +323,7 @@ const UserDesk = () => {
             className={`me-1 ${isSmallScreen ? "mb-1" : "mb-0"}`}
             iconPosition="end"
             iconName={faSearch}
-            disabled={tableData.length === 0 ? true : false}
+            // disabled={tableData.length === 0 ? true : false}
             onChange={(e) => {
               if (e.target?.value != "") {
                 console.log(e.target?.value);
@@ -342,7 +339,7 @@ const UserDesk = () => {
         </div>
       </div>
 
-      <Paper elevation={3}>
+      <Paper elevation={3} className="mb-1">
         <div className="row">
           <div className="col-12">
             <TableComponent

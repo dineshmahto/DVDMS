@@ -161,7 +161,7 @@ const issueReturn = (state = initialState, action) => {
         ...state,
         saveIssueToThirdPartyResp: action?.payload,
       };
-
+      break;
     case GET_INTENT_DRUG:
       state = {
         ...state,

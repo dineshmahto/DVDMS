@@ -1,4 +1,4 @@
-import { call, put, take, takeEvery } from "redux-saga/effects";
+import { call, put, takeEvery } from "redux-saga/effects";
 import {
   createNewBudgetDeskResponse,
   createNewBudgetInterfaceResponse,
@@ -38,7 +38,6 @@ import {
   editStoreRecordResponse,
   deleteStoreRecordResponse,
   editRoleResponse,
-  createEdlMappingResponse,
   createEdlMapingResponse,
   createProgramFundingResponse,
 } from "./action";
@@ -70,10 +69,8 @@ import {
   GET_USER_LIST,
   POST_EDL_MAPPING,
   POST_PROGRAM_FUND_MAPPING,
-  ROLE_DELETED_SUCCESSFULL,
   UPDATE_PROGRAM,
   EDIT_NEW_FUNDING,
-  EDIT_NEW_FUNDING_RESPONSE,
   GET_ACTIVITY_LIST_BY_ROLE_ID,
   DELETE_USER,
   GET_FUNDING_SOURCE_BY_PORGRM_NAME,
@@ -125,11 +122,9 @@ function* deleteUserById({ payload: userId }) {
 function* getUserList({ payload: pageDetails }) {
   console.log("pageDetails", pageDetails);
   try {
-    const response = yield call(
-      Service.commonFetch,
-      CONSTANTS.USER_LISTING,
-      pageDetails
-    );
+    const response = yield call(Service.commonFetch, CONSTANTS.USER_LISTING, {
+      params: pageDetails,
+    });
     console.log("Response", response);
     yield put(getUserListResponse(response));
   } catch (error) {

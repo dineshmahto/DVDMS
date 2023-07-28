@@ -14,39 +14,42 @@ import {
   NETWORK_STATUS_CODE,
   SERVER_STATUS_CODE,
 } from "../../common/constant/constant";
-import { getPoApprovedList } from "src/store/supplier/action";
+import {
+  approvePoInfo,
+  approvePoInfoResponse,
+  getPoApprovedList,
+  getPoInfoById,
+  rejectPoInfo,
+  rejectPoInfoResponse,
+} from "src/store/supplier/action";
 import { useNavigate } from "react-router-dom";
 import BasicTextAreaField from "src/components/inputbox/textarea";
 import BackButon from "src/components/button/backButon";
+import { useLocation } from "react-router-dom";
 const AcceptanceForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const poApprovedListResp = useSelector(
-    (state) => state.admin.purchaseOrderListResponse
+  const { state } = useLocation();
+  console.log("state", state);
+  const poInfoIdByResp = useSelector((state) => state?.supplier?.poInfoIdResp);
+  const approvePoInfoResp = useSelector(
+    (state) => state?.supplier?.approvePoInfoResp
   );
-  const cancelPoResp = useSelector(
-    (state) => state?.supplier?.poApprovedListResp
+  const rejectPoInfoResp = useSelector(
+    (state) => state?.supplier?.rejectPoInfoResp
   );
-  console.log("poApprovedListResp", poApprovedListResp);
-  console.log("cancelPores", cancelPoResp);
+  console.log("approvePoInfoResp", approvePoInfoResp);
+  console.log("rejectPoInfoResp", rejectPoInfoResp);
+  console.log("poInfoIdByResp", poInfoIdByResp);
   const [tableData, setTableData] = useState([]);
-  const [totalRows, setTotalRows] = useState(0);
-  const [controller, setController] = useState({
-    page: 0,
-    rowsPerPage: 10,
-  });
-  const [sortField, setSortField] = useState("");
-  const [order, setOrder] = useState("asc");
-  const [selected, setSelected] = useState([]);
-  const [selectedRow, setSelectedRow] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showDialog, setShowDialog] = useState(false);
-
-  const [isCancelable, setIsCancelable] = useState(false);
-  const [open, setOpen] = useState([]);
+  const [submitData, setSubmitData] = useState({
+    remarks: "",
+    id: state?.id,
+  });
   const columns = useMemo(() => [
     {
-      id: "id",
+      id: "sl",
       name: "SL.NO",
       sortable: true,
     },
@@ -56,7 +59,7 @@ const AcceptanceForm = () => {
       sortable: false,
     },
     {
-      id: "orderedQty",
+      id: "orderQty",
       name: "ORDERED QTY",
       sortable: false,
     },
@@ -65,69 +68,119 @@ const AcceptanceForm = () => {
   useEffect(() => {
     let isApiSubcribed = true;
     if (isApiSubcribed) {
-      setLoading(true);
-      dispatch(
-        getPoApprovedList({
-          pageNumber: 0,
-          pageSize: controller.rowsPerPage,
-        })
-      );
+      if (state != null) {
+        setLoading(true);
+        dispatch(
+          getPoInfoById({
+            id: state?.id,
+          })
+        );
+      } else {
+        navigate("/supplierInterface");
+      }
     }
     return () => {
       isApiSubcribed = false;
     };
-  }, [controller]);
+  }, [state]);
 
   useEffect(() => {
     if (
-      poApprovedListResp &&
-      poApprovedListResp?.status === NETWORK_STATUS_CODE.SUCCESS
+      poInfoIdByResp &&
+      poInfoIdByResp?.status === NETWORK_STATUS_CODE.SUCCESS
     ) {
-      setTotalRows(poApprovedListResp?.data?.pageList?.totalElements);
-      setTableData(poApprovedListResp?.data?.pageList?.content);
+      setTableData(poInfoIdByResp?.data?.getPoInfoById.drugInfo);
       setLoading(false);
     } else if (
-      poApprovedListResp &&
-      poApprovedListResp?.status === NETWORK_STATUS_CODE?.INTERNAL_ERROR
+      poInfoIdByResp &&
+      poInfoIdByResp?.status === NETWORK_STATUS_CODE?.INTERNAL_ERROR
     ) {
       setLoading(false);
       toastMessage("Supplier List", "Something went wrong", "error");
     }
-  }, [poApprovedListResp]);
+  }, [poInfoIdByResp]);
 
   useEffect(() => {
     if (
-      cancelPoResp &&
-      cancelPoResp?.status === NETWORK_STATUS_CODE.CREATED_SUCCESSFULLY
+      rejectPoInfoResp &&
+      rejectPoInfoResp?.status === NETWORK_STATUS_CODE.CREATED_SUCCESSFULLY
     ) {
-      if (cancelPoResp?.data?.status === SERVER_STATUS_CODE.SUCCESS) {
-        setSelectedRow([]);
-        setSelected([]);
-
-        setShowDialog(false);
-        toastMessage("CANCEL PO", cancelPoResp?.data?.message, "success");
-      } else if (cancelPoResp?.data?.status === SERVER_STATUS_CODE.FAILED) {
-        setSelectedRow([]);
-        setSelected([]);
-        setShowDialog(false);
-        toastMessage("CANCEL PO", cancelPoResp?.data?.message, "error");
+      if (rejectPoInfoResp?.data?.status === SERVER_STATUS_CODE.SUCCESS) {
+        toastMessage(
+          "ACCEPTANCE FORM REJECT",
+          rejectPoInfoResp?.data?.message,
+          "success"
+        );
+        dispatch(rejectPoInfoResponse(""));
+        navigate("/supplierInterface");
+      } else if (rejectPoInfoResp?.data?.status === SERVER_STATUS_CODE.FAILED) {
+        toastMessage(
+          "ACCEPTANCE FORM REJECT",
+          rejectPoInfoResp?.data?.message,
+          "error"
+        );
+        dispatch(rejectPoInfoResponse(""));
       }
     } else if (
-      cancelPoResp &&
-      cancelPoResp?.status === NETWORK_STATUS_CODE?.INTERNAL_ERROR
+      rejectPoInfoResp &&
+      rejectPoInfoResp?.status === NETWORK_STATUS_CODE?.INTERNAL_ERROR
     ) {
-      setSelectedRow([]);
-      setSelected([]);
-      setShowDialog(false);
-      toastMessage("CANCEL PO", "Something went wrong", "error");
+      toastMessage("ACCEPTANCE FORM REJECT", "Something went wrong", "error");
+      dispatch(rejectPoInfoResponse(""));
     } else if (
-      cancelPoResp &&
-      cancelPoResp?.status === NETWORK_STATUS_CODE?.PAGE_NOT_FOUND
+      rejectPoInfoResp &&
+      rejectPoInfoResp?.status === NETWORK_STATUS_CODE?.PAGE_NOT_FOUND
     ) {
-      setShowDialog(false);
-      toastMessage("CANCEL PO", cancelPoResp?.data?.message, "error");
+      toastMessage(
+        "ACCEPTANCE FORM REJECT",
+        rejectPoInfoResp?.data?.message,
+        "error"
+      );
+      dispatch(rejectPoInfoResponse(""));
     }
-  }, [cancelPoResp]);
+  }, [rejectPoInfoResp]);
+
+  useEffect(() => {
+    if (
+      approvePoInfoResp &&
+      approvePoInfoResp?.status === NETWORK_STATUS_CODE.CREATED_SUCCESSFULLY
+    ) {
+      if (approvePoInfoResp?.data?.status === SERVER_STATUS_CODE.SUCCESS) {
+        toastMessage(
+          "ACCEPTANCE FORM APPROVE",
+          approvePoInfoResp?.data?.message,
+          "success"
+        );
+        dispatch(approvePoInfoResponse(""));
+        navigate("/supplierInterface");
+      } else if (
+        approvePoInfoResp?.data?.status === SERVER_STATUS_CODE.FAILED
+      ) {
+        toastMessage(
+          "ACCEPTANCE FORM APPROVE",
+          approvePoInfoResp?.data?.message,
+          "error"
+        );
+        dispatch(approvePoInfoResponse(""));
+      }
+    } else if (
+      approvePoInfoResp &&
+      approvePoInfoResp?.status === NETWORK_STATUS_CODE?.INTERNAL_ERROR
+    ) {
+      toastMessage("ACCEPTANCE FORM APPROVE", "Something went wrong", "error");
+      dispatch(approvePoInfoResponse(""));
+    } else if (
+      approvePoInfoResp &&
+      approvePoInfoResp?.status === NETWORK_STATUS_CODE?.PAGE_NOT_FOUND
+    ) {
+      toastMessage(
+        "ACCEPTANCE FORM APPROVE",
+        approvePoInfoResp?.data?.message,
+        "error"
+      );
+      dispatch(approvePoInfoResponse(""));
+    }
+  }, [approvePoInfoResp]);
 
   return (
     <>
@@ -138,40 +191,50 @@ const AcceptanceForm = () => {
           </div>
         </div>
         <div className="row">
-          <BackButon routePath="/" />
+          <BackButon routePath="/supplierInterface" />
         </div>
         <div className="row">
           <div className="col-sm-12 col-md-3 col-lg-3">
             <div className="col-auto">
-              <label className="labellineHeight" htmlFor="storeName">
-                Supplier Name
+              <label className="labellineHeight fw-bold" htmlFor="storeName">
+                Supplier Name :{" "}
+                {poInfoIdByResp?.data?.getPoInfoById?.supplierInfo?.supplierId}
               </label>
             </div>
-            <div className="col-auto"></div>
           </div>
           <div className=" col-sm-12 col-md-3 col-lg-3">
             <div className="col-auto">
-              <label className="labellineHeight" htmlFor="notificationStatus">
-                PO Number
+              <label
+                className="labellineHeight fw-bold"
+                htmlFor="notificationStatus"
+              >
+                PO Number : {poInfoIdByResp?.data?.getPoInfoById?.poNo}
               </label>
             </div>
-            <div className="col-auto"></div>
           </div>
           <div className=" col-sm-12 col-md-3 col-lg-3">
             <div className="col-auto">
-              <label className="labellineHeight" htmlFor="notificationStatus">
-                PO Date
+              <label
+                className="labellineHeight fw-bold"
+                htmlFor="notificationStatus"
+              >
+                PO Date: {poInfoIdByResp?.data?.getPoInfoById?.poDate}
               </label>
             </div>
-            <div className="col-auto"></div>
           </div>
           <div className=" col-sm-12 col-md-3 col-lg-3">
             <div className="col-auto">
-              <label className="labellineHeight" htmlFor="notificationStatus">
-                Consignee Warehouse
+              <label
+                className="labellineHeight fw-bold"
+                htmlFor="notificationStatus"
+              >
+                Consignee Warehouse :{" "}
+                {
+                  poInfoIdByResp?.data?.getPoInfoById?.supplierInfo
+                    ?.consigneeInfo
+                }
               </label>
             </div>
-            <div className="col-auto"></div>
           </div>
         </div>
         <div className="row mt-2">
@@ -192,6 +255,13 @@ const AcceptanceForm = () => {
                       <>
                         <StyledTableRow key={row.id}>
                           {columns.map((d, k) => {
+                            if (d.id === "sl") {
+                              return (
+                                <StyledTableCell padding="none">
+                                  {index + 1}
+                                </StyledTableCell>
+                              );
+                            }
                             return (
                               <StyledTableCell padding="none">
                                 {row[d.id]}
@@ -210,13 +280,50 @@ const AcceptanceForm = () => {
         </Paper>
       </div>
 
-      <div className="row d-flex justify-content-center">
-        <BasicTextAreaField rows={1} onChange={(e) => {}} />
+      <div className="row">
+        <div className="col-sm-12 col-md-6 col-lg-6 col-xl-6 offset-md-3 offset-lg-3 offset-xl-3">
+          <div className="col-auto">
+            <label className="form-label">Remarks</label>
+          </div>
+          <div className="col-auto">
+            <BasicTextAreaField
+              rows={1}
+              onChange={(e) => {
+                setSubmitData({
+                  ...submitData,
+                  remarks: e.target.value.trim(),
+                });
+              }}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="row d-flex justify-content-center">
-        <BasicButton buttonText="Accept" onClick={() => {}} />
-        <BasicButton buttonText="Reject" onClick={() => {}} />
+      <div className="row mt-2">
+        <div className="d-flex justify-content-center">
+          <BasicButton
+            className="btn btn-primary rounded-0 me-1"
+            buttonText="Accept"
+            onClick={() => {
+              if (submitData?.remarks === "") {
+                toastMessage("ACCEPTANCE DESK", "Remarks is Required", "error");
+              } else {
+                dispatch(approvePoInfo(submitData));
+              }
+            }}
+          />
+          <BasicButton
+            className="btn btn-danger rounded-0"
+            buttonText="Reject"
+            onClick={() => {
+              if (submitData?.remarks === "") {
+                toastMessage("ACCEPTANCE DESK", "Remarks is Required", "error");
+              } else {
+                dispatch(rejectPoInfo(submitData));
+              }
+            }}
+          />
+        </div>
       </div>
     </>
   );

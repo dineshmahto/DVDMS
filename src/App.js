@@ -195,6 +195,7 @@ const ReceivePoChallan = lazy(() =>
 const ReceiveChallanForm = lazy(() =>
   import("./pages/receiving/receivepochallan/receivechallan")
 );
+const DispatchForm = lazy(() => import("./pages/supplier/dispatchdesk"));
 // End of Receiving
 // Supplier
 const SupplierPoApporovedList = lazy(() =>
@@ -707,6 +708,8 @@ function App() {
                 path="supplierInterface"
                 element={<SupplierPoApporovedList />}
               />
+              <Route path="openAcceptanceForm" element={<AcceptanceForm />} />
+              <Route path="openDispatchForm" element={<DispatchForm />} />
               {/* End of Supplier */}
               <Route path="intent" element={<OpenIntentDesk />} />
               <Route path="pdf" element={<Pdf />} />
